@@ -18,13 +18,15 @@
 #include "HVersion.hpp"
 #include "HObject.hpp"
 #include "IModelVisitor.hpp"
-#include "StdModel.hpp"
-#include "XML/XMLDatabaseModel.hpp"
-#include "XML/XMLExporter.hpp"
-#include "VersionRelation.hpp"
+#include "MemoryModel.hpp"
+#include "XmlModel.hpp"
+#include "XmlVisitor.hpp"
+#include "Helpers.h"
+
 #include <functional>
 #include <string>
 #include <iostream>
+#include <map>
 
 Merger::Merger(PromptMergeConflict* MergePrompt, ObjectVersionMergeStrategy_e MergeStrategy) :
             mpMergePrompt(MergePrompt),
@@ -59,17 +61,17 @@ MergeStatus_e Merger::smartMerge(   const char* input_file1, const char* input_f
     auto file_vect2 = std::vector<std::string>();
     file_vect2.push_back(std::string(input_file2));
 
-    auto database1 = MakeStdModel();
-    auto database2 = MakeStdModel();
+    const auto db1 = MakeMemoryModel();
+    const auto db2 = MakeMemoryModel();
 
     // reload two databases with one object version in each database
-    MakeXmlFilesDatabaseModel(file_vect1)->accept(*database1.visitor);
-    MakeXmlFilesDatabaseModel(file_vect2)->accept(*database2.visitor);
+    MakeXmlFilesModel(file_vect1)->accept(*db1);
+    MakeXmlFilesModel(file_vect2)->accept(*db2);
 
     /* Check only one object version is present in each database */
     int count1 = 0;
     HObject db1_ref_object;
-    database1.model->walk_objects([&](const YaToolObjectId& id, const HObject& obj){
+    db1->walk_objects([&](const YaToolObjectId& id, const HObject& obj){
         UNUSED(id);
         UNUSED(obj);
         count1++;
@@ -78,7 +80,7 @@ MergeStatus_e Merger::smartMerge(   const char* input_file1, const char* input_f
     });
     int count2 = 0;
     HObject db2_ref_object;
-    database2.model->walk_objects([&](const YaToolObjectId& id, const HObject& obj){
+    db2->walk_objects([&](const YaToolObjectId& id, const HObject& obj){
         UNUSED(id);
         UNUSED(obj);
         count2++;
@@ -113,7 +115,7 @@ MergeStatus_e Merger::smartMerge(   const char* input_file1, const char* input_f
         throw("PythonResolveFileConflictCallback: callback: invalid number of object version in reference object");
     }
 
-    auto visitor1 = MakeStdModel();
+    auto output = MakeMemoryModel();
 
     /* Build relation */
     Relation relation;
@@ -125,16 +127,16 @@ MergeStatus_e Merger::smartMerge(   const char* input_file1, const char* input_f
     relation.flags_ = 0;
 
     /* Merge */
-    visitor1.visitor->visit_start();
+    output->visit_start();
     std::set<YaToolObjectId> newObjectIds;
-    MergeStatus_e retval = mergeObjectVersions(*(visitor1.visitor), newObjectIds, relation);
-	visitor1.visitor->visit_end();
+    MergeStatus_e retval = mergeObjectVersions(*output, newObjectIds, relation);
+	output->visit_end();
     
     if(retval != OBJECT_MERGE_STATUS_NOT_UPDATED)
     {
         const std::string output_path = std::string(output_file_result);
-        auto xml_exporter = MakeFileXmlExporter(output_path);
-        visitor1.model->accept(*xml_exporter);
+        auto xml_exporter = MakeFileXmlVisitor(output_path);
+        output->accept(*xml_exporter);
     }
 
     return retval;
@@ -188,6 +190,91 @@ void Merger::mergeAttributes(const std::string& attribute_name, const const_stri
     }
 }
 
+namespace
+{
+    void merge_offsets(Merger& m, const Relation relation, IModelVisitor& v)
+    {
+        std::map<std::pair<offset_t, CommentType_e>, std::string> comments;
+        std::map<std::pair<offset_t, operand_t>, std::string> valueviews;
+
+        // FIXME register_views
+        // FIXME hidden_areas
+        switch(relation.type_)
+        {
+        case RELATION_TYPE_EXACT_MATCH:
+            relation.version2_.walk_comments([&](offset_t offset_new, CommentType_e type_new, const const_string_ref& comment_new)
+            {
+               comments[std::make_pair(offset_new, type_new)] = make_string(comment_new);
+               return WALK_CONTINUE;
+            });
+            relation.version2_.walk_value_views([&](offset_t offset, operand_t operand, const const_string_ref& value)
+            {
+                valueviews[std::make_pair(offset, operand)] = make_string(value);
+                return WALK_CONTINUE;
+            });
+            relation.version1_.walk_comments([&](offset_t offset_ref, CommentType_e type_ref, const const_string_ref& comment_ref)
+            {
+                const auto& search = comments.find(std::make_pair(offset_ref, type_ref));
+                if(search == comments.end())
+                {
+                    comments[std::make_pair(offset_ref, type_ref)] = make_string(comment_ref);
+                }
+                else
+                {
+                    m.mergeAttributes("comment", comment_ref, make_string_ref(search->second), [&](const const_string_ref& value)
+                    {
+                        comments[std::make_pair(offset_ref, type_ref)] = make_string(value);
+                    });
+                }
+                return WALK_CONTINUE;
+            });
+            relation.version1_.walk_value_views([&](offset_t offset_ref, operand_t operand, const const_string_ref& value)
+            {
+                const auto& search = valueviews.find(std::make_pair(offset_ref, operand));
+                if(search == valueviews.end())
+                {
+                    valueviews[std::make_pair(offset_ref, operand)] = make_string(value);
+                }
+                else
+                {
+                    m.mergeAttributes("value_view", value, make_string_ref(search->second), [&](const const_string_ref& value)
+                    {
+                        valueviews[std::make_pair(offset_ref, operand)] = make_string(value);
+                    });
+                }
+                return WALK_CONTINUE;
+            });
+            if(!comments.empty() || !valueviews.empty())
+            {
+                v.visit_start_offsets();
+                for(const auto& offset: comments)
+                    v.visit_offset_comments(offset.first.first, offset.first.second, make_string_ref(offset.second));
+                for(const auto& it: valueviews)
+                    v.visit_offset_valueview(it.first.first, it.first.second, make_string_ref(it.second));
+                v.visit_end_offsets();
+            }
+            break;
+
+        default:
+            if(relation.version2_.has_comments() || relation.version2_.has_value_views())
+            {
+                v.visit_start_offsets();
+                relation.version2_.walk_comments([&](offset_t offset, CommentType_e type, const const_string_ref& comment)
+                {
+                    v.visit_offset_comments(offset, type, comment);
+                    return WALK_CONTINUE;
+                });
+                relation.version2_.walk_value_views([&](offset_t offset, operand_t operand, const const_string_ref& value)
+                {
+                    v.visit_offset_valueview(offset, operand, value);
+                    return WALK_CONTINUE;
+                });
+                v.visit_end_offsets();
+            }
+            break;
+        }
+    }
+}
 
 MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<YaToolObjectId>& newObjectIds,
                                                             const Relation& relation)
@@ -304,59 +391,7 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
     }
     /*********************************/
 
-
-    /********** merge offsets ****************************/
-     /* Merge comments */
-    //TODO export valueviews registerviews hiddenareas
-    std::map<std::pair<offset_t, CommentType_e>, const_string_ref> offsets;
-    switch(relation.type_)
-    {
-    case RELATION_TYPE_EXACT_MATCH:
-        relation.version2_.walk_comments([&](offset_t offset_new, CommentType_e type_new, const const_string_ref& comment_new)
-        {
-           offsets[std::make_pair(offset_new, type_new)] = comment_new;
-           return WALK_CONTINUE;
-        });
-        relation.version1_.walk_comments([&](offset_t offset_ref, CommentType_e type_ref, const const_string_ref& comment_ref)
-        {
-            const auto& search = offsets.find(std::make_pair(offset_ref, type_ref));
-            if( search == offsets.end())
-            {
-                offsets[std::make_pair(offset_ref, type_ref)] = comment_ref;
-            }
-            else
-            {
-                mergeAttributes("comment", comment_ref, search->second, [&](const const_string_ref& value)
-                {
-                    offsets[std::make_pair(offset_ref, type_ref)] = value;
-                });
-            }
-            return WALK_CONTINUE;
-        });
-        if(offsets.size() > 0)
-        {
-            visitor_db.visit_start_offsets();
-            for(const auto& offset: offsets)
-            {
-                visitor_db.visit_offset_comments(offset.first.first, offset.first.second, offset.second);
-            }
-            visitor_db.visit_end_offsets();
-        }
-        break;
-    default:
-        if(relation.version2_.has_comments())
-        {
-            visitor_db.visit_start_offsets();
-            relation.version2_.walk_comments([&](offset_t offset, CommentType_e type, const const_string_ref& comment)
-            {
-                visitor_db.visit_offset_comments(offset, type, comment);
-                return WALK_CONTINUE;
-            });
-            visitor_db.visit_end_offsets();
-        }
-        break;
-    }
-    /******************************************************/
+    merge_offsets(*this, relation, visitor_db);
 
     /*********** xrefs ****************************/
     struct xref_value_s
@@ -426,62 +461,35 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
     }
     /**********************************************/
 
-    /************* matching systems ***************/
-    switch(relation.type_)
-    {
-    case RELATION_TYPE_EXACT_MATCH:
-    default:
-        if (relation.version2_.has_systems())
-        {
-            visitor_db.visit_start_matching_systems();
-            relation.version2_.walk_systems([&](offset_t address, HSystem_id_t system)
-            {
-                visitor_db.visit_start_matching_system(address);
-                relation.version2_.walk_system_attributes(system, [&](const const_string_ref& key, const const_string_ref& value)
-                {
-                    visitor_db.visit_matching_system_description(key, value);
-                    return WALK_CONTINUE;
-                });
-                visitor_db.visit_end_matching_system();
-                return WALK_CONTINUE;
-            });
-            visitor_db.visit_end_matching_systems();
-        }
-        break;
-
-    }
-    /**********************************************/
-
-
     /*********** attributes ***********************/
-    std::map<const_string_ref, const_string_ref> attributes;
+    std::map<std::string, std::string> attributes;
     switch(relation.type_)
     {
     case RELATION_TYPE_EXACT_MATCH:
         relation.version2_.walk_attributes([&](const const_string_ref& key_new, const const_string_ref& value_new)
         {
-            attributes[key_new] = value_new;
+            attributes[make_string(key_new)] = make_string(value_new);
             return WALK_CONTINUE;
         });
         relation.version1_.walk_attributes([&](const const_string_ref& key_ref, const const_string_ref& value_ref)
         {
-            const auto& search = attributes.find(key_ref);
+            const auto& search = attributes.find(make_string(key_ref));
             if(search == attributes.end())
             {
-                attributes[key_ref] = value_ref;
+                attributes[make_string(key_ref)] = make_string(value_ref);
             }
             else
             {
-                mergeAttributes("attribute", value_ref, search->second, [&](const const_string_ref& value)
+                mergeAttributes("attribute", value_ref, make_string_ref(search->second), [&](const const_string_ref& value)
                 {
-                    attributes[key_ref] = value;
+                    attributes[make_string(key_ref)] = make_string(value);
                 });
             }
             return WALK_CONTINUE;
         });
         for(const auto& attribute: attributes)
         {
-            visitor_db.visit_attribute(attribute.first, attribute.second);
+            visitor_db.visit_attribute(make_string_ref(attribute.first), make_string_ref(attribute.second));
         }
 
         break;

@@ -220,10 +220,10 @@ function(setup_git target files_ includes_)
     file(WRITE ${root}/git_version.cmake "
         execute_process(COMMAND
         ${GIT_EXECUTABLE} describe --dirty --tags --long
-        WORKING_DIRECTORY ${root_dir}
+        WORKING_DIRECTORY \"${root_dir}\"
         OUTPUT_VARIABLE GIT_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-        configure_file(\${SRC} \${DST} @ONLY)
+        configure_file(\"\${SRC}\" \"\${DST}\" @ONLY)
     ")
 
     # add custom git version command
@@ -350,9 +350,34 @@ function(setup_target target)
         setup_gcc(${target} OPTIONS ${ARGN})
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         setup_gcc(${target} OPTIONS ${ARGN})
+    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+        setup_gcc(${target} OPTIONS ${ARGN})
     else()
         message(FATAL_ERROR "unsupported compiler ${CMAKE_CXX_COMPILER_ID}")
     endif()
+endfunction()
+
+# auto-generate external cmake file containing all inputs
+function(autogen_files target)
+    set(files ${ARGN})
+    list(REMOVE_DUPLICATES files)
+    list(SORT files)
+    set(data "# generated with cmake\nset(_${target}_files\n")
+    foreach(it ${files})
+        file(RELATIVE_PATH it ${CMAKE_CURRENT_SOURCE_DIR} ${it})
+        set(data "${data}    \"${it}\"\n")
+    endforeach()
+    set(data "${data})")
+    set(filename "${CMAKE_CURRENT_SOURCE_DIR}/files/${target}.${OS}.files.cmake")
+    set(got)
+    if(EXISTS "${filename}")
+        file(READ "${filename}" got)
+    endif()
+    if(NOT "${data}" STREQUAL "${got}")
+        file(WRITE "${filename}" ${data})
+    endif()
+    include(${filename})
+    set(_${target}_files ${_${target}_files} PARENT_SCOPE)
 endfunction()
 
 # make_target <target> <group> <files...> [INCLUDES <includes...>] [OPTIONS <options...>]
@@ -412,6 +437,10 @@ function(make_target target group)
         setup_git(${target} files includes)
     endif()
 
+    # include auto-generated file list
+    autogen_files(${target} ${files})
+    set(files ${_${target}_files})
+
     # add the target
     if(is_executable OR is_test)
         set(suffix "")
@@ -450,32 +479,50 @@ function(add_target target group)
     make_target(${target} ${group} ${files} OPTIONS ${options})
 endfunction()
 
-function(add_swig_module target group)
-    split_args(args2 "INCLUDES" includes ${ARGN})
-    split_args(files "DEPS" deps ${args2})
-    foreach(it ${files})
+function(split_swig_files itarget deps)
+    set(itarget_)
+    set(deps_)
+    foreach(it ${ARGN})
         if(${it} MATCHES "[.]i$")
-            set_property(SOURCE ${it} PROPERTY CPLUSPLUS ON)
-            get_filename_component(outname ${it} NAME_WE)
-            set(outpy  "${CMAKE_CURRENT_BINARY_DIR}/${outname}.py")
-            set(outcpp "${CMAKE_CURRENT_BINARY_DIR}/${outname}PYTHON_wrap.cxx")
-            source_group(autogen FILES ${outpy} ${outcpp})
-            # foreach input file create a custom command
-            # which depend on every dependency and work-around
-            # broken dependency handling from swig_add_module
-            add_custom_command(
-                OUTPUT  ${it}
-                COMMAND ${CMAKE_COMMAND} -E touch ${it}
-                DEPENDS ${deps}
-                COMMENT "Swig required on ${outname}.i"
-            )
+            list(APPEND itarget_ ${it})
+        else()
+            list(APPEND deps_ ${it})
         endif()
     endforeach()
+    set(${itarget} ${itarget_} PARENT_SCOPE)
+    set(${deps} ${deps_} PARENT_SCOPE)
+endfunction()
+
+function(add_swig_module target group)
+    split_args(right_args "INCLUDES" includes ${ARGN})
+    split_args(files "DEPS" deps ${right_args})
+    split_swig_files(itarget others ${files})
+    get_filename_component(outname ${itarget} NAME_WE)
+    set(outi   "${CMAKE_CURRENT_BINARY_DIR}/${outname}.i")
+    set(outpy  "${CMAKE_CURRENT_BINARY_DIR}/${outname}.py")
+    set(outcpp "${CMAKE_CURRENT_BINARY_DIR}/${outname}PYTHON_wrap.cxx")
+    set_property(SOURCE ${outi} PROPERTY CPLUSPLUS ON)
+    source_group(autogen FILES ${outpy} ${outcpp} ${outi})
+    # foreach input file create a custom command
+    # which depend on every dependency and work-around
+    # broken dependency handling from swig_add_module
+    # we also create a dummy copy of input file &
+    # ensure make clean doesn't clean original file
+    add_custom_command(
+        OUTPUT  "${outi}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${itarget}" "${outi}"
+        DEPENDS ${itarget} ${deps}
+        COMMENT "${outname}.i"
+    )
     get_directory_property(backup_includes INCLUDE_DIRECTORIES)
     list(APPEND includes "${SWIG_DIR}/python" "${SWIG_DIR}")
     set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${includes}")
     message("-- Configuring ${group}/_${target}")
-    swig_add_module(${target} python ${files})
+    if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
+        swig_add_module(${target} python ${outi} ${others})
+    else()
+        swig_add_library(${target} LANGUAGE python SOURCES ${outi} ${others})
+    endif()
     set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${backup_includes}")
     set_target_properties(_${target} PROPERTIES FOLDER ${group})
 endfunction()
@@ -524,6 +571,7 @@ include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckSymbolExists)
 include(CheckVariableExists)
+include(CheckTypeSize)
 
 function(todef output input)
     string(TOUPPER ${input} output_)
@@ -536,16 +584,48 @@ function(parse_config input)
     set(re_cmake_fun "cmakedefine[ ]+HAVE_([A-Z_0-9]+)")
     set(re_inc "<([^>]+)> header file\.")
     set(re_cmake_inc "cmakedefine[ ]+HAVE_([A-Z_0-9]+)_H")
-    set(functions_)
-    set(includes_)
+    set(re_type "<([^>]+)> declares ([A-Z_a-z0-9]+).")
+    set(re_type_only " if you have the '([A-Za-z_0-9]+)' type.")
+    set(re_sys_type " system has the type `([^']+)'.")
+
     # read input file
     file(READ ${input} contents)
+    set(functions_)
+    set(includes_)
+
+    # match types with extra header
+    string(REGEX MATCHALL "${re_type}" matchs ${contents})
+    foreach(match ${matchs})
+        string(REGEX REPLACE "${re_type}" "\\1" header ${match})
+        string(REGEX REPLACE "${re_type}" "\\2" type ${match})
+        todef(define ${type})
+        set(CMAKE_EXTRA_INCLUDE_FILES ${header})
+        check_type_size(${type} ${define})
+    endforeach()
+
+    # match types without headers
+    string(REGEX MATCHALL "${re_type_only}" matchs ${contents})
+    foreach(match ${matchs})
+        string(REGEX REPLACE "${re_type_only}" "\\1" match ${match})
+        todef(define ${match})
+        check_type_size(${match} ${define})
+    endforeach()
+
+    # match system types
+    string(REGEX MATCHALL "${re_sys_type}" matchs ${contents})
+    foreach(match ${matchs})
+        string(REGEX REPLACE "${re_sys_type}" "\\1" match ${match})
+        todef(define ${match})
+        check_type_size(${match} ${define})
+    endforeach()
+
     # match functions
     string(REGEX MATCHALL "${re_fun}" matchs ${contents})
     foreach(match ${matchs})
         string(REGEX REPLACE "${re_fun}" "\\1" match ${match})
         list(APPEND functions_ ${match})
     endforeach()
+
     # match cmake functions
     string(REGEX MATCHALL "${re_cmake_fun}" matchs ${contents})
     foreach(match ${matchs})
@@ -557,12 +637,14 @@ function(parse_config input)
 		    list(APPEND functions_ ${match})
 		endif()
     endforeach()
+
     # match includes
     string(REGEX MATCHALL "${re_inc}" matchs ${contents})
     foreach(match ${matchs})
         string(REGEX REPLACE "${re_inc}" "\\1" match ${match})
         list(APPEND includes_ ${match})
     endforeach()
+
     # match cmake includes
     string(REGEX MATCHALL "${re_cmake_inc}" matchs ${contents})
     foreach(match ${matchs})
@@ -571,6 +653,7 @@ function(parse_config input)
 		string(TOLOWER "${match}.h" match)
         list(APPEND includes_ ${match})
     endforeach()
+
     # check each function
     list(LENGTH functions_ size)
     if(size)
@@ -581,6 +664,7 @@ function(parse_config input)
         todef(define_it ${it})
         check_function_exists("${it}" ${define_it})
     endforeach()
+
     # check each include
     list(LENGTH includes_ size)
     if(size)
@@ -634,6 +718,8 @@ string(TOUPPER ARCH_${ARCH} arch_define)
 add_definitions(-D${arch_define})
 if(WIN32)
     set(OS nt)
+elseif(APPLE)
+    set(OS mac)
 else()
     set(OS linux)
 endif()

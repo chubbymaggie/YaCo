@@ -20,24 +20,20 @@
 #endif
 
 #include "test_common.hpp"
-#include "../Helpers.h"
+#include "Helpers.h"
 
 #include "HVersion.hpp"
-#include "YaToolReferencedObject.hpp"
 #include "HObject.hpp"
-#include "YaToolObjectId.hpp"
-#include "PathDebuggerVisitor.hpp"
 #include "ExporterValidatorVisitor.hpp"
-#include "DelegatingVisitor.hpp"
-#include "MatchingSystem.hpp"
-#include "StdModel.hpp"
-#include "FlatBufferDatabaseModel.hpp"
-#include "FlatBufferExporter.hpp"
-#include "utils.hpp"
+#include "MemoryModel.hpp"
+#include "FlatBufferModel.hpp"
+#include "FlatBufferVisitor.hpp"
+#include "FileUtils.hpp"
 
-#include "model.hpp"
+#include "test_model.hpp"
 
 #include <functional>
+#include <map>
 
 #ifdef _MSC_VER
 #   include <optional.hpp>
@@ -47,23 +43,14 @@ using namespace nonstd;
 using namespace std::experimental;
 #endif
 
-#define USE_PATH_DEBUGGER false
-
 using namespace std;
 
-class TestYaToolDatabaseModel: public testing::Test {
-protected:
-    virtual void SetUp() {
-    }
-
-    virtual void TearDown() {
-    }
+class TestYaToolDatabaseModel
+    : public testing::Test
+{
 };
 
 static const std::string gEmpty;
-
-MatchingSystem sysA(0xa, {{"os", "os1"}, {"equipment", "eq1"}});
-MatchingSystem sysB(0xb, {{"os", "os2"}, {"equipment", "eq2"}});
 
 struct Xref
 {
@@ -74,18 +61,15 @@ struct Xref
 
 void create_object(std::shared_ptr<IModelVisitor> visitor, YaToolObjectId id,
                    const std::vector<const char*>& crcVals,
-                   const std::vector<MatchingSystem>& systems,
                    const std::vector<std::vector<Xref>>& xrefs)
 {
     visitor->visit_start_reference_object(OBJECT_TYPE_DATA);
     visitor->visit_id(id);
 
-    EXPECT_EQ(crcVals.size(), systems.size());
     uint32_t i;
     for(i=0; i<crcVals.size(); i++)
     {
         auto crcVal = crcVals[i];
-        auto system = systems[i];
         visitor->visit_start_object_version();
         visitor->visit_size(0x20);
         visitor->visit_start_signatures();
@@ -93,12 +77,6 @@ void create_object(std::shared_ptr<IModelVisitor> visitor, YaToolObjectId id,
         visitor->visit_end_signatures();
         visitor->visit_start_xrefs();
         visitor->visit_end_xrefs();
-
-        visitor->visit_start_matching_systems();
-        visitor->visit_start_matching_system(i);
-        system.accept(*visitor);
-        visitor->visit_end_matching_system();
-        visitor->visit_end_matching_systems();
 
         visitor->visit_start_xrefs();
         if(i < xrefs.size())
@@ -135,29 +113,20 @@ void create_model(std::shared_ptr<IModelVisitor> visitor)
     visitor->visit_start_xref(0x30, 0xDDDDDDDD, 0);  visitor->visit_end_xref();
     visitor->visit_end_xrefs();
 
-    visitor->visit_start_matching_systems();
-    visitor->visit_start_matching_system(0x1);
-    sysB.accept(*visitor);
-    visitor->visit_end_matching_system();
-    visitor->visit_start_matching_system(0x2);
-    sysA.accept(*visitor);
-    visitor->visit_end_matching_system();
-    visitor->visit_end_matching_systems();
-
     visitor->visit_end_object_version();
     visitor->visit_end_reference_object();
 
-    create_object(visitor, 0xBBBBBBBB, {"11111111"}, {sysA}, {{{0x10, 0, 0xDDDDDDDD}}});
-    create_object(visitor, 0xDDDDDDDD, {"22222222", "44444444"}, {sysA, sysB}, {{{0x20, 1, 0xCCCCCCCC}, {0x20, 2, 0xBBBBBBBB}}});
-    create_object(visitor, 0xCCCCCCCC, {"22222222", "33333333"}, {sysA, sysB}, {});
+    create_object(visitor, 0xBBBBBBBB, {"11111111"}, {{{0x10, 0, 0xDDDDDDDD}}});
+    create_object(visitor, 0xDDDDDDDD, {"22222222", "44444444"}, {{{0x20, 1, 0xCCCCCCCC}, {0x20, 2, 0xBBBBBBBB}}});
+    create_object(visitor, 0xCCCCCCCC, {"22222222", "33333333"}, {});
     visitor->visit_end();
 }
 
 std::shared_ptr<IModel> create_memorySignatureDB()
 {
-    auto db = MakeStdModel();
-    create_model(db.visitor);
-    return db.model;
+    auto db = MakeMemoryModel();
+    create_model(db);
+    return db;
 }
 
 namespace
@@ -176,44 +145,26 @@ public:
     MockDatabase(){}
     virtual ~MockDatabase(){}
 
-    virtual void        accept(IModelVisitor&) {};
-    virtual void        walk_objects(const OnObjectAndIdFn&) const {};
-    virtual size_t      num_objects() const { return 0; };
-    virtual void        walk_objects_with_signature(const HSignature&, const OnObjectFn&) const {};
-    virtual size_t      num_objects_with_signature(const HSignature&) const { return 0; };
-    virtual void        walk_versions_with_signature(const HSignature&, const OnVersionFn&) const {};
-    virtual void        walk_matching_objects(const HObject&, const OnObjectFn&) const {};
-    virtual size_t      num_matching_objects(const HObject&) const { return 0; };
-    virtual HObject     get_object(YaToolObjectId) const { return HObject{nullptr, 0}; };
-    virtual bool        has_object(YaToolObjectId) const { return false; };
-    virtual void        walk_versions_without_collision(const OnSigAndVersionFn&) const {};
-    virtual void        walk_systems(const OnSystemFn&) const {};
-    virtual void        walk_matching_versions(const HObject&, size_t, const OnVersionPairFn&) const {};
+    void        accept(IModelVisitor&) override {};
+    void        walk_objects(const OnObjectAndIdFn&) const override {};
+    size_t      num_objects() const override { return 0; };
+    void        walk_objects_with_signature(const HSignature&, const OnObjectFn&) const override {};
+    size_t      num_objects_with_signature(const HSignature&) const override { return 0; };
+    void        walk_versions_with_signature(const HSignature&, const OnVersionFn&) const override {};
+    HObject     get_object(YaToolObjectId) const override { return HObject{nullptr, 0}; };
+    bool        has_object(YaToolObjectId) const override { return false; };
+    void        walk_versions_without_collision(const OnSigAndVersionFn&) const override {};
+    void        walk_matching_versions(const HObject&, size_t, const OnVersionPairFn&) const override {};
 };
 }
 
-TEST_F(TestYaToolDatabaseModel, model) {
+TEST_F(TestYaToolDatabaseModel, model)
+{
     /**
      * This test ensures that the model created with create_model is consistent and passes
      * validation through ExporterValidatorVisitor
      */
-    auto db = MakeStdModel();
-    auto validator = MakeExporterValidatorVisitor();
-    auto exporter = make_shared<DelegatingVisitor>();
-    exporter->add_delegate(db.visitor);
-
-    if(USE_PATH_DEBUGGER)
-    {
-        auto pathdebugger = MakePathDebuggerVisitor("SaveValidator", validator, PrintValues);
-
-        exporter->add_delegate(pathdebugger);
-        create_model(exporter);
-    }
-    else
-    {
-        exporter->add_delegate(validator);
-        create_model(exporter);
-    }
+    create_model(MakeExporterValidatorVisitor());
 }
 
 void ReferencedObjects_Impl(std::shared_ptr<IModel>db)
@@ -241,66 +192,6 @@ TEST_F(TestYaToolDatabaseModel, FBModel_ReferencedObjects) {
     ReferencedObjects_Impl(create_FBSignatureDB());
 }
 
-void MatchingSystems_Impl(std::shared_ptr<IModel>db)
-{
-    std::multiset<HSystem_id_t> systems;
-    db->walk_systems([&](HSystem_id_t system)
-    {
-        systems.insert(system);
-        return WALK_CONTINUE;
-    });
-    expect_eq(systems, {0, 1});
-
-    std::multiset<std::tuple<std::string, offset_t, std::string, std::string>> values;
-    const auto checkobj = [&](auto id)
-    {
-        const auto hobj = db->get_object(id);
-        EXPECT_EQ(id, hobj.id());
-        hobj.walk_versions([&](const HVersion& hver)
-        {
-            EXPECT_EQ(id, hver.id());
-            hver.walk_systems([&](offset_t offset, HSystem_id_t sysid)
-            {
-                hver.walk_system_attributes(sysid, [&](const const_string_ref& key, const const_string_ref& val)
-                {
-                    values.insert(std::make_tuple(str(id), offset, make_string(key), make_string(val)));
-                    return WALK_CONTINUE;
-                });
-                return WALK_CONTINUE;
-            });
-            return WALK_CONTINUE;
-        });
-    };
-    checkobj(0xAAAAAAAA);
-    checkobj(0xBBBBBBBB);
-    checkobj(0xCCCCCCCC);
-    checkobj(0xDDDDDDDD);
-    expect_eq(values, {
-        std::make_tuple("00000000AAAAAAAA", 1, "equipment", "eq2"),
-        std::make_tuple("00000000AAAAAAAA", 1, "os", "os2"),
-        std::make_tuple("00000000AAAAAAAA", 2, "equipment", "eq1"),
-        std::make_tuple("00000000AAAAAAAA", 2, "os", "os1"),
-        std::make_tuple("00000000BBBBBBBB", 0, "equipment", "eq1"),
-        std::make_tuple("00000000BBBBBBBB", 0, "os", "os1"),
-        std::make_tuple("00000000CCCCCCCC", 0, "equipment", "eq1"),
-        std::make_tuple("00000000CCCCCCCC", 0, "os", "os1"),
-        std::make_tuple("00000000CCCCCCCC", 1, "equipment", "eq2"),
-        std::make_tuple("00000000CCCCCCCC", 1, "os", "os2"),
-        std::make_tuple("00000000DDDDDDDD", 0, "equipment", "eq1"),
-        std::make_tuple("00000000DDDDDDDD", 0, "os", "os1"),
-        std::make_tuple("00000000DDDDDDDD", 1, "equipment", "eq2"),
-        std::make_tuple("00000000DDDDDDDD", 1, "os", "os2"),
-    });
-}
-
-TEST_F(TestYaToolDatabaseModel, memoryModel_MatchingSystems) {
-    MatchingSystems_Impl(create_memorySignatureDB());
-}
-
-TEST_F(TestYaToolDatabaseModel, FBModel_MatchingSystems) {
-    MatchingSystems_Impl(create_FBSignatureDB());
-}
-
 class MockSignatureDatabase1
     : public MockDatabase
     , public ISignatures
@@ -311,7 +202,7 @@ public:
     {
     }
 
-    virtual Signature get(HSignature_id_t) const
+    Signature get(HSignature_id_t) const override
     {
         return sig;
     }
@@ -322,7 +213,7 @@ private:
 
 struct Ctx
 {
-    std::vector<StdModelAndVisitor> models;
+    std::vector<std::shared_ptr<IModelAndVisitor>> models;
     std::vector<std::shared_ptr<MockSignatureDatabase1>> mocks;
 };
 
@@ -394,32 +285,95 @@ TEST_F(TestYaToolDatabaseModel, FBModel_ReferencedObjectsBySignature) {
     ReferencedObjectsBySignature_Impl(create_FBSignatureDB());
 }
 
-static auto create_version(YaToolObjectId id, uint32_t crc, size_t size)
+namespace
 {
-    auto version = std::make_shared<YaToolObjectVersion>();
-    version->set_id(id);
-    version->set_size(size);
+    struct Version
+    {
+        YaToolObjectId          id;
+        size_t                  size;
+        std::vector<Signature>  sigs;
+
+        Version(YaToolObjectId id, uint32_t crc, size_t size);
+
+        void add_signature(const Signature& sig);
+        void accept(IModelVisitor& visitor);
+    };
+
+    struct Object
+    {
+        YaToolObjectId  id;
+        std::vector<std::shared_ptr<Version>> versions;
+
+        Object(YaToolObjectId id);
+
+        void putVersion(const std::shared_ptr<Version>& version);
+        void accept(IModelVisitor& visitor);
+    };
+}
+
+Version::Version(YaToolObjectId id, uint32_t crc, size_t size)
+    : id(id)
+    , size(size)
+{
     char buf[32];
     sprintf(buf, "%X", crc);
-    version->add_signature(MakeSignature(SIGNATURE_ALGORITHM_CRC32, SIGNATURE_OPCODE_HASH, make_string_ref(buf)));
-    return version;
+    add_signature(MakeSignature(SIGNATURE_ALGORITHM_CRC32, SIGNATURE_OPCODE_HASH, make_string_ref(buf)));
 }
 
-static auto create_object(YaToolObjectId id)
+static std::shared_ptr<Version> create_version(YaToolObjectId id, uint32_t crc, size_t size)
 {
-    auto object = std::make_shared<YaToolReferencedObject>(OBJECT_TYPE_DATA);
-    object->setId(id);
-    return object;
+    return std::make_shared<Version>(id, crc, size);
 }
 
-static auto create_href(Ctx& ctx, YaToolReferencedObject& object)
+void Version::add_signature(const Signature& sig)
 {
-    ctx.models.push_back(MakeStdModel());
+    sigs.push_back(sig);
+}
+
+void Version::accept(IModelVisitor& visitor)
+{
+    visitor.visit_start_object_version();
+    if(size)
+        visitor.visit_size(size);
+    visitor.visit_start_signatures();
+    for(const auto& sig : sigs)
+        visitor.visit_signature(sig.method, sig.algo, make_string_ref(sig));
+    visitor.visit_end_signatures();
+    visitor.visit_end_object_version();
+}
+
+Object::Object(YaToolObjectId id)
+    : id(id)
+{
+}
+
+static std::shared_ptr<Object> create_object(YaToolObjectId id)
+{
+    return std::make_shared<Object>(id);
+}
+
+void Object::putVersion(const std::shared_ptr<Version>& version)
+{
+    versions.push_back(version);
+}
+
+void Object::accept(IModelVisitor& visitor)
+{
+    visitor.visit_start_reference_object(OBJECT_TYPE_DATA);
+    visitor.visit_id(id);
+    for(const auto& version : versions)
+        version->accept(visitor);
+    visitor.visit_end_reference_object();
+}
+
+static HObject create_href(Ctx& ctx, Object& object)
+{
+    ctx.models.push_back(MakeMemoryModel());
     auto& db = ctx.models.back();
-    db.visitor->visit_start();
-    object.accept(*db.visitor);
-    db.visitor->visit_end();
-    return db.model->get_object(object.getId());
+    db->visit_start();
+    object.accept(*db);
+    db->visit_end();
+    return db->get_object(object.id);
 }
 
 void walkMatchingVersions_Impl(std::shared_ptr<IModel> db)
@@ -1000,9 +954,9 @@ static void testObjectWithoutVersion(IModel& db)
 
 TEST_F(TestYaToolDatabaseModel, memoryModel_objectWithoutVersion)
 {
-    const auto db = MakeStdModel();
-    create_model_objects_without_versions(*db.visitor);
-    testObjectWithoutVersion(*db.model);
+    const auto db = MakeMemoryModel();
+    create_model_objects_without_versions(*db);
+    testObjectWithoutVersion(*db);
 }
 
 TEST_F(TestYaToolDatabaseModel, FBModel_objectWithoutVersion)
@@ -1012,4 +966,22 @@ TEST_F(TestYaToolDatabaseModel, FBModel_objectWithoutVersion)
         create_model_objects_without_versions(*visitor);
     });
     testObjectWithoutVersion(*model);
+}
+
+TEST_F(TestYaToolDatabaseModel, test_model_get_object_with_invalid_id)
+{
+    const auto model = create_fbmodel_with([&](std::shared_ptr<IModelVisitor> visitor)
+    {
+        create_model(visitor);
+    });
+    const auto hobj1 = model->get_object(~0u);
+    EXPECT_EQ(hobj1.is_valid(), false);
+    const auto hobj2 = model->get_object(0);
+    EXPECT_EQ(hobj2.is_valid(), false);
+    model->walk_objects([&](YaToolObjectId id, const HObject& /*hobj*/)
+    {
+        const auto hobj3 = model->get_object(id+1);
+        EXPECT_EQ(hobj3.is_valid(), false);
+        return WALK_CONTINUE;
+    });
 }

@@ -20,10 +20,14 @@
 #pragma GCC system_header
 #endif
 
-#define BYTES_SOURCE
-#define NO_OBSOLETE_FUNCS
+#define BYTES_SOURCE        // access byte flags
+#define NO_OBSOLETE_FUNCS   // disable obsolete functions
+#include <auto.hpp>
 #include <bytes.hpp>
+#include <enum.hpp>
 #include <frame.hpp>
+#include <funcs.hpp>
+#include <gdl.hpp>
 #include <ida.hpp>
 #include <idp.hpp>
 #include <kernwin.hpp>
@@ -31,14 +35,17 @@
 #include <loader.hpp>
 #include <moves.hpp>
 #include <name.hpp>
+#include <offset.hpp>
+#include <segment.hpp>
+#include <segregs.hpp>
 #include <struct.hpp>
 #include <typeinf.hpp>
-
-#ifdef __EA64__
-#define PRIXEA  PRIX64
-#else
-#define PRIXEA  PRIX32
-#endif
+#include <pro.h>
+#include <idp.hpp>
+#include <expr.hpp>
+#include <tryblks.hpp>
+#include <dbg.hpp>
+#undef snprintf // ida disable this...
 
 #ifdef _MSC_VER
 #pragma warning(pop)

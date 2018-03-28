@@ -20,6 +20,8 @@
 
 #include <string.h>
 
+#define UNUSED(X) ((void)(X))
+
 #ifdef _MSC_VER
 #   include <io.h>
 #   include <stdio.h>
@@ -44,7 +46,6 @@
 
 #include "YaGitLib.hpp"
 #include "ResolveFileConflictCallback.hpp"
-#include "../Helpers.h"
 
 using namespace std;
 using namespace std::experimental;
@@ -52,15 +53,16 @@ using namespace std::experimental;
 #define DEFAULT_NAME "git_default_name"
 #define DEFAULT_EMAIL "git_default@mail.com"
 
-static void check_git_error(int result)
+static void throw_git_error()
 {
-    {
-        if (result != 0)
-        {
-            const git_error* error = giterr_last();
-            throw std::runtime_error(error->message);
-        }
-    }
+    throw std::runtime_error(giterr_last()->message);
+}
+
+
+static void check_git_error(int err)
+{
+    if(err)
+        throw_git_error();
 }
 
 template<typename T, typename Init_T, typename Exit_T>
@@ -110,41 +112,19 @@ GitRepo::~GitRepo()
     git_libgit2_shutdown();
 }
 
-
-static std::string last_ssh_url;
-
-void clear_last_ssh_url(){
-    last_ssh_url = "";
-}
-
 int git_cred_acquire_callback(git_cred **cred, const char *url, const char *username_from_url, unsigned int allowed_types, void* payload)
 {
+    UNUSED(url);
     UNUSED(allowed_types);
     UNUSED(payload);
-
-#ifdef WIN32
-    filesystem::path priv_path(std::string(getenv("HOMEDRIVE")) + getenv("HOMEPATH"));
-#else
-    filesystem::path priv_path(getenv("HOME"));
-#endif
-    priv_path /= ".ssh";
-    filesystem::path pub_path(priv_path);
-    priv_path /= "id_rsa";
-    pub_path /= "id_rsa.pub";
-    if(last_ssh_url.length() > 0 && last_ssh_url.compare(url) == 0) {
-        throw "could not authenticate with given url";
-    }
-    last_ssh_url = url;
-    int result = git_cred_ssh_key_new(cred, username_from_url, pub_path.string().c_str(), priv_path.string().c_str(), "");
-//  FIXME cerr << "git_cred_acquire_callback: " << result << endl;
-    return result;
+    return git_cred_ssh_key_from_agent(cred, username_from_url);
 }
 
 std::shared_ptr<const git_signature> GitRepo::make_signature()
 {
     if (repository == nullptr)
     {
-        throw string("could not get signature, no repository configured");
+        throw std::runtime_error("could not get signature, no repository configured");
     }
     const auto signature = MakeAutoFree<git_signature>([&](git_signature** sign){
         return git_signature_default(sign, repository);
@@ -162,7 +142,7 @@ void GitRepo::init(bool bare)
 {
     if (repository != nullptr)
     {
-        throw string("already open or init repository");
+        throw std::runtime_error("already open or init repository");
     }
     check_git_error(git_repository_init(&repository, repo_path.c_str(), static_cast<unsigned int>(bare)));
     git_signature* sig = nullptr;
@@ -205,12 +185,9 @@ void GitRepo::clone(const std::string &url, const std::string &branch)
     }
     else
     {
-
         options.checkout_branch = branch.c_str();
         check_git_error(git_clone(&repository, url.c_str(), repo_path.c_str(), &options ));
     }
-
-    clear_last_ssh_url();
 }
 
 
@@ -264,8 +241,6 @@ void GitRepo::fetch(const std::string& remote_name)
     git_fetch_options options = make_git_fetch_options();
     options.callbacks.credentials = git_cred_acquire_callback;
     check_git_error(git_remote_fetch(current_remote, nullptr, &options, ""));
-
-    clear_last_ssh_url();
 }
 
 void GitRepo::load_remote(const std::string& remote_name)
@@ -777,6 +752,10 @@ void GitRepo::checkout(const std::string& branch)
                 return git_branch_create(ref, repository, branch.c_str(), target.get(), 1);
             }, &git_reference_free);
             /*********************************************************************************/
+
+            // avoid gcc warning with -Wimplicit-fallthrough
+            /* FALLTHRU */
+
         case 0:
             //jump to new branch
             // branch found, change current branch
@@ -849,7 +828,6 @@ void GitRepo::push(const std::string& src, const std::string& dst)
             1,
     };
     check_git_error(git_remote_push(current_remote, &refspecs, &options));
-    clear_last_ssh_url();
 }
 
 void GitRepo::merge_fastforward(const std::string& onto, const std::string& from)
@@ -927,7 +905,7 @@ void GitRepo::merge()
 std::string GitRepo::config_get_string(const std::string& name)
 {
     if(repository == nullptr) {
-        throw "repository must be init first";
+        throw std::runtime_error("repository must be init first");
     }
     auto config = MakeAutoFree<git_config>(
             [&](git_config** config){
@@ -947,7 +925,7 @@ std::string GitRepo::config_get_string(const std::string& name)
 void GitRepo::config_set_string(const std::string& name, const std::string& value)
 {
     if(repository == nullptr) {
-        throw "repository must be init first";
+        throw std::runtime_error("repository must be init first");
     }
     auto config = MakeAutoFree<git_config>(
                 [&](git_config** config){
@@ -995,11 +973,11 @@ plop.txt content line 2
 
     const auto f1 = CreateTempFile();
     if(!f1)
-        throw runtime_error("unable to create temp2 file");
+        throw std::runtime_error("unable to create temp2 file");
 
     const auto f2 = CreateTempFile();
     if(!f2)
-        throw runtime_error("unable to create temp2 file");
+        throw std::runtime_error("unable to create temp2 file");
 
     typedef std::function<void(const std::string& line)> Writer;
     const Writer write_input1 = [&](const std::string& line)
@@ -1052,7 +1030,7 @@ plop.txt content line 2
 void GitRepo::rebase(const std::string& upstream, const std::string& dst, ResolveFileConflictCallback& ResolveFileConflict)
 {
     if(repository == nullptr) {
-        throw "repository must be init first";
+        throw std::runtime_error("repository must be init first");
     }
     git_rebase* rebase = nullptr;
     git_rebase_options options = make_git_rebase_options();
@@ -1180,7 +1158,7 @@ std::set<std::string> GitRepo::get_tags(const std::string& pattern) {
 
 void GitRepo::remove_tag(const std::string& tag_name) {
     if(tag_name.empty()) {
-        throw "tag name required";
+        throw std::runtime_error("tag name required");
     }
     check_git_error(git_tag_delete(repository, tag_name.c_str()));
 }
@@ -1193,7 +1171,7 @@ void GitRepo::create_tag(const std::string& target, const std::string& tag_name,
     auto tagger = make_signature();
     git_oid oid;
     if(tag_name.empty()) {
-        throw "tag_name required";
+        throw std::runtime_error("tag_name required");
     }
 
     string target_name = "HEAD";
@@ -1211,4 +1189,71 @@ void GitRepo::create_tag(const std::string& target, const std::string& tag_name,
 
     check_git_error(git_tag_create(&oid, repository, tag_name.c_str(),
             target_.get(), tagger.get(), message.c_str(), 1));
+}
+
+namespace
+{
+    std::shared_ptr<git_tree> get_tree(git_repository* repo, const std::string& target)
+    {
+        git_oid oid;
+        int err = 0;
+
+        err = git_oid_fromstr(&oid, target.data());
+        if(err)
+            err = git_reference_name_to_id(&oid, repo, target.data());
+        if(err)
+            throw_git_error();
+
+        git_commit* commit = nullptr;
+        err = git_commit_lookup(&commit, repo, &oid);
+        if(err)
+            throw_git_error();
+
+        git_tree* tree = nullptr;
+        err = git_commit_tree(&tree, commit);
+        git_commit_free(commit);
+        if(err)
+            throw_git_error();
+
+        return std::shared_ptr<git_tree>(tree, &git_tree_free);
+    }
+}
+
+void GitRepo::diff_index(const std::string& from, const on_blob_fn& on_blob) const
+{
+        const auto from_tree = get_tree(repository, from);
+        if(!from_tree)
+            throw_git_error();
+
+        git_diff* diff = nullptr;
+        int err = git_diff_tree_to_index(&diff, repository, &*from_tree, nullptr, nullptr);
+        if(err)
+            throw_git_error();
+
+        using Payload = struct
+        {
+            git_repository* repo;
+            on_blob_fn      on_blob;
+        };
+        const auto file_cb = [](const git_diff_delta* delta, float /*progress*/, void* vpayload)
+        {
+            const auto payload = static_cast<Payload*>(vpayload);
+            const auto deleted = delta->status == GIT_DELTA_DELETED;
+            const auto& file = deleted ? delta->old_file : delta->new_file;
+
+            git_blob* blob = nullptr;
+            const auto err = git_blob_lookup(&blob, payload->repo, &file.id);
+            if(err)
+                return 0;
+
+            const auto ptr = git_blob_rawcontent(blob);
+            const auto size = git_blob_rawsize(blob);
+            const auto rpy = payload->on_blob(file.path, !deleted, ptr, size);
+            git_blob_free(blob);
+            return rpy;
+        };
+
+        Payload payload{repository, on_blob};
+        git_diff_foreach(diff, file_cb, nullptr, nullptr, nullptr, &payload);
+        git_diff_free(diff);
 }

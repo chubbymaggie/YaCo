@@ -16,11 +16,11 @@
 #include "Signature.hpp"
 
 #include "IModel.hpp"
-#include "../Helpers.h"
+#include "Helpers.h"
 
+#include <farmhash.h>
 #include <sstream>
 #include <type_traits>
-
 
 #ifdef _MSC_VER
 #define stricmp _stricmp
@@ -83,13 +83,6 @@ SignatureMethod_e get_signature_method(const char* value)
         if(!stricmp(g_methods[i], value))
             return static_cast<SignatureMethod_e>(i);
     return SIGNATURE_UNKNOWN;
-}
-
-std::string ToString(const Signature& sign)
-{
-    std::stringstream ss;
-    ss << "sig: " << sign.buffer << " hash: " << std::hex << sign.hash;
-    return ss.str();
 }
 
 Signature MakeSignature(SignatureAlgo_e algo, SignatureMethod_e method, const const_string_ref& value)

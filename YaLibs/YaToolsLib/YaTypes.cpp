@@ -14,10 +14,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "YaTypes.hpp"
-#include "Hexa.h"
-#include "../Helpers.h"
+
+#include "Helpers.h"
+
+#include <farmhash.h>
 
 #include <type_traits>
+#include <vector>
 
 #ifdef _MSC_VER
 #define stricmp _stricmp
@@ -61,32 +64,34 @@ const char* get_object_type_string(YaToolObjectType_e object_type)
     return gObjectTypes[object_type];
 }
 
-static const char gObjectSwigTypes[][24] =
+const YaToolObjectType_e ordered_types[] =
 {
-    "UNKNOWN",
-    "BINARY",
-    "DATA",
-    "CODE",
-    "FUNCTION",
-    "STRUCT",
-    "ENUM",
-    "ENUM_MEMBER",
-    "BASIC_BLOCK",
-    "SEGMENT",
-    "SEGMENT_CHUNK",
-    "STRUCT_MEMBER",
-    "STACKFRAME",
-    "STACKFRAME_MEMBER",
-    "REFERENCE_INFO",
+    OBJECT_TYPE_BINARY,
+    OBJECT_TYPE_STRUCT,
+    OBJECT_TYPE_STRUCT_MEMBER,
+    OBJECT_TYPE_ENUM,
+    OBJECT_TYPE_ENUM_MEMBER,
+    OBJECT_TYPE_SEGMENT,
+    OBJECT_TYPE_SEGMENT_CHUNK,
+    OBJECT_TYPE_FUNCTION,
+    OBJECT_TYPE_STACKFRAME,
+    OBJECT_TYPE_STACKFRAME_MEMBER,
+    OBJECT_TYPE_REFERENCE_INFO,
+    OBJECT_TYPE_CODE,
+    OBJECT_TYPE_DATA,
+    OBJECT_TYPE_BASIC_BLOCK,
+    OBJECT_TYPE_UNKNOWN,
 };
-static_assert(COUNT_OF(gObjectSwigTypes) == OBJECT_TYPE_COUNT, "invalid number of object swig types");
+static_assert(COUNT_OF(ordered_types) == OBJECT_TYPE_COUNT, "invalid ordered_types");
 
-const char* get_object_swig_type_string(YaToolObjectType_e object_type)
+const std::vector<size_t> indexed_types = []
 {
-    if(object_type < OBJECT_TYPE_UNKNOWN || object_type >= OBJECT_TYPE_COUNT)
-        object_type = OBJECT_TYPE_UNKNOWN;
-    return gObjectSwigTypes[object_type];
-}
+    std::vector<size_t> indexed;
+    indexed.resize(OBJECT_TYPE_COUNT);
+    for(size_t i = 0; i < OBJECT_TYPE_COUNT; ++i)
+        indexed[ordered_types[i]] = i;
+    return indexed;
+}();
 
 static const char gComments[][24] =
 {
@@ -115,11 +120,9 @@ const char* get_comment_type_string(CommentType_e comment_type)
 }
 
 
-std::string get_uint_hex(uint64_t value)
-{
-    char buffer[20];
-    snprintf(buffer, sizeof buffer, "%016" PRIX64, value);
-    return std::string(buffer);
-}
-
 STATIC_ASSERT_POD(const_string_ref);
+
+size_t std::hash<const_string_ref>::operator()(const const_string_ref& v) const
+{
+    return util::Hash(v.value, v.size);
+}

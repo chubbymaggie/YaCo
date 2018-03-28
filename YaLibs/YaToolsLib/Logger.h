@@ -16,7 +16,8 @@
 #pragma once
 #include <stdio.h>
 #include <stdint.h>
-#include "../Helpers.h"
+
+#include "Helpers.h"
 
 // levels are sorted in decreasing severity order
 enum LOG_ELevel
@@ -38,8 +39,6 @@ enum LOG_EOutput
     LOG_OUTPUT_FILENAME_APPEND,
     LOG_OUTPUT_LAST,
 };
-
-#ifndef SWIG
 
 struct LOG_Output
 {
@@ -70,7 +69,6 @@ struct ALIGN(LOG_ALIGN) LOG_Ctx
 
 bool    LOG_Init    (LOG_Ctx* pCtx, const LOG_Cfg* pCfg);
 bool    LOG_Exit    (LOG_Ctx* pCtx);
-bool    LOG_Printv  (LOG_Ctx* pCtx, const char* pModule, LOG_ELevel eLevel, const char* pFmt, va_list argptr);
 bool    LOG_Print   (LOG_Ctx* pCtx, const char* pModule, LOG_ELevel eLevel, const char* pFmt, ...);
 
 // ex: LOG_(pCtx, "memory", INFO, "%s %d %p\n", "something", 0x60, some_pointer);
@@ -87,4 +85,3 @@ bool    LOG_Print   (LOG_Ctx* pCtx, const char* pModule, LOG_ELevel eLevel, cons
 #define LOG_INFO(   CTX, MOD, FMT, ...) LOG_((CTX), (MOD), INFO,     (FMT), ## __VA_ARGS__)
 #define LOG_DEBUG(  CTX, MOD, FMT, ...) LOG_((CTX), (MOD), DEBUG,    (FMT), ## __VA_ARGS__)
 
-#endif

@@ -16,18 +16,15 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <string>
 #include <set>
-#include <list>
 #include <map>
 #include <tuple>
+#include <functional>
 
 class ResolveFileConflictCallback;
-
-namespace std {
-    template<typename T> class shared_ptr;
-}
 
 struct git_repository;
 struct git_remote;
@@ -43,6 +40,7 @@ struct git_oid;
 class GitRepo
 {
 public:
+    GitRepo(const GitRepo&) = delete;
     GitRepo(const std::string& path);
     ~GitRepo();
     void open();
@@ -60,6 +58,9 @@ public:
     void remove_file(const std::string& file_path);
     void remove_files(const std::vector<std::string>& file_paths);
     void add_all();
+
+    typedef std::function<int(const char* path, bool added, const void* data, size_t szdata)> on_blob_fn;
+    void diff_index(const std::string& from, const on_blob_fn& on_blob) const;
 
     //void rebase();
     void rebase(const std::string& upstreal, const std::string& dst, ResolveFileConflictCallback& callback);
@@ -106,11 +107,12 @@ public:
 
     std::map<std::string, std::string> get_remotes();
 
+    GitRepo& operator=(const GitRepo&) = delete;
+
 private:
     std::string repo_path;
     git_repository* repository;
     git_remote* current_remote;
-    git_signature*  get_signature();
     git_index*  idx;
     git_remote_callbacks*   remote_callbacks;
 

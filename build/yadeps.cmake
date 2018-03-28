@@ -14,21 +14,14 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # yatools dependencies
-get_filename_component(async_dir    "${ya_dir}/deps/async-0.6.1"    REALPATH)
-get_filename_component(farm_dir     "${ya_dir}/deps/farmhash-1.1"   REALPATH)
-get_filename_component(git_dir      "${ya_dir}/deps/libgit2-0.25.1" REALPATH)
-get_filename_component(gtest_dir    "${ya_dir}/deps/gtest-1.7.0"    REALPATH)
-get_filename_component(ico_dir      "${ya_dir}/deps/libiconv-1.14"  REALPATH)
-get_filename_component(mbed_dir     "${ya_dir}/deps/mbedtls-2.4.2"  REALPATH)
-get_filename_component(pympler_dir  "${ya_dir}/deps/pympler"        REALPATH)
-get_filename_component(ssh2_dir     "${ya_dir}/deps/libssh2-1.8.0"  REALPATH)
-get_filename_component(swig_dir     "${ya_dir}/deps/swig-3.0.7"     REALPATH)
-get_filename_component(xml_dir      "${ya_dir}/deps/libxml2-2.7.8"  REALPATH)
-
-if("$ENV{IDASDK_DIR}" STREQUAL "")
-    message(FATAL_ERROR "missing IDASDK_DIR environment variable")
-endif()
-get_filename_component(ida_dir "$ENV{IDASDK_DIR}" REALPATH)
+get_filename_component(farm_dir     "${ya_dir}/deps/farmhash-1.1"       ABSOLUTE)
+get_filename_component(git_dir      "${ya_dir}/deps/libgit2-0.27.0-rc1" ABSOLUTE)
+get_filename_component(gtest_dir    "${ya_dir}/deps/gtest-1.7.0"        ABSOLUTE)
+get_filename_component(ico_dir      "${ya_dir}/deps/libiconv-1.14"      ABSOLUTE)
+get_filename_component(mbed_dir     "${ya_dir}/deps/mbedtls-2.4.2"      ABSOLUTE)
+get_filename_component(ssh2_dir     "${ya_dir}/deps/libssh2-1.8.0"      ABSOLUTE)
+get_filename_component(swig_dir     "${ya_dir}/deps/swig-3.0.7"         ABSOLUTE)
+get_filename_component(xml_dir      "${ya_dir}/deps/libxml2-2.7.8"      ABSOLUTE)
 
 if(WIN32)
     # force add winsock2 & crypt32
@@ -42,7 +35,7 @@ if(WIN32)
 endif()
 
 # charset
-get_filename_component(ch_dir  "${ico_dir}/libcharset" REALPATH)
+get_filename_component(ch_dir  "${ico_dir}/libcharset" ABSOLUTE)
 get_files(files ${ch_dir}/lib ${ch_dir}/include)
 autoconfigure(files includes libcharset "${ch_dir}/config.h.in"
     "\n#define HAVE_WORKING_O_NOFOLLOW 0"
@@ -67,12 +60,15 @@ get_files(files ${ico_dir} ${ico_dir}/lib ${ico_dir}/srclib ${ico_dir}/include)
 # set config.h.in variables
 set(DLL_VARIABLE)
 set(USE_MBSTATE_T 0)
-set(HAVE_WCHAR_T 1)
+set(BROKEN_WCHAR_H 0)
 set(ICONV_CONST const)
 autoconfigure(files includes iconv "${ico_dir}/config.h.in"
     "\n#define EILSEQ      64"
     "\n#define ICONV_CONST const"
 )
+if(HAVE_WCRTOMB OR HAVE_MBRTOWC)
+    set(USE_MBSTATE_T 1)
+endif()
 set(out_dir ${CMAKE_CURRENT_BINARY_DIR}/iconv_)
 # configure remaining headers
 cfg_file(files "${out_dir}/config.h.in" "${out_dir}/config.h")
@@ -210,10 +206,46 @@ target_link_libraries(ssh2 PUBLIC
     zlib
 )
 
+# git2 nsec option
+function(setup_git2_mtime target)
+    include(CheckStructHasMember)
+
+    check_struct_has_member("struct stat" st_mtim      "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIM LANGUAGE C)
+    check_struct_has_member("struct stat" st_mtimespec "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIMESPEC LANGUAGE C)
+    check_struct_has_member("struct stat" st_mtime_nsec sys/stat.h              HAVE_STRUCT_STAT_MTIME_NSEC LANGUAGE C)
+
+    if(HAVE_STRUCT_STAT_ST_MTIM)
+        check_struct_has_member("struct stat" st_mtim.tv_nsec sys/stat.h HAVE_STRUCT_STAT_NSEC LANGUAGE C)
+    elseif(HAVE_STRUCT_STAT_ST_MTIMESPEC)
+        check_struct_has_member("struct stat" st_mtimespec.tv_nsec sys/stat.h HAVE_STRUCT_STAT_NSEC LANGUAGE C)
+    else()
+        set(HAVE_STRUCT_STAT_NSEC true)
+    endif()
+
+    if(HAVE_STRUCT_STAT_NSEC OR WIN32)
+        target_compile_definitions(${target} PRIVATE GIT_USE_NSEC)
+    endif()
+
+    if(HAVE_STRUCT_STAT_ST_MTIM)
+        target_compile_definitions(${target} PRIVATE GIT_USE_STAT_MTIM)
+    elseif(HAVE_STRUCT_STAT_ST_MTIMESPEC)
+        target_compile_definitions(${target} PRIVATE GIT_USE_STAT_MTIMESPEC)
+    elseif(HAVE_STRUCT_STAT_ST_MTIME_NSEC)
+        target_compile_definitions(${target} PRIVATE GIT_USE_STAT_MTIME_NSEC)
+    endif()
+endfunction()
+
 # git2
 find_package(Threads)
 get_files(files "${git_dir}/src" "${git_dir}/include" OPTIONS recurse)
-filter_out(files "precompiled[.]c")
+filter_out(files
+    "auth_negotiate[.]c"        # GSSAPI
+    "precompiled[.]c"           # empty precompiled header
+    "stransport[.]c"            # GIT_SECURE_TRANSPORT
+    "w32_crtdbg_stacktrace[.]c" # GIT_MSVC_CRTDBG
+    "w32_stack[.]c"             # GIT_MSVC_CRTDBG
+    "winhttp[.]c"               # GIT_WINHTTP
+)
 if(WIN32)
     filter_out(files
         "${re_sep}unix${re_sep}"
@@ -227,14 +259,21 @@ target_include_directories(git2 PUBLIC
     "${git_dir}/src"
     "${git_dir}/include"
 )
-target_compile_definitions(git2 PRIVATE GIT_SSH GIT_THREADS)
+target_compile_definitions(git2 PRIVATE
+    GIT_SSH
+    GIT_THREADS
+    GIT_USE_ICONV
+    LIBGIT2_NO_FEATURES_H
+)
+setup_git2_mtime(git2)
 target_link_libraries(git2 PUBLIC
     http_parser
+    iconv
     ssh2
     ${CMAKE_THREAD_LIBS_INIT}
 )
 if(WIN32)
-    target_compile_definitions(git2 PRIVATE WIN32_SHA1 GIT_WIN32)
+    target_compile_definitions(git2 PRIVATE GIT_SHA1_WIN32 GIT_WIN32)
     target_link_libraries(git2 PUBLIC advapi32)
 endif()
 
@@ -250,11 +289,13 @@ target_include_directories(gtest PRIVATE ${gtest_dir})
 if(NOT WIN32)
     find_package(Threads)
     target_link_libraries(gtest PUBLIC Threads::Threads)
+else()
+    target_compile_definitions(gtest PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
 endif()
 
 # swig
 # annoying autoconfigure stuff
-get_filename_component(tmp_dir "${CMAKE_CURRENT_BINARY_DIR}/swig_" REALPATH)
+get_filename_component(tmp_dir "${CMAKE_CURRENT_BINARY_DIR}/swig_" ABSOLUTE)
 configure_file("${swig_dir}/Source/Include/swigwarn.h" "${tmp_dir}/swigwarn.h")
 file(WRITE "${tmp_dir}/swigconfig.h.in" "
 #include <stdbool.h>

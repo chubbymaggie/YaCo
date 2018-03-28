@@ -16,10 +16,10 @@
 #pragma once
 
 #include <stdint.h>
-#include "../Helpers.h"
-#include <string>
-#include <sstream>
 
+#include "Helpers.h"
+
+#include <memory>
 
 // forward declarations
 struct LOG_Ctx;
@@ -51,19 +51,5 @@ YATOOLS_Ctx* YATOOLS_Get();
 #define YALOG_DEBUG(MOD, FMT, ...)   LOG_DEBUG  (YATOOLS_GetLogger(YATOOLS_Get()), (MOD), (FMT), ## __VA_ARGS__)
 
 
-// helper for objects using operator<<
-template<typename T>
-inline std::string ToString(const T& Value)
-{
-    std::stringstream Stream;
-    Stream << Value;
-    return Stream.str();
-}
-
-template<>
-inline std::string ToString(const bool& Value)
-{
-    return Value ? "true" : "false";
-}
-
-#define TO_STRING(X) ToString(X).data()
+struct Yatools;
+std::shared_ptr<Yatools> MakeYatools(const char* base);

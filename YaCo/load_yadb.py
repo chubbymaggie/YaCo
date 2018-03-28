@@ -25,6 +25,7 @@ parser = argparse.ArgumentParser(prog=prog, description="Import to IDA database"
 parser.add_argument("bin_dir", type=os.path.abspath, help="YaCo bin directory")
 parser.add_argument("filename", type=os.path.abspath, help="Input yadb database")
 parser.add_argument("--no-exit", action="store_true", help="Do not exit IDA when done")
+parser.add_argument("--quick", action="store_true", help="Skip IDA auto-analysis")
 args = parser.parse_args(idc.ARGV[1:])
 
 root_dir = os.path.abspath(os.path.join(args.bin_dir, '..'))
@@ -37,57 +38,12 @@ if idc.__EA64__:
 else:
     import YaToolsPy32 as ya
 
-from ImportExport.YaToolHashProvider import YaToolHashProvider
-from ImportExport.YaToolIDAExporter import YaToolIDAExporter
-from ImportExport.YaTools import YaTools
-
-
-class YaLogHandler(logging.Handler):
-    def __init__(self):
-        logging.Handler.__init__(self)
-        self.deftype = ya.LOG_LEVEL_ERROR
-        self.typemap = {
-            logging.DEBUG: ya.LOG_LEVEL_DEBUG,
-            logging.INFO: ya.LOG_LEVEL_INFO,
-            logging.WARNING: ya.LOG_LEVEL_WARNING,
-            logging.ERROR: ya.LOG_LEVEL_ERROR,
-        }
-
-    def emit(self, record):
-        try:
-            level = self.typemap.get(record.levelno, self.deftype)
-            ya.yaco_log(level, self.format(record) + '\n')
-        except:
-            self.handleError(record)
-
-
-path = idc.GetIdbPath()
-name, ext = os.path.splitext(path)
-ya.StartYatools(name)
-
-logging.basicConfig()
-global logger
-logger = logging.getLogger("YaCo")
-
-logger.setLevel(logging.INFO)
-logger.propagate = True
-for h in logger.handlers:
-    h.setLevel(logging.WARN)
-
-handler = YaLogHandler()
-handler.setLevel(logging.INFO)
-logger.addHandler(handler)
-
 idc.Wait()
-yatools = YaTools()
-hash_provider = YaToolHashProvider()
-hash_provider.populate_struc_enum_ids()
-ida_exporter = YaToolIDAExporter(yatools, hash_provider, use_stackframes=False)
-fbmodel = ya.MakeFlatBufferDatabaseModel(args.filename)
-exporter = ya.MakeSingleObjectVisitor(ida_exporter)
-fbmodel.accept(exporter)
+name, _ = os.path.splitext(idc.GetIdbPath())
+ya.import_to_ida(name, args.filename)
+if not args.quick:
+    idc.Wait()
 
-idc.Wait()
 idaapi.cvar.database_flags = idaapi.DBFL_COMP
 if not args.no_exit:
     idc.Exit(0)

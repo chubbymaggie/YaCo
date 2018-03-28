@@ -18,7 +18,7 @@
 #include "YaTypes.hpp"
 #include "IModel.hpp"
 
-namespace std { template<typename T> class function; }
+#include <memory>
 
 struct HVersion
 {
@@ -58,16 +58,12 @@ struct HVersion
     void                walk_xrefs              (const IVersions::OnXrefFn& fnWalk) const;
     bool                has_xrefs               () const;
     void                walk_xref_attributes    (const XrefAttributes* hattr, const IVersions::OnAttributeFn& fnWalk) const;
-    void                walk_systems            (const IVersions::OnSystemFn& fnWalk) const;
-    bool                has_systems             () const;
-    void                walk_system_attributes  (HSystem_id_t system, const IVersions::OnAttributeFn& fnWalk) const;
     void                walk_attributes         (const IVersions::OnAttributeFn& fnWalk) const;
     bool                has_attributes          () const;
 
     bool                is_different_from   (const HVersion& object_version_diff) const;
     bool                match               (const HVersion& version) const;
 
-#ifndef SWIG
     friend bool operator==(const HVersion& t1, const HVersion& t2)
     {
         return t1.id() == t2.id();
@@ -88,17 +84,10 @@ struct HVersion
         return t1.id() > t2.id();
     }
 
-    friend std::ostream & operator<<(std::ostream& oss, HVersion version)
-    {
-        return oss << version.model_ << version.id_;
-    }
-#endif //SWIG
-
     const IVersions*    model_;
     HVersion_id_t       id_;
 };
 
-#ifndef SWIG
 namespace std
 {
     template<>
@@ -110,4 +99,3 @@ namespace std
         }
     };
 }
-#endif //SWIG

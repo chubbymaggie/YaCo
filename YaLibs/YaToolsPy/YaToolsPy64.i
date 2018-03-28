@@ -15,12 +15,14 @@
 
 %module(directors="1") YaToolsPy64
 
-#define __EA64__ 1
 %{
 #define __EA64__ 1
-#ifdef __NT__
+#ifdef _MSC_VER
 typedef uint64_t ea_t;
+#else
+typedef unsigned long long ea_t;
 #endif
+typedef ea_t bmask_t;
 %}
 
 %include "YaToolsPy.h"

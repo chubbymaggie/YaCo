@@ -1,4 +1,5 @@
-## Synopsis
+# YaCo [v1.8.1](https://github.com/DGA-MI-SSI/YaCo/releases/tag/v1.8.1)
+
 **YaCo** is an [**Hex-Rays IDA**](https://www.hex-rays.com/products/ida/) plugin.
 When enabled, multiple users can work simultaneously on the same binary.
 Any modification done by any user is synchronized through **git** version control.
@@ -17,49 +18,42 @@ During large malware analysis, we had to use a team of reversers and manual sync
 ## Installation
 
 ### Debian stretch/x64
-As **IDA** is a 32bits software, **YaCo** must be built for 32 bits architecture.
+
+**YaCo** like **IDA** 7.0 is 64-bit only.
 
 Install dependencies
 ```
-sudo apt install cmake
+sudo apt install build-essential git cmake libpython-2.7
 ```
 
-Add i386 architecture and install dependencies
+Set IDA_DIR & IDASDK_DIR environment variables
 ```
-sudo dpkg --add-architecture i386
-sudo apt update
-sudo apt install binutils:i386
-sudo apt install gcc:i386
-sudo apt install g++:i386
-sudo apt install python2.7-dev:i386
-```
-
-Set IDA_DIR environment variable
-```
-export IDA_DIR=/opt/ida6.8/
+export IDA_DIR=/opt/ida7.0/
+export IDASDK_DIR=/opt/idasdk70/
 ```
 
 Clone, configure & build **YaCo**
 ```
 ~/YaCo (master) $ cd build
 ~/YaCo/build (master) $ ./configure.sh
-~/YaCo/build (master) $ pushd ../out/x86_64_Release
-~/YaCo/out/x86_64_Release (master) $ make -j4
-~/YaCo/out/x86_64_Release (master) $ pushd $IDA_DIR/plugin
+~/YaCo/build (master) $ pushd ../out/x64_Release
+~/YaCo/out/x64_Release (master) $ make -j4
+~/YaCo/out/x64_Release (master) $ pushd $IDA_DIR/plugin
 $IDA_DIR/plugin $ ~/YaCo/build/deploy.sh
 ```
 
 ### Windows
 
 CMake must be installed and in the PATH
-Only visual studio 2015 is currently supported
+Only visual studio 2015 & 2017 are currently supported
 
 Configure and build **YaCo**
 ```
-set IDA_DIR=/your/ida/directory
-build> configure_2015.cmd
-out/x86> cmake --build . --config RelWithDebInfo
-out/x86> ctest . --output-on-failure -C RelWithDebInfo -j4
+set IDA_DIR=C:\Program Files\IDA Pro 7.0
+set IDASDK_DIR=C:\idasdk70
+build> configure_2017.cmd
+out/x64> cmake --build . --config RelWithDebInfo
+out/x64> ctest . --output-on-failure -C RelWithDebInfo -j4
 ```
 
 ## Usage
@@ -89,7 +83,18 @@ Setup **YaCo** environment:
   6. launch **IDA** for your FILE_local.idb file
   7. save database
   8. start working as usual
+  
+### How it works
+**YaCo** use a git server to synchronize changes between users.
 
+In the local repository, **YaCo** stores the original IDB and incremental changes as xml files & commits.
+
+Note that the database is not modified anymore unless you force a synchronisation.
+When saving the database, we fetch remote changes, rebase local changes on top of those, import this new state into IDA and push this state to the remote git server.
+
+Any git server should work, like github, gitlab or gitea instances.
+
+Currently, **YaCo** only support SSH authentication. To keep the plugin user-friendly, there is no mechanism which ask for passwords & passphrases on every git operation. Instead, it is recommended to use an ssh agent, like pageant under windows or ssh-agent under linux.
 
 ## Contributors
 
@@ -97,7 +102,9 @@ Setup **YaCo** environment:
   * Frederic Grelot
   * Jeremy Bouetard
   * Martin Tourneboeuf
+  * Maxime Pinard
   * Valerian Comiti
 
 ## License
 
+YaCo is licensed under the GNU General Public License v3.0 that can be found in the LICENSE file

@@ -15,7 +15,7 @@
 
 #include "HVersion.hpp"
 
-#include "../Helpers.h"
+#include "Helpers.h"
 
 #include <functional>
 
@@ -124,16 +124,6 @@ void HVersion::walk_xrefs(const IVersions::OnXrefFn& fnWalk)const
 void HVersion::walk_xref_attributes(const XrefAttributes* hattr, const IVersions::OnAttributeFn& fnWalk)const
 {
     model_->walk_xref_attributes(id_, hattr, fnWalk);
-}
-
-void HVersion::walk_systems(const IVersions::OnSystemFn& fnWalk)const
-{
-    model_->walk_systems(id_, fnWalk);
-}
-
-void HVersion::walk_system_attributes(HSystem_id_t system, const IVersions::OnAttributeFn& fnWalk)const
-{
-    model_->walk_system_attributes(id_, system, fnWalk);
 }
 
 void HVersion::walk_attributes(const IVersions::OnAttributeFn& fnWalk)const
@@ -332,17 +322,6 @@ bool HVersion::has_signatures() const
 {
     bool found = false;
     model_->walk_signatures(id_, [&](const HSignature&)
-    {
-        found = true;
-        return WALK_STOP;
-    });
-    return found;
-}
-
-bool HVersion::has_systems() const
-{
-    bool found = false;
-    model_->walk_systems(id_, [&](offset_t, HSystem_id_t)
     {
         found = true;
         return WALK_STOP;

@@ -33,7 +33,6 @@ struct Signature
     SignatureMethod_e   method;
 };
 
-std::string ToString(const Signature& sign);
 Signature MakeSignature(SignatureAlgo_e algo, SignatureMethod_e method, const const_string_ref& value);
 
 inline const_string_ref make_string_ref(const Signature& sign)
@@ -41,7 +40,6 @@ inline const_string_ref make_string_ref(const Signature& sign)
     return {sign.buffer, sign.size};
 }
 
-#ifndef SWIG
 inline bool operator==(const Signature& a, const Signature& b)
 {
     return !strcmp(a.buffer, b.buffer);
@@ -63,4 +61,3 @@ namespace std
         }
     };
 }
-#endif //SWIG

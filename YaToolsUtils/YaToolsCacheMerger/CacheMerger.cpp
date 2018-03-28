@@ -16,13 +16,11 @@
 #include <iostream>
 #include <vector>
 
-#include "XML/XMLDatabaseModel.hpp"
-#include "XML/XMLExporter.hpp"
-#include "StdModel.hpp"
+#include "XmlModel.hpp"
+#include "XmlVisitor.hpp"
+#include "MemoryModel.hpp"
 #include "IModelAccept.hpp"
 #include "IModel.hpp"
-#include "DependencyResolverVisitor.hpp"
-#include "DelegatingVisitor.hpp"
 using namespace std;
 
 
@@ -33,13 +31,9 @@ void usage(char* name) {
 
 int main_func(const std::string& folder, const std::string&  output_path) {
 
-    auto db = MakeStdModel();
-    auto db_depend_resol = MakeDependencyResolverVisitor(db.visitor);
-
-    MakeXmlAllDatabaseModel(folder)->accept(*db_depend_resol.visitor);
-
-    auto file_exporter = MakeFileXmlExporter(output_path);
-    db.model->accept(*file_exporter);
+    const auto db = MakeMemoryModel();
+    MakeXmlAllModel(folder)->accept(*db);
+    db->accept(*MakeFileXmlVisitor(output_path));
     return 0;
 }
 

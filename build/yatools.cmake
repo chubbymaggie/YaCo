@@ -16,13 +16,22 @@
 set(bin_dir     ${bin_dir}/YaTools/bin)
 set(bin_d_dir   ${bin_d_dir}/YaTools/bin)
 
+if("$ENV{IDASDK_DIR}" STREQUAL "")
+    message(FATAL_ERROR "missing IDASDK_DIR environment variable")
+endif()
+get_filename_component(idasdk_dir "$ENV{IDASDK_DIR}" ABSOLUTE)
+message("-- Using IDASDK_DIR=${idasdk_dir}")
+
+if("$ENV{IDA_DIR}" STREQUAL "")
+    message(FATAL_ERROR "missing IDA_DIR environment variable")
+endif()
+get_filename_component(ida_dir "$ENV{IDA_DIR}" ABSOLUTE)
+message("-- Using IDA_DIR=${ida_dir}")
+
 if(MSVC)
     # disable 'conditional expression is constant'
     set_cx_flags("" "/wd4127" "/wd4127")
-    # enable large address aware flag on 32-bit binaries
-    if("${ARCH}" STREQUAL "x86")
-        set_flag_all(LINKER_FLAGS "/LARGEADDRESSAWARE(:NO)?" "/LARGEADDRESSAWARE" DEBUG RELEASE RELWITHDEBINFO)
-    endif()
+    include_directories("${ya_dir}/deps/optional-lite")
 endif()
 
 include(${ya_dir}/build/yadeps.cmake)
@@ -60,11 +69,6 @@ setup_yatools(yatools)
 target_include_directories(yatools PUBLIC
     "${ya_dir}/YaLibs/YaToolsLib"
 )
-if(MSVC)
-    target_include_directories(yatools PRIVATE
-        "${ya_dir}/deps/optional-lite"
-    )
-endif()
 target_link_libraries(yatools PUBLIC
     farmhash
     flatbuffers
@@ -78,11 +82,8 @@ make_deploy_dir(${bin_dir}/.. YaCo ${ya_dir}/YaCo)
 add_custom_command(TARGET yatools POST_BUILD
     # make sure deploy_dir exists
     COMMAND ${CMAKE_COMMAND} -E make_directory ${deploy_dir}
-    # python dependencies
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${async_dir}   ${deploy_dir}/async
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${pympler_dir} ${deploy_dir}/pympler
     # ida plugins
-    COMMAND ${CMAKE_COMMAND} -E copy ${ya_dir}/YaCo/yaco_plugin.py     ${deploy_dir}/../..
+    COMMAND ${CMAKE_COMMAND} -E copy ${ya_dir}/YaCo/yaco_plugin.py ${deploy_dir}/../..
     # flatbuffers bindings
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${fb_dir}/python/flatbuffers" "${deploy_dir}/flatbuffers"
     # generated yadb bindings
@@ -93,7 +94,6 @@ add_custom_command(TARGET yatools POST_BUILD
 add_target(yatools_tests yatools/tests "${ya_dir}/YaLibs/tests/YaToolsLib_test" OPTIONS test recurse static_runtime)
 setup_yatools(yatools_tests)
 target_include_directories(yatools_tests PRIVATE
-    "${ya_dir}/deps/optional-lite"
     "${ya_dir}/YaLibs/tests"
 )
 target_link_libraries(yatools_tests PRIVATE
@@ -109,17 +109,15 @@ setup_yatools(yagit)
 target_include_directories(yagit PUBLIC "${ya_dir}/YaLibs/YaGitLib")
 target_link_libraries(yagit PUBLIC git2 ssh2)
 
-# yagit tests
-add_custom_command(OUTPUT cleanup.rule
+# yagit_tests
+add_test(NAME yagit_tests_init
     COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/temp_folder_unittest"
-    COMMENT "cleaning up temp directory"
 )
-set_source_files_properties(cleanup.rule PROPERTIES SYMBOLIC true)
-source_group(cmake FILES cleanup.rule)
 get_files(files "${ya_dir}/YaLibs/tests/YaGitLib_test")
-make_target(yagit_tests yatools/tests ${files} cleanup.rule OPTIONS test static_runtime)
+make_target(yagit_tests yatools/tests ${files} OPTIONS test static_runtime)
 setup_yatools(yagit_tests)
 target_include_directories(yagit_tests PRIVATE "${ya_dir}/YaLibs/tests")
+set_property(TEST yagit_tests APPEND PROPERTY DEPENDS yagit_tests_init)
 target_link_libraries(yagit_tests PRIVATE
     gtest
     yagit
@@ -142,12 +140,6 @@ add_tool(yafb2xml YaToolsUtils/YaToolsFBToXML)
 # yacachemerger
 add_tool(yacachemerger YaToolsUtils/YaToolsCacheMerger)
 
-# yadbdbmerger
-add_tool(yadbdbmerger YaToolsUtils/YaToolsYADBDBMerger)
-
-# depres
-add_tool(depres YaToolsUtils/depres)
-
 # swig modules
 function(add_swig_mod target name)
     add_swig_module(${target} yatools/swig ${ARGN})
@@ -169,33 +161,55 @@ function(add_swig_mod target name)
     endif()
     set_target_output_name(_${target} _${name} _${name})
     set_target_output_directory(_${target} "")
-    set_target_properties(_${target} PROPERTIES INSTALL_RPATH "$ORIGIN/")
     deploy_to_bin(_${target} "${CMAKE_CURRENT_BINARY_DIR}/${name}.py" "")
 endfunction()
 
 # yatools_py
 function(add_yatools_py bits)
     # set constants
-    set(os_ LINUX)
     set(xbits_ 64)
     if(bits EQUAL 64)
         set(xbits_ 32)
     endif()
+    set(os_)
     if(WIN32)
         set(os_ NT)
+    elseif(APPLE)
+        set(os_ MAC)
+    elseif(UNIX)
+        set(os_ LINUX)
     endif()
 
     # yaida
     get_files(yaida_files "${ya_dir}/YaLibs/YaToolsIDALib")
     make_target(yaida${bits} yatools ${yaida_files} OPTIONS static_runtime)
     setup_yatools(yaida${bits})
-    target_include_directories(yaida${bits} PUBLIC "${ida_dir}/include")
-    target_compile_definitions(yaida${bits} PUBLIC __${os_}__ __IDP__)
-    target_link_libraries(yaida${bits} PUBLIC yatools)
+    target_include_directories(yaida${bits} PUBLIC "${idasdk_dir}/include" "${CMAKE_CURRENT_BINARY_DIR}/yatools_")
+    target_compile_definitions(yaida${bits} PUBLIC __${os_}__ __IDP__ __X64__)
+    target_link_libraries(yaida${bits}
+        PUBLIC
+        yatools
+        yagit
+        PRIVATE
+        zlib
+    )
     if(WIN32)
         target_link_libraries(yaida${bits} PRIVATE
-            "${ida_dir}/lib/x86_win_vc_${bits}/ida.lib"
-            "${ida_dir}/lib/x86_win_vc_32/pro.lib"
+            "${idasdk_dir}/lib/x64_win_vc_${bits}/ida.lib"
+            "${idasdk_dir}/lib/x64_win_vc_64/pro.lib"
+        )
+    elseif(APPLE)
+        set(libbits)
+        if(bits EQUAL 64)
+            set(libbits 64)
+        endif()
+        target_link_libraries(yaida${bits} PRIVATE
+            "${idasdk_dir}/lib/x64_mac_gcc_${bits}/libida${libbits}.dylib"
+            "${idasdk_dir}/lib/x64_mac_gcc_64/pro.a"
+        )
+    elseif(UNIX)
+        target_link_libraries(yaida${bits} PRIVATE
+            "${idasdk_dir}/lib/x64_linux_gcc_64/pro.a"
         )
     endif()
     if(bits EQUAL 64)
@@ -205,7 +219,7 @@ function(add_yatools_py bits)
     # yaida swig
     get_files(files "${ya_dir}/YaLibs/YaToolsPy")
     filter_out(files "YaToolsPy${xbits_}.i")
-    set(yaswig_deps ${yatools_files} ${yaida_files})
+    set(yaswig_deps ${yatools_files} ${yaida_files} ${files})
     filter_in(yaswig_deps "[.]h$" "[.]hpp$")
     add_swig_mod(yatools_py${bits} YaToolsPy${bits} ${files} DEPS ${yaswig_deps} INCLUDES
         "${CMAKE_CURRENT_BINARY_DIR}/yatools_"
@@ -218,70 +232,57 @@ function(add_yatools_py bits)
         yagit
         yaida${bits}
     )
-
-    # disable target on x64
-    if("${ARCH}" STREQUAL "x64")
-        exclude_target(yaida${bits})
-        exclude_target(_yatools_py${bits})
-    endif()
 endfunction()
 add_yatools_py(32)
 add_yatools_py(64)
 
 # testdata
-if("$ENV{IDA_DIR}" STREQUAL "")
-    message(FATAL_ERROR "missing IDA_DIR environment variable")
-endif()
-find_package(PythonInterp)
-function(make_testdata dst dir dll idaq)
-    if("${ARCH}" STREQUAL "x86")
-        set(dst_ ${${dst}})
-        set(output "${root_dir}/testdata/${dir}/database/database.yadb")
-        list(APPEND dst_ ${output})
-        add_test(NAME "make_${dir}_testdata"
-            COMMAND ${PYTHON_EXECUTABLE} "${ya_dir}/tests/make_testdata.py"
-            "${root_dir}" "${deploy_dir}" "${dir}/${dll}" "$ENV{IDA_DIR}/${idaq}"
-            WORKING_DIRECTORY "${ya_dir}/tests"
-        )
-        set(${dst} ${dst_} PARENT_SCOPE)
-    else()
-        message("make_${dir}_testdata is disabled on ${ARCH}")
+find_package(PythonInterp 2.7 REQUIRED)
+function(make_testdata target bin src idaq)
+    set(output "${root_dir}/testdata/${target}/database/database.yadb")
+    set(no_pdb "--no-pdb")
+    if("${target}" STREQUAL "${src}")
+        set(no_pdb "")
     endif()
+    add_test(NAME "make_testdata_${target}"
+        COMMAND ${PYTHON_EXECUTABLE} "${ya_dir}/tests/make_testdata.py"
+        ${no_pdb} "${root_dir}/testdata/${target}" "${deploy_dir}" "${root_dir}/tests/${src}/${bin}" "${ida_dir}/${idaq}"
+        WORKING_DIRECTORY "${ya_dir}/tests"
+    )
 endfunction()
-set(testdata_outputs)
-make_testdata(testdata_outputs "qt54_svg" "Qt5Svgd.dll" "idaq64")
-make_testdata(testdata_outputs "qt57_svg" "Qt5Svgd.dll" "idaq")
+make_testdata(qt54_svg        Qt5Svgd.dll qt54_svg ida64)
+make_testdata(qt54_svg_no_pdb Qt5Svgd.dll qt54_svg ida64)
+make_testdata(qt57_svg        Qt5Svgd.dll qt54_svg ida)
+make_testdata(cmder           Cmder.exe   cmder    ida64)
 
 # integration_tests
-if("${ARCH}" STREQUAL "x86")
-    add_target(integration_tests yatools/tests "${ya_dir}/YaLibs/tests/integration" OPTIONS test static_runtime)
-    setup_yatools(integration_tests)
-    target_include_directories(integration_tests PRIVATE
-        "${ya_dir}/deps/optional-lite"
-        "${ya_dir}/YaLibs/tests"
-    )
-    target_link_libraries(integration_tests PRIVATE
-        gtest
-        yatools
-    )
-    set_property(TEST integration_tests APPEND PROPERTY DEPENDS make_qt54_svg_testdata)
-    set_property(TEST integration_tests APPEND PROPERTY DEPENDS make_qt57_svg_testdata)
-else()
-    message("integration_tests are disabled on ${ARCH}")
-endif()
+add_target(integration_tests yatools/tests "${ya_dir}/YaLibs/tests/integration" OPTIONS test static_runtime)
+setup_yatools(integration_tests)
+target_include_directories(integration_tests PRIVATE
+    "${ya_dir}/YaLibs/tests"
+)
+target_link_libraries(integration_tests PRIVATE
+    gtest
+    yatools
+)
+set_property(TEST integration_tests APPEND PROPERTY DEPENDS make_testdata_qt54_svg)
+set_property(TEST integration_tests APPEND PROPERTY DEPENDS make_testdata_qt57_svg)
 
-# yaco_tests
-function(make_yaco_test bitness idaq)
-    set(name yaco${bitness}_tests)
-    if("${ARCH}" STREQUAL "x86")
-        add_test(NAME ${name}
-            COMMAND ${PYTHON_EXECUTABLE} ${ya_dir}/tests/run_tests.py
-            ${deploy_dir} all ${CMAKE_CURRENT_BINARY_DIR} ${idaq}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        )
-    else()
-        message("${name} are disabled on ${ARCH}")
-    endif()
-endfunction()
-make_yaco_test(32 idaq)
-make_yaco_test(64 idaq64)
+# unit_tests
+execute_process(COMMAND
+    ${PYTHON_EXECUTABLE} "${ya_dir}/tests/runtests.py" --list
+    WORKING_DIRECTORY "${ya_dir}/tests"
+    OUTPUT_VARIABLE test_names
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+string(REGEX MATCHALL "[a-zA-Z0-9._]+" test_names ${test_names})
+foreach(test ${test_names})
+    string(REGEX REPLACE ".+Fixture\." "" shortname ${test})
+    message("-- Configuring yatools/tests/${shortname}")
+    add_test(NAME ${shortname}
+        COMMAND "${PYTHON_EXECUTABLE}" "${ya_dir}/tests/runtests.py" -f${test} -b "${deploy_dir}"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+    set_property(TEST ${shortname} APPEND PROPERTY DEPENDS make_testdata_qt54_svg_no_pdb)
+    set_property(TEST ${shortname} APPEND PROPERTY DEPENDS make_testdata_cmder)
+endforeach()
