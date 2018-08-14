@@ -36,7 +36,7 @@ struct HVersion
     int                 username_flags      () const;
     const_string_ref    prototype           () const;
     bool                has_prototype       () const;
-    YaToolFlag_T        flags               () const;
+    flags_t             flags               () const;
     int                 string_type         () const;
     const_string_ref    header_comment      (bool repeatable) const;
     bool                has_header_comment  (bool repeatable) const;
@@ -44,7 +44,7 @@ struct HVersion
     void                walk_signatures         (const IVersions::OnSignatureFn& fnWalk) const;
     bool                has_signatures          () const;
     void                walk_xrefs_from         (const IVersions::OnXrefFromFn& fnWalk) const;
-    void                walk_xrefs_to           (const IVersions::OnObjectFn& fnWalk) const;
+    void                walk_xrefs_to           (const IVersions::OnVersionFn& fnWalk) const;
     void                walk_blobs              (const IVersions::OnBlobFn& fnWalk) const;
     bool                has_blobs               () const;
     void                walk_comments           (const IVersions::OnCommentFn& fnWalk) const;
@@ -85,7 +85,7 @@ struct HVersion
     }
 
     const IVersions*    model_;
-    HVersion_id_t       id_;
+    VersionIndex        idx_;
 };
 
 namespace std

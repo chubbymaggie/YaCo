@@ -79,6 +79,8 @@ namespace
     {
         if(cc != CM_CC_SPECIAL && cc != CM_CC_SPECIALE && cc != CM_CC_SPECIALP)
             return;
+        if(loc.is_badloc())
+            return;
         const auto size = print_argloc(buffer, bufsize, loc);
         if(!size)
             return;
@@ -86,9 +88,6 @@ namespace
         dst.append(buffer, size);
         dst += '>';
     }
-
-    const qstring comment_prefix = "/*%";
-    const qstring comment_suffix = "%*/";
 
     void simple_tif_to_string(qstring& dst, ya::TypeToStringMode_e mode, ya::Deps* deps, const tinfo_t& tif, const const_string_ref& name)
     {
@@ -114,37 +113,7 @@ namespace
             hash::hash_enum(ya::to_string_ref(subtype));
         if(deps)
             deps->push_back({subid, subtid});
-
-        subtype.insert(0, comment_prefix);
-        subtype += '#';
-        ya::append_uint64(subtype, subid);
-        subtype += comment_suffix;
-
-        auto comment_size = subtype.length();
-        const auto has_name = name.value && *name.value;
-        if(has_name)
-        {
-            subtype += ' ';
-            comment_size += 1;
-            subtype.append(name.value, name.size);
-        }
-
-        to_string(dst, tif, subtype.c_str(), nullptr);
-
-        // move back pointers after dependency comment
-        const auto pos = dst.find(subtype);
-        if(pos == qstring::npos)
-            return;
-
-        bool first = !has_name;
-        while(pos > 1 && dst[pos - 1] == '*')
-        {
-            dst.remove(pos - 1, 1);
-            dst.insert(pos - 1 + comment_size, first ? " *" : "*");
-            first = false;
-        }
     }
-
 
     #define DECLARE_REF(name, value)\
     const char name ## _txt[] = value;\
@@ -188,10 +157,11 @@ namespace
         
         const auto cc = tif.get_cc();
         add_suffix(dst, get_calling_convention(cc));
+        add_suffix(dst, name.size ? name : default_function_name);
 
+        // append return type usercall *after* function name
         char buffer[256];
         append_location(dst, cc, buffer, sizeof buffer, fi.retloc);
-        add_suffix(dst, name.size ? name : default_function_name);
 
         size_t i = 0;
         std::string argname;
@@ -234,20 +204,11 @@ namespace ya
     }
 }
 
-namespace
-{
-    void cleanup_deps(ya::Deps& deps)
-    {
-        std::sort(deps.begin(), deps.end());
-        deps.erase(std::unique(deps.begin(), deps.end()), deps.end());
-    }
-}
-
 void ya::print_type(qstring& dst, TypeToStringMode_e mode, Deps* deps, const tinfo_t& tif, const const_string_ref& name)
 {
     tif_to_string(dst, mode, deps, tif, name);
     if(deps)
-        cleanup_deps(*deps);
+        ya::dedup(*deps);
 }
 
 namespace
@@ -402,7 +363,7 @@ std::string ya::dump_flags(flags_t flags)
     return reply;
 }
 
-tinfo_t ya::get_tinfo(flags_t flags, const opinfo_t* op)
+tinfo_t ya::get_tinfo_from_op(flags_t flags, const opinfo_t* op)
 {
     tinfo_t empty;
     if(!op)
@@ -433,7 +394,7 @@ tinfo_t ya::get_tinfo(ea_t ea)
     opinfo_t op;
     const auto flags = get_flags(ea);
     const auto has_op = get_opinfo(&op, ea, 0, flags);
-    return get_tinfo(flags, has_op ? &op : nullptr);
+    return get_tinfo_from_op(flags, has_op ? &op : nullptr);
 }
 
 std::string ya::get_type(ea_t ea)
@@ -473,7 +434,102 @@ const_string_ref ya::get_default_name(qstring& buffer, ea_t offset, func_t* func
         return ya::read_string_from(buffer, TO_FMT("field_%" PRIXEA, offset));
     if(offset <= func->frsize)
         return ya::read_string_from(buffer, TO_FMT("var_%" PRIXEA, func->frsize - offset));
-    if(offset < func->frsize + 4)
+    if(offset < func->frsize + 4 + func->frregs)
         return ya::read_string_from(buffer, TO_FMT("var_s%" PRIuEA, offset - func->frsize));
-    return ya::read_string_from(buffer, TO_FMT("arg_%" PRIXEA, offset - func->frsize - 4));
+    return ya::read_string_from(buffer, TO_FMT("arg_%" PRIXEA, offset - func->frsize - 4 - func->frregs));
+}
+
+namespace ya
+{
+    range_t get_range_item(ea_t ea)
+    {
+        return range_t{get_item_head(ea), get_item_end(ea)};
+    }
+
+    range_t get_range_code(ea_t ea, ea_t min, ea_t max)
+    {
+        const auto seg = getseg(ea);
+        if(!seg)
+            return range_t();
+
+        min = std::max(min, seg->start_ea);
+        max = std::min(max, seg->end_ea);
+
+        const auto item = get_range_item(ea);
+        auto start = item.start_ea;
+        const auto func = get_func(item.start_ea);
+        while(true)
+        {
+            const auto prev = get_range_item(start - 1);
+            if(!is_code(get_flags(prev.start_ea)) || get_func(prev.start_ea) != func)
+                break;
+            if(prev.start_ea < min)
+                break;
+            start = prev.start_ea;
+        }
+        auto end = item.end_ea;
+        while(end < max)
+        {
+            const auto next = get_range_item(end);
+            if(!is_code(get_flags(next.start_ea)) || get_func(next.start_ea) != func)
+                break;
+            end = next.end_ea;
+        }
+        return range_t{start, end};
+    }
+
+    std::vector<ea_t> get_all_items(ea_t start, ea_t end)
+    {
+        std::vector<ea_t> items;
+
+        // add previous overlapped item
+        auto ea = start;
+        const auto curr = ya::get_range_item(ea);
+        if(curr.contains(ea))
+            ea = curr.start_ea;
+
+        const auto allowed = range_t{start, end};
+        const auto add_ea = [&](ea_t x)
+        {
+            const auto flags = get_flags(x);
+            if(is_code(flags) || ya::is_item(flags))
+                if(allowed.contains(x))
+                    items.emplace_back(x);
+        };
+
+        // find all interesting items
+        while(ea != BADADDR && ea < end)
+        {
+            const auto flags = get_flags(ea);
+            if(is_code(flags))
+            {
+                const auto func = get_func(ea);
+                const auto code = ya::get_range_code(ea, start, end);
+                if(func)
+                    add_ea(func->start_ea);
+                else if(code.contains(ea))
+                    add_ea(code.start_ea);
+                ea = code.end_ea;
+                continue;
+            }
+            add_ea(ea);
+            ea = next_not_tail(ea);
+        }
+
+        dedup(items);
+        return items;
+    }
+
+    bool is_item(flags_t flags)
+    {
+        return has_cmt(flags)
+            || has_xref(flags)
+            || has_extra_cmts(flags)
+            || has_any_name(flags)
+            || !!(flags & FF_SIGN)
+            || !!(flags & FF_BNOT)
+            || is_defarg0(flags)
+            || is_defarg1(flags)
+            || (is_data(flags) && !is_byte(flags));
+    }
 }

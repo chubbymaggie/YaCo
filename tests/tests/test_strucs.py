@@ -36,7 +36,7 @@ idaapi.set_struc_cmt(eid, "cmt_02", False)
             self.save_struc("name_a"),
             self.save_struc("name_b"),
         )
-        b.check_git(moved=["struc"])
+        b.check_git(added=["struc"], deleted=["struc"])
         self.assertEqual(self.strucs["name_a"][1], "")
         self.assertNotEqual(self.strucs["name_b"][1], "")
         a.run(
@@ -67,7 +67,7 @@ idaapi.set_struc_cmt(eid, "cmt_02", False)
             self.save_struc("name_a"),
             self.save_struc("name_b"),
         )
-        a.check_git(moved=["struc", "strucmember"])
+        a.check_git(added=["struc", "strucmember"], deleted=["struc", "strucmember"])
         self.assertEqual(self.strucs["name_a"][1], "")
         self.assertNotEqual(self.strucs["name_b"][1], "")
         b.run(
@@ -162,8 +162,7 @@ for ea, n, offset in targets:
             self.save_strucs(),
             self.save_last_ea(),
         )
-        a.check_git(added=["binary", "segment", "segment_chunk", "function",
-            "stackframe", "stackframe_member", "stackframe_member", "basic_block"] +
+        a.check_git(added=["binary", "segment", "segment_chunk", "function", "basic_block"] +
             ["struc"] * 2 + ["strucmember"] * 112)
         self.assertRegexpMatches(self.eas[self.last_ea][1], "path_idx")
         b.run(
@@ -199,6 +198,32 @@ idaapi.set_member_name(idaapi.get_struc(idaapi.get_struc_id('t0')), 0, 'field_0'
             self.save_strucs(),
         )
         b.check_git(deleted=["strucmember"])
+        a.run(
+            self.check_strucs(),
+        )
+
+    def test_shrink_strucs_with_default_fields(self):
+        a, b = self.setup_repos()
+
+        a.run(
+            self.script("""
+sid = idaapi.add_struc(-1, "sa", False)
+idc.add_struc_member(sid, "field_0", 0, idaapi.FF_DWORD | idaapi.FF_DATA, -1, 4)
+idc.add_struc_member(sid, "field_4", 4, idaapi.FF_DWORD | idaapi.FF_DATA, -1, 4)
+"""),
+            self.save_strucs(),
+        )
+        a.check_git(added=["struc", "strucmember", "strucmember"])
+        b.run(
+            self.check_strucs(),
+            self.script("""
+sid = idc.get_struc_id("sa")
+idc.set_member_type(sid, 0, idaapi.FF_BYTE | idaapi.FF_DATA, -1, 1)
+idc.set_member_type(sid, 4, idaapi.FF_BYTE | idaapi.FF_DATA, -1, 1)
+"""),
+            self.save_strucs(),
+        )
+        b.check_git(modified=["struc"], deleted=["strucmember"] * 2)
         a.run(
             self.check_strucs(),
         )

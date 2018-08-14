@@ -15,183 +15,114 @@
 
 #include "Merger.hpp"
 
-#include "HVersion.hpp"
-#include "HObject.hpp"
-#include "IModelVisitor.hpp"
 #include "MemoryModel.hpp"
-#include "XmlModel.hpp"
+#include "XmlAccept.hpp"
 #include "XmlVisitor.hpp"
-#include "Helpers.h"
+#include "Relation.hpp"
 
-#include <functional>
-#include <string>
-#include <iostream>
+#include <algorithm>
 #include <map>
 
-Merger::Merger(PromptMergeConflict* MergePrompt, ObjectVersionMergeStrategy_e MergeStrategy) :
-            mpMergePrompt(MergePrompt),
-            mMergeStrategy(MergeStrategy)
+Merger::Merger(ObjectVersionMergeStrategy_e estrategy, const Merger::on_conflict_fn& on_conflict)
+    : estrategy_(estrategy)
+    , on_conflict_(on_conflict)
 {
-
 }
 
-static bool begins_with(const const_string_ref& ref, const char* token)
+namespace
 {
-    return strstr(ref.value, token) == ref.value;
+    bool begins_with(const const_string_ref& ref, const char* token)
+    {
+        return strstr(ref.value, token) == ref.value;
+    }
+
+    bool is_unset(const const_string_ref& ref)
+    {
+        return !ref.size
+            || begins_with(ref, "var_")
+            || begins_with(ref, "field_")
+            || begins_with(ref, "dword_")
+            || begins_with(ref, "offset_");
+    }
 }
 
-static bool is_unset(const const_string_ref& attribute)
+MergeStatus_e Merger::merge_files(const std::string& local, const std::string& remote,
+                                  const std::string& filename)
 {
-    if(attribute.size == 0)
-            return true;
-    return attribute.value
-            &&(begins_with(attribute, "var_")
-        || begins_with(attribute, "field_")
-        || begins_with(attribute, "dword_")
-        || begins_with(attribute, "offset_"));
-}
-
-MergeStatus_e Merger::smartMerge(   const char* input_file1, const char* input_file2,
-                                const char* output_file_result)
-{
-
-    /* Load XML files */
-    auto file_vect1 = std::vector<std::string>();
-    file_vect1.push_back(std::string(input_file1));
-    auto file_vect2 = std::vector<std::string>();
-    file_vect2.push_back(std::string(input_file2));
-
     const auto db1 = MakeMemoryModel();
     const auto db2 = MakeMemoryModel();
 
     // reload two databases with one object version in each database
-    MakeXmlFilesModel(file_vect1)->accept(*db1);
-    MakeXmlFilesModel(file_vect2)->accept(*db2);
+    AcceptXmlMemory(*db1, local.data(), local.size());
+    AcceptXmlMemory(*db2, remote.data(), remote.size());
 
-    /* Check only one object version is present in each database */
-    int count1 = 0;
-    HObject db1_ref_object;
-    db1->walk_objects([&](const YaToolObjectId& id, const HObject& obj){
-        UNUSED(id);
-        UNUSED(obj);
-        count1++;
-        db1_ref_object = obj;
-        return WALK_CONTINUE;
-    });
-    int count2 = 0;
-    HObject db2_ref_object;
-    db2->walk_objects([&](const YaToolObjectId& id, const HObject& obj){
-        UNUSED(id);
-        UNUSED(obj);
-        count2++;
-        db2_ref_object = obj;
-        return WALK_CONTINUE;
-    });
+    if(db1->size() != 1 || db2->size() != 1)
+        throw std::runtime_error("invalid number of referenced object in databases");
 
-    if (count1 != 1 || count2 != 1)
+    const auto get = [](IModel& model)
     {
-        throw("PythonResolveFileConflictCallback: callback: invalid number of referenced object in databases");
-    }
-
-    count1 = 0;
-    count2 = 0;
-    HVersion db1_obj_version;
-    HVersion db2_obj_version;
-    db1_ref_object.walk_versions([&](const HVersion& ver)
-    {
-        count1++;
-        db1_obj_version = ver;
-        return WALK_CONTINUE;
-    });
-    db2_ref_object.walk_versions([&](const HVersion& ver)
-    {
-        count2++;
-        db2_obj_version = ver;
-        return WALK_CONTINUE;
-    });
-
-    if (count1 != 1 || count2 != 1)
-    {
-        throw("PythonResolveFileConflictCallback: callback: invalid number of object version in reference object");
-    }
-
-    auto output = MakeMemoryModel();
+        HVersion reply;
+        model.walk([&](const HVersion& hver)
+        {
+            reply = hver;
+            return WALK_STOP;
+        });
+        return reply;
+    };
 
     /* Build relation */
     Relation relation;
-    relation.version1_ = db1_obj_version;
-    relation.version2_ = db2_obj_version;
+    relation.version1_ = get(*db1);
+    relation.version2_ = get(*db2);
     relation.type_ = RELATION_TYPE_EXACT_MATCH;
     relation.confidence_ = RELATION_CONFIDENCE_MAX;
     relation.direction_ = RELATION_DIRECTION_BOTH;
     relation.flags_ = 0;
 
     /* Merge */
+    const auto output = MakeMemoryModel();
     output->visit_start();
-    std::set<YaToolObjectId> newObjectIds;
-    MergeStatus_e retval = mergeObjectVersions(*output, newObjectIds, relation);
+    const auto retval = merge_ids(*output, relation, nullptr);
 	output->visit_end();
     
     if(retval != OBJECT_MERGE_STATUS_NOT_UPDATED)
-    {
-        const std::string output_path = std::string(output_file_result);
-        auto xml_exporter = MakeFileXmlVisitor(output_path);
-        output->accept(*xml_exporter);
-    }
+        output->accept(*MakeFileXmlVisitor(filename));
 
     return retval;
 }
 
-void Merger::mergeAttributes(const std::string& attribute_name, const const_string_ref& ref_attr, const const_string_ref& new_attr,
-                             const std::function<void(const const_string_ref&)>& fnCallback)
-{
-    if (ref_attr == new_attr)
-    {
-        /* Both same, no merge */
-        fnCallback(ref_attr);
-        return;
-    }
-    if (is_unset(ref_attr))
-    {
-        fnCallback(new_attr);
-        return;
-    }
-    if (is_unset(new_attr))
-    {
-        fnCallback(ref_attr);
-        return;
-    }
-
-    /* Conflict detected, see what is the strategy */
-    switch (mMergeStrategy)
-    {
-    case OBJECT_VERSION_MERGE_FORCE_REFERENCE:
-        fnCallback(ref_attr);
-        break;
-    case OBJECT_VERSION_MERGE_FORCE_NEW:
-        fnCallback(new_attr);
-        break;
-    case OBJECT_VERSION_MERGE_IGNORE:
-        fnCallback(new_attr);
-        break;
-    case OBJECT_VERSION_MERGE_PROMPT:
-        /* A conflict is detected, need to fix conflict manualy */
-        std::string message("Conflict detected between ");
-        message += attribute_name;
-        message += " attributes";
-        std::string      result_conflict = mpMergePrompt->merge_attributes_callback(message.c_str(), new_attr.value, ref_attr.value);
-
-        if (result_conflict.length() == 0)
-        {
-            fnCallback(new_attr);
-        }
-        fnCallback(make_string_ref(result_conflict));
-        break;
-    }
-}
-
 namespace
 {
+    template<typename T>
+    void merge_attributes(const Merger& m, const std::string& name, const const_string_ref& local, const const_string_ref& remote, const T& on_merge)
+    {
+        if(local == remote)
+            return on_merge(local);
+
+        if(is_unset(local))
+            return on_merge(remote);
+
+        if(is_unset(remote))
+            return on_merge(local);
+
+        /* Conflict detected, see what is the strategy */
+        switch (m.estrategy_)
+        {
+        case OBJECT_VERSION_MERGE_FORCE_REFERENCE:
+            return on_merge(local);
+
+        case OBJECT_VERSION_MERGE_FORCE_NEW:
+        case OBJECT_VERSION_MERGE_IGNORE:
+            return on_merge(remote);
+
+        case OBJECT_VERSION_MERGE_PROMPT:
+            /* A conflict is detected, need to fix conflict manually */
+            const auto message = "Conflict detected on " + name + " attribute";
+            const auto reply = m.on_conflict_(message, make_string(local), make_string(remote));
+            return on_merge(reply.empty() ? remote : make_string_ref(reply));
+        }
+    }
+
     void merge_offsets(Merger& m, const Relation relation, IModelVisitor& v)
     {
         std::map<std::pair<offset_t, CommentType_e>, std::string> comments;
@@ -221,7 +152,7 @@ namespace
                 }
                 else
                 {
-                    m.mergeAttributes("comment", comment_ref, make_string_ref(search->second), [&](const const_string_ref& value)
+                    merge_attributes(m, "comment", comment_ref, make_string_ref(search->second), [&](const const_string_ref& value)
                     {
                         comments[std::make_pair(offset_ref, type_ref)] = make_string(value);
                     });
@@ -237,7 +168,7 @@ namespace
                 }
                 else
                 {
-                    m.mergeAttributes("value_view", value, make_string_ref(search->second), [&](const const_string_ref& value)
+                    merge_attributes(m, "value_view", value, make_string_ref(search->second), [&](const const_string_ref& value)
                     {
                         valueviews[std::make_pair(offset_ref, operand)] = make_string(value);
                     });
@@ -255,6 +186,8 @@ namespace
             }
             break;
 
+        case RELATION_TYPE_DIFF:
+            // TODO propagate comments ???
         default:
             if(relation.version2_.has_comments() || relation.version2_.has_value_views())
             {
@@ -276,19 +209,11 @@ namespace
     }
 }
 
-MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<YaToolObjectId>& newObjectIds,
-                                                            const Relation& relation)
+MergeStatus_e Merger::merge_ids(IModelVisitor& visitor_db, const Relation& relation, const on_id_fn& on_id)
 {
-    visitor_db.visit_start_reference_object(relation.version2_.type());
+    visitor_db.visit_start_version(relation.version2_.type(), relation.version2_.id());
 
-    /* Visit id */
-    visitor_db.visit_id(relation.version2_.id());
-
-    visitor_db.visit_start_object_version();
-
-    /* Visit size */
     visitor_db.visit_size(relation.version2_.size());
-
     visitor_db.visit_parent_id(relation.version2_.parent_id());
     visitor_db.visit_address(relation.version2_.address());
 
@@ -308,7 +233,7 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
                 flags2 = flags1;
             }
         }
-        mergeAttributes("name", relation.version1_.username(), relation.version2_.username(), [&](const const_string_ref& name)
+        merge_attributes(*this, "name", relation.version1_.username(), relation.version2_.username(), [&](const const_string_ref& name)
         {
             visitor_db.visit_name(name, flags1);
         });
@@ -320,12 +245,14 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
     case RELATION_TYPE_EXACT_MATCH:
         if (relation.version1_.has_prototype() || relation.version2_.has_prototype())
          {
-             mergeAttributes("prototype", relation.version1_.prototype(), relation.version2_.prototype(), [&](const const_string_ref& prototype)
+             merge_attributes(*this, "prototype", relation.version1_.prototype(), relation.version2_.prototype(), [&](const const_string_ref& prototype)
              {
                  visitor_db.visit_prototype(prototype);
              });
          }
         break;
+    case RELATION_TYPE_DIFF:
+        // TODO propagate prototype ???
     default:
         if(relation.version2_.has_prototype())
         {
@@ -365,7 +292,7 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
         /* Header non repeatable comment */
         if (relation.version1_.has_header_comment(false) || relation.version2_.has_header_comment(false))
         {
-            mergeAttributes("header_nonrepeatable_comment", relation.version1_.header_comment(false), relation.version2_.header_comment(false), [&](const const_string_ref& value)
+            merge_attributes(*this, "header_nonrepeatable_comment", relation.version1_.header_comment(false), relation.version2_.header_comment(false), [&](const const_string_ref& value)
             {
                 visitor_db.visit_header_comment(false, value);
             });
@@ -374,12 +301,14 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
         /* Header repeatable comment */
         if (relation.version1_.has_header_comment(true) || relation.version2_.has_header_comment(true))
         {
-            mergeAttributes("header_repeatable_comment", relation.version1_.header_comment(true), relation.version2_.header_comment(true), [&](const const_string_ref& value)
+            merge_attributes(*this, "header_repeatable_comment", relation.version1_.header_comment(true), relation.version2_.header_comment(true), [&](const const_string_ref& value)
             {
                 visitor_db.visit_header_comment(true, value);
             });
         }
         break;
+    case RELATION_TYPE_DIFF:
+        // TODO propagate ???
     default:
         if (relation.version2_.has_header_comment(false))
             visitor_db.visit_header_comment(false, relation.version2_.header_comment(false));
@@ -429,7 +358,8 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
                 operand_t operand = xref.first.second;
 
                 visitor_db.visit_start_xref(xref_offset, xref.second.xref_value, operand);
-                newObjectIds.insert(xref.second.xref_value);
+                if(on_id)
+                    on_id(xref.second.xref_value);
                 xref.second.object.walk_xref_attributes(xref.second.hattr, [&](const const_string_ref& xref_attr_key, const const_string_ref& xref_attr_value)
                 {
                     visitor_db.visit_xref_attribute(xref_attr_key, xref_attr_value);
@@ -440,6 +370,8 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
             visitor_db.visit_end_xrefs();
         }
         break;
+    case RELATION_TYPE_DIFF:
+        // TODO propagate ???
     default:
         if (relation.version2_.has_xrefs())
         {
@@ -480,7 +412,7 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
             }
             else
             {
-                mergeAttributes("attribute", value_ref, make_string_ref(search->second), [&](const const_string_ref& value)
+                merge_attributes(*this, "attribute", value_ref, make_string_ref(search->second), [&](const const_string_ref& value)
                 {
                     attributes[make_string(key_ref)] = make_string(value);
                 });
@@ -493,6 +425,8 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
         }
 
         break;
+    case RELATION_TYPE_DIFF:
+        // TODO propagate ???
     default:
         relation.version2_.walk_attributes([&](const const_string_ref& key, const const_string_ref& value)
         {
@@ -512,10 +446,7 @@ MergeStatus_e Merger::mergeObjectVersions( IModelVisitor& visitor_db, std::set<Y
     /**********************************************/
 
 
-     visitor_db.visit_end_object_version();
-
-     visitor_db.visit_end_reference_object();
-
+     visitor_db.visit_end_version();
      return OBJECT_MERGE_STATUS_BOTH_UPDATED;
 }
 

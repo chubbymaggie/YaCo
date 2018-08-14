@@ -21,6 +21,20 @@
 #include <vector>
 #include <algorithm>
 
+#ifdef __EA64__
+#define PRIxEA  "llx"
+#define PRIXEA  "llX"
+#define PRIuEA  "llu"
+#define PRIdEA  "lld"
+#define EA_SIZE "16"
+#else
+#define PRIxEA  "x"
+#define PRIXEA  "X"
+#define PRIuEA  "u"
+#define PRIdEA  "d"
+#define EA_SIZE "8"
+#endif
+
 namespace ya
 {
     struct Dependency
@@ -37,7 +51,7 @@ namespace ya
     };
 
     void                print_type(qstring& dst, TypeToStringMode_e mode, Deps* deps, const tinfo_t& tif, const const_string_ref& name);
-    tinfo_t             get_tinfo(flags_t flags, const opinfo_t* op);
+    tinfo_t             get_tinfo_from_op(flags_t flags, const opinfo_t* op);
     tinfo_t             get_tinfo(ea_t ea);
     std::string         get_type(ea_t ea);
     std::string         dump_flags(flags_t flags);
@@ -70,21 +84,6 @@ namespace ya
         walk_enum_members_with_bmask(eid, DEFMASK, operand);
         for(auto fmask = get_first_bmask(eid); fmask != BADADDR; fmask = get_next_bmask(eid, fmask))
             walk_enum_members_with_bmask(eid, fmask, operand);
-    }
-
-    // call void(area_t area) on every function chunks
-    template<typename T>
-    bool walk_function_chunks(ea_t ea, const T& operand)
-    {
-        const auto func = get_func(ea);
-        if(!func)
-            return false;
-
-        func_tail_iterator_t fti{func, ea};
-        for(auto ok = fti.first(); ok; ok = fti.next())
-            operand(fti.chunk());
-
-        return true;
     }
 
     // call void(int i, ea_t locea, const lochist_entry_t& loc, const qstring& desc) on every bookmarks
@@ -179,48 +178,17 @@ namespace ya
         }
     }
 
-    template<uint32_t flags = 0, typename T>
-    void append_uint64(T& dst, uint64_t x)
+    template<typename T>
+    void dedup(T& d)
     {
-        char buf[sizeof x * 2];
-        const auto str = to_hex<flags>(buf, x);
-        dst.append(str.value, str.size);
+        // sort & remove duplicates
+        std::sort(d.begin(), d.end());
+        d.erase(std::unique(d.begin(), d.end()), d.end());
     }
 
-    inline range_t get_range_item(ea_t ea)
-    {
-        return range_t{get_item_head(ea), get_item_end(ea)};
-    }
+    range_t get_range_item(ea_t ea);
+    range_t get_range_code(ea_t ea, ea_t min, ea_t max);
+    std::vector<ea_t> get_all_items(ea_t start, ea_t end);
 
-    inline range_t get_range_code(ea_t ea, ea_t min, ea_t max)
-    {
-        const auto seg = getseg(ea);
-        if(!seg)
-            return range_t();
-
-        min = std::max(min, seg->start_ea);
-        max = std::min(max, seg->end_ea);
-
-        const auto item = get_range_item(ea);
-        auto start = item.start_ea;
-        const auto func = get_func(item.start_ea);
-        while(true)
-        {
-            const auto prev = get_range_item(start - 1);
-            if(!is_code(get_flags(prev.start_ea)) || get_func(prev.start_ea) != func)
-                break;
-            if(prev.start_ea < min)
-                break;
-            start = prev.start_ea;
-        }
-        auto end = item.end_ea;
-        while(end < max)
-        {
-            const auto next = get_range_item(end);
-            if(!is_code(get_flags(next.start_ea)) || get_func(next.start_ea) != func)
-                break;
-            end = next.end_ea;
-        }
-        return range_t{start, end};
-    }
+    bool is_item(flags_t flags);
 }

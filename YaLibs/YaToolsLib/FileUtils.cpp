@@ -14,18 +14,19 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "FileUtils.hpp"
-#include "IModelAccept.hpp"
-#include "FlatBufferModel.hpp"
-#include "FlatBufferVisitor.hpp"
-#include "XmlModel.hpp"
 
 #include <memory>
-#include <string>
+
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
 
 #ifdef _MSC_VER
+#   include <io.h>
 #   include <filesystem>
 #else
 #   include <experimental/filesystem>
+#   include <unistd.h>
 #endif
 
 namespace fs = std::experimental::filesystem;

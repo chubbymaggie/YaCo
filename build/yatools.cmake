@@ -37,7 +37,9 @@ endif()
 include(${ya_dir}/build/yadeps.cmake)
 
 # IDA works with Python 2.7, which is mandatory to build swig tools
-find_package(PythonLibs 2.7 REQUIRED)
+# ask for pythonlibs first or it may not get python x64 libraries
+find_package(PythonLibs   2.7 REQUIRED)
+find_package(PythonInterp 2.7 REQUIRED)
 
 # yatools helpers
 function(setup_yatools target)
@@ -72,7 +74,9 @@ target_include_directories(yatools PUBLIC
 target_link_libraries(yatools PUBLIC
     farmhash
     flatbuffers
+    git2
     libxml2
+    ssh2
 )
 
 # export yatools dependencies
@@ -82,10 +86,14 @@ make_deploy_dir(${bin_dir}/.. YaCo ${ya_dir}/YaCo)
 add_custom_command(TARGET yatools POST_BUILD
     # make sure deploy_dir exists
     COMMAND ${CMAKE_COMMAND} -E make_directory ${deploy_dir}
+    # yaco library
+    COMMAND ${CMAKE_COMMAND} -E copy ${ya_dir}/YaDiff/merge_idb.py ${deploy_dir}
     # ida plugins
     COMMAND ${CMAKE_COMMAND} -E copy ${ya_dir}/YaCo/yaco_plugin.py ${deploy_dir}/../..
     # flatbuffers bindings
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${fb_dir}/python/flatbuffers" "${deploy_dir}/flatbuffers"
+    # capstone bindings
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${cap_dir}/bindings/python/capstone" "${deploy_dir}/capstone"
     # generated yadb bindings
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_BINARY_DIR}/yadb" "${deploy_dir}/yadb"
 )
@@ -101,26 +109,24 @@ target_link_libraries(yatools_tests PRIVATE
     yatools
 )
 
-# yagit
-get_files(files "${ya_dir}/YaLibs/YaGitLib")
-filter_out(files "test[.]")
-make_target(yagit yatools ${files} OPTIONS static_runtime)
-setup_yatools(yagit)
-target_include_directories(yagit PUBLIC "${ya_dir}/YaLibs/YaGitLib")
-target_link_libraries(yagit PUBLIC git2 ssh2)
-
-# yagit_tests
-add_test(NAME yagit_tests_init
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/temp_folder_unittest"
+# yadifflib
+add_target(yadifflib yatools "${ya_dir}/YaDiff/YaDiffLib" OPTIONS static_runtime recurse)
+setup_yatools(yadifflib)
+target_include_directories(yadifflib PUBLIC
+    "${ya_dir}/YaDiff/YaDiffLib"
 )
-get_files(files "${ya_dir}/YaLibs/tests/YaGitLib_test")
-make_target(yagit_tests yatools/tests ${files} OPTIONS test static_runtime)
-setup_yatools(yagit_tests)
-target_include_directories(yagit_tests PRIVATE "${ya_dir}/YaLibs/tests")
-set_property(TEST yagit_tests APPEND PROPERTY DEPENDS yagit_tests_init)
-target_link_libraries(yagit_tests PRIVATE
+target_link_libraries(yadifflib PUBLIC
+    yatools
+    capstone
+)
+
+# yadifflib_tests
+add_target(yadifflib_tests yatools/tests "${ya_dir}/YaDiff/tests/YaDiffLib_test" OPTIONS test recurse static_runtime)
+setup_yatools(yadifflib_tests)
+target_include_directories(yadifflib_tests PRIVATE "${ya_dir}/YaDiff/tests/" "${ya_dir}/YaLibs/tests")
+target_link_libraries(yadifflib_tests PRIVATE
     gtest
-    yagit
+    yadifflib
 )
 
 # add tool
@@ -131,6 +137,9 @@ function(add_tool target dir)
     set_target_output_directory(${target} "")
 endfunction()
 
+# yadiff
+add_tool(yadiff YaDiff yadifflib)
+
 # yaxml2fb
 add_tool(yaxml2fb YaToolsUtils/YaToolsXMLToFB)
 
@@ -140,9 +149,12 @@ add_tool(yafb2xml YaToolsUtils/YaToolsFBToXML)
 # yacachemerger
 add_tool(yacachemerger YaToolsUtils/YaToolsCacheMerger)
 
+# yadbtovector
+add_tool(yadbtovector YaToolsUtils/YaToolsYaDBToVectors yadifflib)
+
 # swig modules
 function(add_swig_mod target name)
-    add_swig_module(${target} yatools/swig ${ARGN})
+    add_swig_module(${target} yatools ${ARGN})
     target_include_directories(_${target} PRIVATE ${PYTHON_INCLUDE_DIRS})
     if(MSVC)
         # ida does not install debug python libraries
@@ -189,7 +201,6 @@ function(add_yatools_py bits)
     target_link_libraries(yaida${bits}
         PUBLIC
         yatools
-        yagit
         PRIVATE
         zlib
     )
@@ -223,13 +234,14 @@ function(add_yatools_py bits)
     filter_in(yaswig_deps "[.]h$" "[.]hpp$")
     add_swig_mod(yatools_py${bits} YaToolsPy${bits} ${files} DEPS ${yaswig_deps} INCLUDES
         "${CMAKE_CURRENT_BINARY_DIR}/yatools_"
+        "${ya_dir}/YaDiff/YaDiffLib"
         "${ya_dir}/YaLibs/YaGitLib"
         "${ya_dir}/YaLibs/YaToolsIDALib"
         "${ya_dir}/YaLibs/YaToolsLib"
         "${ya_dir}/YaLibs/YaToolsPy"
     )
     target_link_libraries(_yatools_py${bits} PRIVATE
-        yagit
+        yadifflib
         yaida${bits}
     )
 endfunction()
@@ -237,7 +249,6 @@ add_yatools_py(32)
 add_yatools_py(64)
 
 # testdata
-find_package(PythonInterp 2.7 REQUIRED)
 function(make_testdata target bin src idaq)
     set(output "${root_dir}/testdata/${target}/database/database.yadb")
     set(no_pdb "--no-pdb")
@@ -252,8 +263,9 @@ function(make_testdata target bin src idaq)
 endfunction()
 make_testdata(qt54_svg        Qt5Svgd.dll qt54_svg ida64)
 make_testdata(qt54_svg_no_pdb Qt5Svgd.dll qt54_svg ida64)
-make_testdata(qt57_svg        Qt5Svgd.dll qt54_svg ida)
 make_testdata(cmder           Cmder.exe   cmder    ida64)
+make_testdata(vim_0197        vim.basic   vim_0197 ida64)
+make_testdata(vim_1453        vim.basic   vim_1453 ida64)
 
 # integration_tests
 add_target(integration_tests yatools/tests "${ya_dir}/YaLibs/tests/integration" OPTIONS test static_runtime)
@@ -266,7 +278,7 @@ target_link_libraries(integration_tests PRIVATE
     yatools
 )
 set_property(TEST integration_tests APPEND PROPERTY DEPENDS make_testdata_qt54_svg)
-set_property(TEST integration_tests APPEND PROPERTY DEPENDS make_testdata_qt57_svg)
+set_property(TEST integration_tests APPEND PROPERTY DEPENDS make_testdata_qt54_svg_no_pdb)
 
 # unit_tests
 execute_process(COMMAND
@@ -286,3 +298,15 @@ foreach(test ${test_names})
     set_property(TEST ${shortname} APPEND PROPERTY DEPENDS make_testdata_qt54_svg_no_pdb)
     set_property(TEST ${shortname} APPEND PROPERTY DEPENDS make_testdata_cmder)
 endforeach()
+
+# merge_idb_tests
+add_test(NAME merge_idb_tests
+    COMMAND ${PYTHON_EXECUTABLE} "${ya_dir}/tests/test_yadiff.py"
+    "${deploy_dir}/.."
+    "${PYTHON_EXECUTABLE}"
+    ${root_dir}/testdata/vim_0197/vim.basic.i64
+    ${root_dir}/testdata/vim_1453/vim.basic.i64
+)
+set_property(TEST merge_idb_tests APPEND PROPERTY ENVIRONMENT "YATOOLS_DIR=${deploy_dir}/..")
+set_property(TEST merge_idb_tests APPEND PROPERTY DEPENDS make_testdata_vim_0197)
+set_property(TEST merge_idb_tests APPEND PROPERTY DEPENDS make_testdata_vim_1453)

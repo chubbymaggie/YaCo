@@ -17,7 +17,6 @@
 
 #include "Helpers.h"
 #include "IModel.hpp"
-#include "HObject.hpp"
 #include "HVersion.hpp"
 #include "HSignature.hpp"
 #include "IModelSink.hpp"
@@ -191,39 +190,40 @@ struct StdHiddenArea
 
 struct StdSignature
 {
-    StdSignature(const Signature& value, HVersion_id_t version_idx)
+    StdSignature(const Signature& value, VersionIndex idx)
         : value(value)
-        , version_idx(version_idx)
+        , idx(idx)
     {
     }
 
     StdSignature()
-        : version_idx(UINT32_MAX)
+        : idx(UINT32_MAX)
     {
         memset(&value, 0, sizeof value);
     }
 
     Signature       value;
-    HVersion_id_t   version_idx;
+    VersionIndex    idx;
 };
 
 struct StdVersion
 {
     StdVersion()
         : id(0)
+        , idx(UINT32_MAX)
         , parent(0)
         , address(0)
         , type(OBJECT_TYPE_COUNT)
-        , object_idx(UINT32_MAX)
         , sig_idx(UINT32_MAX)
         , size(0)
         , offset(0)
         , flags(0)
         , strtype(UINT8_MAX)
+        , xref_to_idx(UINT32_MAX)
     {
     }
 
-    void reset()
+    void clear()
     {
         // clear vectors but keep their capacities
         attributes.clear();
@@ -242,15 +242,16 @@ struct StdVersion
 
         // reset every scalars
         id = 0;
+        idx = UINT32_MAX;
         parent = 0;
         address = 0;
         type = OBJECT_TYPE_COUNT;
-        object_idx = UINT32_MAX;
         sig_idx = UINT32_MAX;
         size = 0;
         offset = 0;
         flags = 0;
         strtype = UINT8_MAX;
+        xref_to_idx = UINT32_MAX;
     }
 
     std::vector<StdAttribute>       attributes;
@@ -267,71 +268,21 @@ struct StdVersion
     std::string                 header_comment_nonrepeatable;
 
     YaToolObjectId              id;
+    VersionIndex                idx;
     YaToolObjectId              parent;
     offset_t                    address;
     YaToolObjectType_e          type;
-    HObject_id_t                object_idx;
     HSignature_id_t             sig_idx;
     offset_t                    size;
     offset_t                    offset;
     uint32_t                    flags;
     uint8_t                     strtype;
-};
-
-struct StdObject
-{
-    StdObject()
-        : id(0)
-        , type(OBJECT_TYPE_COUNT)
-        , idx(UINT32_MAX)
-        , version_idx(UINT32_MAX)
-        , xref_to_idx(UINT32_MAX)
-    {
-    }
-
-    void reset()
-    {
-        *this = {};
-    }
-
-    YaToolObjectId      id;
-    YaToolObjectType_e  type;
-    HObject_id_t        idx;
-    HVersion_id_t       version_idx;
-    uint32_t            xref_to_idx;
+    uint32_t                    xref_to_idx;
 };
 
 typedef std::unordered_map<YaToolObjectId, bool> ObjFound;
 
-struct Current
-{
-    StdObject   object;
-    StdVersion  version;
-    bool        is_deleted;
-};
-
 struct Model;
-
-struct ViewObjects
-    : public IObjects
-{
-    ViewObjects(const Model& db)
-        : db_(db)
-    {
-    }
-
-    // IObjects methods
-    void                accept          (HObject_id_t object_id, IModelVisitor& visitor) const override;
-    YaToolObjectType_e  type            (HObject_id_t object_id) const override;
-    YaToolObjectId      id              (HObject_id_t object_id) const override;
-    bool                has_signature   (HObject_id_t object_id) const override;
-    void                walk_versions   (HObject_id_t object_id, const OnVersionFn& fnWalk) const override;
-    void                walk_xrefs_from (HObject_id_t object_id, const OnXrefFromFn& fnWalk) const override;
-    void                walk_xrefs_to   (HObject_id_t object_id, const OnObjectFn& fnWalk) const override;
-    bool                match           (HObject_id_t object_id, const HObject& remote) const override;
-
-    const Model& db_;
-};
 
 struct ViewVersions
     : public IVersions
@@ -341,31 +292,32 @@ struct ViewVersions
     {
     }
 
-    void                accept(HVersion_id_t version_id, IModelVisitor& visitor) const override;
+    void                accept(VersionIndex idx, IModelVisitor& visitor) const override;
 
-    YaToolObjectId      id              (HVersion_id_t version_id) const override;
-    YaToolObjectId      parent_id       (HVersion_id_t version_id) const override;
-    offset_t            size            (HVersion_id_t version_id) const override;
-    YaToolObjectType_e  type            (HVersion_id_t version_id) const override;
-    offset_t            address         (HVersion_id_t version_id) const override;
-    const_string_ref    username        (HVersion_id_t version_id) const override;
-    int                 username_flags  (HVersion_id_t version_id) const override;
-    const_string_ref    prototype       (HVersion_id_t version_id) const override;
-    YaToolFlag_T        flags           (HVersion_id_t version_id) const override;
-    int                 string_type     (HVersion_id_t version_id) const override;
-    const_string_ref    header_comment  (HVersion_id_t version_id, bool repeatable) const override;
+    YaToolObjectId      id              (VersionIndex idx) const override;
+    YaToolObjectId      parent_id       (VersionIndex idx) const override;
+    offset_t            size            (VersionIndex idx) const override;
+    YaToolObjectType_e  type            (VersionIndex idx) const override;
+    offset_t            address         (VersionIndex idx) const override;
+    const_string_ref    username        (VersionIndex idx) const override;
+    int                 username_flags  (VersionIndex idx) const override;
+    const_string_ref    prototype       (VersionIndex idx) const override;
+    flags_t             flags           (VersionIndex idx) const override;
+    int                 string_type     (VersionIndex idx) const override;
+    const_string_ref    header_comment  (VersionIndex idx, bool repeatable) const override;
+    bool                has_signature   (VersionIndex idx) const override;
 
-    void                walk_signatures         (HVersion_id_t version_id, const OnSignatureFn& fnWalk) const override;
-    void                walk_xrefs_from         (HVersion_id_t version_id, const OnXrefFromFn& fnWalk) const override;
-    void                walk_xrefs_to           (HVersion_id_t version_id, const OnObjectFn& fnWalk) const override;
-    void                walk_blobs              (HVersion_id_t version_id, const OnBlobFn& fnWalk) const override;
-    void                walk_comments           (HVersion_id_t version_id, const OnCommentFn& fnWalk) const override;
-    void                walk_value_views        (HVersion_id_t version_id, const OnValueViewFn& fnWalk) const override;
-    void                walk_register_views     (HVersion_id_t version_id, const OnRegisterViewFn& fnWalk) const override;
-    void                walk_hidden_areas       (HVersion_id_t version_id, const OnHiddenAreaFn& fnWalk) const override;
-    void                walk_xrefs              (HVersion_id_t version_id, const OnXrefFn& fnWalk) const override;
-    void                walk_xref_attributes    (HVersion_id_t version_id, const XrefAttributes* hattr, const OnAttributeFn& fnWalk) const override;
-    void                walk_attributes         (HVersion_id_t version_id, const OnAttributeFn& fnWalk) const override;
+    void                walk_signatures         (VersionIndex idx, const OnSignatureFn& fnWalk) const override;
+    void                walk_xrefs_from         (VersionIndex idx, const OnXrefFromFn& fnWalk) const override;
+    void                walk_xrefs_to           (VersionIndex idx, const OnVersionFn& fnWalk) const override;
+    void                walk_blobs              (VersionIndex idx, const OnBlobFn& fnWalk) const override;
+    void                walk_comments           (VersionIndex idx, const OnCommentFn& fnWalk) const override;
+    void                walk_value_views        (VersionIndex idx, const OnValueViewFn& fnWalk) const override;
+    void                walk_register_views     (VersionIndex idx, const OnRegisterViewFn& fnWalk) const override;
+    void                walk_hidden_areas       (VersionIndex idx, const OnHiddenAreaFn& fnWalk) const override;
+    void                walk_xrefs              (VersionIndex idx, const OnXrefFn& fnWalk) const override;
+    void                walk_xref_attributes    (VersionIndex idx, const XrefAttributes* hattr, const OnAttributeFn& fnWalk) const override;
+    void                walk_attributes         (VersionIndex idx, const OnAttributeFn& fnWalk) const override;
 
     const Model& db_;
 };
@@ -391,15 +343,11 @@ struct Model
     // IModelVisitor
     void visit_start() override;
     void visit_end() override;
-    void visit_start_reference_object(YaToolObjectType_e type) override;
-    void visit_start_deleted_object(YaToolObjectType_e type) override;
-    void visit_end_deleted_object() override;
-    void visit_end_reference_object() override;
-    void visit_id(YaToolObjectId id) override;
-    void visit_start_object_version() override;
+    void visit_start_version(YaToolObjectType_e type, YaToolObjectId id) override;
+    void visit_deleted(YaToolObjectType_e type, YaToolObjectId id) override;
+    void visit_end_version() override;
     void visit_parent_id(YaToolObjectId id) override;
     void visit_address(offset_t address) override;
-    void visit_end_object_version() override;
     void visit_name(const const_string_ref& name, int flags) override;
     void visit_size(offset_t size) override;
     void visit_start_signatures() override;
@@ -425,36 +373,31 @@ struct Model
     void visit_blob(offset_t offset, const void* blob, size_t len) override;
     void visit_flags(flags_t flags) override;
 
-    // IModelAccept
-    void accept(IModelVisitor& visitor) override;
 
     // IModel
-    void    walk_objects                    (const OnObjectAndIdFn& fnWalk) const override;
-    size_t  num_objects                     () const override;
-    void    walk_objects_with_signature     (const HSignature& hash, const OnObjectFn& fnWalk) const override;
-    size_t  num_objects_with_signature      (const HSignature& hash) const override;
-    void    walk_versions_with_signature    (const HSignature& hash, const OnVersionFn& fnWalk) const override;
-    HObject get_object                      (YaToolObjectId id) const override;
-    bool    has_object                      (YaToolObjectId id) const override;
-    void    walk_versions_without_collision (const OnSigAndVersionFn& fnWalk) const override;
-    void    walk_matching_versions          (const HObject& object, size_t min_size, const OnVersionPairFn& fnWalk) const override;
+    void        accept          (IModelVisitor& visitor) override;
+    void        walk            (const OnVersionFn& fnWalk) const override;
+    size_t      size            () const override;
+    size_t      size_matching   (const HSignature& hash) const override;
+    void        walk_matching   (const HSignature& hash, const OnVersionFn& fnWalk) const override;
+    HVersion    get             (YaToolObjectId id) const override;
+    bool        has             (YaToolObjectId id) const override;
+    void        walk_uniques    (const OnSignatureFn& fnWalk) const override;
+    void        walk_matching   (const HVersion& object, size_t min_size, const OnVersionFn& fnWalk) const override;
 
-    ViewObjects                     view_objects_;
     ViewVersions                    view_versions_;
     ViewSignatures                  view_signatures_;
-    std::unique_ptr<Current>        current_;
-    std::vector<StdObject>          objects_;
+    StdVersion                      current_;
     std::vector<StdVersion>         versions_;
     std::vector<StdSignature>       signatures_;
-    std::vector<StdObject>          deleted_;
-    std::vector<const StdObject*>   ordered_;
+    std::vector<StdVersion>         deleted_;
+    std::vector<const StdVersion*>  ordered_;
     ModelIndex                      index_;
 };
 }
 
 Model::Model()
-    : view_objects_     (*this)
-    , view_versions_    (*this)
+    : view_versions_    (*this)
     , view_signatures_  (*this)
 {
 }
@@ -466,45 +409,30 @@ std::shared_ptr<IModelAndVisitor> MakeMemoryModel()
 
 void Model::visit_start()
 {
-    current_ = std::make_unique<Current>();
 }
 
 namespace
 {
 template<typename T>
-void walk_versions(const Model& db, const StdObject& object, const T& operand)
+void walk_xrefs_to(const Model& db, const StdVersion& object, const T& operand)
 {
-    const auto end = db.versions_.size();
-    for(auto i = object.version_idx; i < end; ++i)
+    walk_xrefs(db.index_, object.idx, object.xref_to_idx, [&](VersionIndex idx)
     {
-        const auto& version = db.versions_[i];
-        if(object.idx != version.object_idx)
-            break;
-        if(operand(i, version) == WALK_STOP)
-            break;
-    }
-}
-
-template<typename T>
-void walk_xrefs_to(const Model& db, const StdObject& object, const T& operand)
-{
-    walk_xrefs(db.index_, object.idx, object.xref_to_idx, [&](HObject_id_t from)
-    {
-        return operand(from);
+        return operand(idx);
     });
 }
 
 template<typename T>
 void walk_signatures(const Model& db, const StdVersion& ver, const T& operand)
 {
-    optional<HVersion_id_t> version_idx;
+    optional<VersionIndex> idx;
     const auto end = db.signatures_.size();
     for(auto i = ver.sig_idx; i < end; ++i)
     {
         const auto& sig = db.signatures_[i];
-        if(version_idx && *version_idx != sig.version_idx)
+        if(idx && *idx != sig.idx)
             return;
-        version_idx = sig.version_idx;
+        idx = sig.idx;
         if(operand(i, sig) == WALK_STOP)
             return;
     }
@@ -520,7 +448,7 @@ void walk_xrefs(const Model&, const StdVersion& version, const T& operand)
 
 void accept_version(const Model& db, const StdVersion& version, IModelVisitor& visitor)
 {
-    visitor.visit_start_object_version();
+    visitor.visit_start_version(version.type, version.id);
     visitor.visit_size(version.size);
     visitor.visit_parent_id(version.parent);
     visitor.visit_address(version.address);
@@ -588,32 +516,20 @@ void accept_version(const Model& db, const StdVersion& version, IModelVisitor& v
     for(const auto& blob : version.blobs)
         visitor.visit_blob(blob.offset, &blob.data[0], blob.data.size());
 
-    visitor.visit_end_object_version();
-}
-
-void accept_object(const Model& db, const StdObject& object, IModelVisitor& visitor)
-{
-    visitor.visit_start_reference_object(object.type);
-    visitor.visit_id(object.id);
-    walk_versions(db, object, [&](HVersion_id_t, const StdVersion& version)
-    {
-        accept_version(db, version, visitor);
-        return WALK_CONTINUE;
-    });
-    visitor.visit_end_reference_object();
+    visitor.visit_end_version();
 }
 
 void finish_index(Model& db)
 {
-    finish_objects(db.index_);
+    finish_indexs(db.index_);
 
     for(const auto& version : db.versions_)
         for(const auto& xref : version.xrefs)
-            add_xref_to(db.index_, version.object_idx, xref.id);
+            add_xref_to(db.index_, version.idx, xref.id);
 
-    finish_xrefs(db.index_, [&](HObject_id_t to, uint32_t xref_to_idx)
+    finish_xrefs(db.index_, [&](VersionIndex to, uint32_t xref_to_idx)
     {
-        auto& obj = db.objects_[to];
+        auto& obj = db.versions_[to];
         assert(obj.idx == to);
         auto& idx = obj.xref_to_idx;
         idx = std::min(idx, xref_to_idx);
@@ -630,11 +546,10 @@ void finish_index(Model& db)
 void Model::visit_end()
 {
     finish_index(*this);
-    current_.reset();
 
     // sort objects by type
-    ordered_.reserve(objects_.size());
-    for(const auto& it : objects_)
+    ordered_.reserve(versions_.size());
+    for(const auto& it : versions_)
         ordered_.emplace_back(&it);
     std::sort(ordered_.begin(), ordered_.end(), [](const auto& a, const auto& b)
     {
@@ -642,75 +557,45 @@ void Model::visit_end()
     });
 }
 
-void Model::visit_start_reference_object(YaToolObjectType_e type)
+void Model::visit_start_version(YaToolObjectType_e type, YaToolObjectId id)
 {
-    current_->is_deleted = false;
-    current_->object.reset();
-    current_->object.type = type;
-    current_->object.idx = static_cast<HObject_id_t>(objects_.size());
-    current_->object.version_idx = static_cast<HVersion_id_t>(versions_.size());
+    current_.clear();
+    current_.type = type;
+    current_.idx = static_cast<VersionIndex>(versions_.size());
+    current_.id = id;
 }
 
-void Model::visit_start_deleted_object(YaToolObjectType_e type)
+void Model::visit_deleted(YaToolObjectType_e type, YaToolObjectId id)
 {
-    visit_start_reference_object(type);
-    current_->is_deleted = true;
+    visit_start_version(type, id);
+    deleted_.emplace_back(current_);
 }
 
-void Model::visit_end_deleted_object()
+void Model::visit_end_version()
 {
-    visit_end_reference_object();
-}
-
-void Model::visit_end_reference_object()
-{
-    if(current_->is_deleted)
-    {
-        deleted_.emplace_back(current_->object);
-        return;
-    }
-
-    objects_.emplace_back(current_->object);
-    add_object(index_, current_->object.id, current_->object.idx);
-}
-
-void Model::visit_id(YaToolObjectId id)
-{
-    current_->object.id = id;
-}
-
-void Model::visit_start_object_version()
-{
-    current_->version.reset();
-    current_->version.object_idx = static_cast<HObject_id_t>(objects_.size());
-    current_->version.id = current_->object.id;
-    current_->version.type = current_->object.type;
+    versions_.emplace_back(current_);
+    add_index(index_, current_.id, current_.idx);
 }
 
 void Model::visit_parent_id(YaToolObjectId id)
 {
-    current_->version.parent = id;
+    current_.parent = id;
 }
 
 void Model::visit_address(offset_t address)
 {
-    current_->version.address = address;
-}
-
-void Model::visit_end_object_version()
-{
-    versions_.emplace_back(current_->version);
+    current_.address = address;
 }
 
 void Model::visit_name(const const_string_ref& name, int flags)
 {
-    current_->version.username.value = make_string(name);
-    current_->version.username.flags = flags;
+    current_.username.value = make_string(name);
+    current_.username.flags = flags;
 }
 
 void Model::visit_size(offset_t size)
 {
-    current_->version.size = size;
+    current_.size = size;
 }
 
 void Model::visit_start_signatures()
@@ -720,9 +605,9 @@ void Model::visit_start_signatures()
 void Model::visit_signature(SignatureMethod_e method, SignatureAlgo_e algo, const const_string_ref& hex)
 {
     const auto sig_idx = static_cast<HSignature_id_t>(signatures_.size());
-    current_->version.sig_idx = std::min(current_->version.sig_idx, sig_idx);
-    const auto ver_idx = static_cast<HVersion_id_t>(versions_.size());
-    signatures_.push_back({MakeSignature(algo, method, hex), ver_idx});
+    current_.sig_idx = std::min(current_.sig_idx, sig_idx);
+    const auto idx = static_cast<VersionIndex>(versions_.size());
+    signatures_.push_back({MakeSignature(algo, method, hex), idx});
 }
 
 void Model::visit_end_signatures()
@@ -731,17 +616,17 @@ void Model::visit_end_signatures()
 
 void Model::visit_prototype(const const_string_ref& prototype)
 {
-    current_->version.prototype = make_string(prototype);
+    current_.prototype = make_string(prototype);
 }
 
 void Model::visit_string_type(int strtype)
 {
-    current_->version.strtype = static_cast<uint8_t>(strtype);
+    current_.strtype = static_cast<uint8_t>(strtype);
 }
 
 void Model::visit_header_comment(bool repeatable, const const_string_ref& comment)
 {
-    auto& dst = repeatable ? current_->version.header_comment_repeatable : current_->version.header_comment_nonrepeatable;
+    auto& dst = repeatable ? current_.header_comment_repeatable : current_.header_comment_nonrepeatable;
     dst = make_string(comment);
 }
 
@@ -755,27 +640,27 @@ void Model::visit_end_offsets()
 
 void Model::visit_offset_comments(offset_t offset, CommentType_e comment_type, const const_string_ref& comment)
 {
-    current_->version.comments.emplace_back(make_string(comment), offset, comment_type);
+    current_.comments.emplace_back(make_string(comment), offset, comment_type);
 }
 
 void Model::visit_offset_valueview(offset_t offset, operand_t operand, const const_string_ref& view_value)
 {
-    current_->version.valueviews.emplace_back(make_string(view_value), offset, operand);
+    current_.valueviews.emplace_back(make_string(view_value), offset, operand);
 }
 
 void Model::visit_offset_registerview(offset_t offset, offset_t end_offset, const const_string_ref& register_name, const const_string_ref& register_new_name)
 {
-    current_->version.registerviews.emplace_back(make_string(register_name), make_string(register_new_name), offset, end_offset);
+    current_.registerviews.emplace_back(make_string(register_name), make_string(register_new_name), offset, end_offset);
 }
 
 void Model::visit_offset_hiddenarea(offset_t offset, offset_t area_size, const const_string_ref& hidden_area_value)
 {
-    current_->version.hiddenareas.emplace_back(make_string(hidden_area_value), offset, area_size);
+    current_.hiddenareas.emplace_back(make_string(hidden_area_value), offset, area_size);
 }
 
 void Model::visit_start_xrefs()
 {
-    current_->version.xrefs.clear();
+    current_.xrefs.clear();
 }
 
 void Model::visit_end_xrefs()
@@ -784,12 +669,12 @@ void Model::visit_end_xrefs()
 
 void Model::visit_start_xref(offset_t offset, YaToolObjectId id, operand_t operand)
 {
-    current_->version.xrefs.emplace_back(std::vector<StdAttribute>(), offset, id, operand);
+    current_.xrefs.emplace_back(std::vector<StdAttribute>(), offset, id, operand);
 }
 
 void Model::visit_xref_attribute(const const_string_ref& key, const const_string_ref& value)
 {
-    current_->version.xrefs.back().attributes.emplace_back(make_string(key), make_string(value));
+    current_.xrefs.back().attributes.emplace_back(make_string(key), make_string(value));
 }
 
 void Model::visit_end_xref()
@@ -806,348 +691,242 @@ void Model::visit_segments_end()
 
 void Model::visit_attribute(const const_string_ref& key, const const_string_ref& value)
 {
-    current_->version.attributes.push_back({make_string(key), make_string(value)});
+    current_.attributes.push_back({make_string(key), make_string(value)});
 }
 
 void Model::visit_blob(offset_t offset, const void* blob, size_t len)
 {
     const uint8_t* ptr = static_cast<const uint8_t*>(blob);
-    current_->version.blobs.emplace_back(ptr, len, offset);
+    current_.blobs.emplace_back(ptr, len, offset);
 }
 
 void Model::visit_flags(flags_t flags)
 {
-    current_->version.flags = flags;
+    current_.flags = flags;
 }
 
 void Model::accept(IModelVisitor& visitor)
 {
     visitor.visit_start();
     for(const auto it : deleted_)
-    {
-        visitor.visit_start_deleted_object(it.type);
-        visitor.visit_id(it.id);
-        visitor.visit_end_deleted_object();
-    }
-    for(const auto& object : objects_)
-        accept_object(*this, object, visitor);
+        visitor.visit_deleted(it.type, it.id);
+    for(const auto& version : versions_)
+        accept_version(*this, version, visitor);
     visitor.visit_end();
 }
 
-void Model::walk_objects(const OnObjectAndIdFn& fnWalk) const
+void Model::walk(const OnVersionFn& fnWalk) const
 {
     for(const auto& it : ordered_)
-        if(fnWalk(it->id, {&view_objects_, it->idx}) != WALK_CONTINUE)
+        if(fnWalk({&view_versions_, it->idx}) != WALK_CONTINUE)
             return;
 }
 
-size_t Model::num_objects() const
+size_t Model::size() const
 {
-    return objects_.size();
+    return versions_.size();
 }
 
-void Model::walk_objects_with_signature(const HSignature& hash, const OnObjectFn& fnWalk) const
-{
-    walk_sigs(index_, make_string_ref(hash.get()), [&](const Sig& sig)
-    {
-        return fnWalk({&view_objects_, versions_[signatures_[sig.idx].version_idx].object_idx});
-    });
-}
-
-void Model::walk_versions_with_signature(const HSignature& hash, const OnVersionFn& fnWalk) const
+void Model::walk_matching(const HSignature& hash, const OnVersionFn& fnWalk) const
 {
     walk_sigs(index_, make_string_ref(hash.get()), [&](const Sig& sig)
     {
-        return fnWalk({&view_versions_, signatures_[sig.idx].version_idx});
+        return fnWalk({&view_versions_, signatures_[sig.idx].idx});
     });
 }
 
-size_t Model::num_objects_with_signature(const HSignature& hash) const
+size_t Model::size_matching(const HSignature& hash) const
 {
     return num_sigs(index_, make_string_ref(hash.get()));
 }
 
-void Model::walk_matching_versions(const HObject& object, size_t min_size, const OnVersionPairFn& fnWalk) const
+void Model::walk_matching(const HVersion& remoteVersion, size_t min_size, const OnVersionFn& fnWalk) const
 {
-    object.walk_versions([&](const HVersion& remoteVersion)
+    // iterate over remote signatures
+    ContinueWalking_e stop_current_iteration = WALK_CONTINUE;
+    remoteVersion.walk_signatures([&](const HSignature& remote)
     {
-        //iterate over remote signatures
-        ContinueWalking_e stop_current_iteration = WALK_CONTINUE;
-        remoteVersion.walk_signatures([&](const HSignature& remote)
+        walk_sigs(index_, make_string_ref(remote.get()), [&](const Sig& sig)
         {
-            walk_sigs(index_, make_string_ref(remote.get()), [&](const Sig& sig)
-            {
-                const auto version_id = signatures_[sig.idx].version_idx;
-                const auto& version = versions_[version_id];
-                if(version.size != remoteVersion.size())
-                    return WALK_CONTINUE;
-                if(!is_unique_sig(index_, sig.key) && version.size < min_size)
-                    return WALK_CONTINUE;
-                if(fnWalk({&view_versions_, version_id}, remoteVersion) != WALK_STOP)
-                    return WALK_CONTINUE;
-                stop_current_iteration = WALK_STOP;
-                return stop_current_iteration;
-            });
+            const auto version_id = signatures_[sig.idx].idx;
+            const auto& version = versions_[version_id];
+            if(version.size != remoteVersion.size())
+                return WALK_CONTINUE;
+            if(!is_unique_sig(index_, sig.key) && version.size < min_size)
+                return WALK_CONTINUE;
+            if(fnWalk({&view_versions_, version_id}) != WALK_STOP)
+                return WALK_CONTINUE;
+            stop_current_iteration = WALK_STOP;
             return stop_current_iteration;
         });
         return stop_current_iteration;
     });
 }
 
-void Model::walk_versions_without_collision(const OnSigAndVersionFn& fnWalk) const
+void Model::walk_uniques(const OnSignatureFn& fnWalk) const
 {
     walk_all_unique_sigs(index_, [&](const Sig& sig)
     {
-        return fnWalk({&view_signatures_, sig.idx}, {&view_versions_, signatures_[sig.idx].version_idx});
+        return fnWalk({&view_versions_, signatures_[sig.idx].idx}, {&view_signatures_, sig.idx});
     });
 }
 
-HObject Model::get_object(YaToolObjectId id) const
+HVersion Model::get(YaToolObjectId id) const
 {
-    if(const auto object_id = find_object_id(index_, id))
-        return{&view_objects_, *object_id};
+    if(const auto idx = find_index(index_, id))
+        return{&view_versions_, *idx};
     return{nullptr, 0};
 }
 
-bool Model::has_object(YaToolObjectId id) const
+bool Model::has(YaToolObjectId id) const
 {
-    return !!find_object_id(index_, id);
+    return !!find_index(index_, id);
 }
 
-void ViewObjects::accept(HObject_id_t object_id, IModelVisitor& visitor) const
-{
-    accept_object(db_, db_.objects_[object_id], visitor);
-}
-
-YaToolObjectType_e ViewObjects::type(HObject_id_t object_id) const
-{
-    return db_.objects_[object_id].type;
-}
-
-YaToolObjectId ViewObjects::id(HObject_id_t object_id) const
-{
-    return db_.objects_[object_id].id;
-}
-
-bool ViewObjects::has_signature(HObject_id_t object_id) const
+bool ViewVersions::has_signature(VersionIndex idx) const
 {
     bool found = false;
-    ::walk_versions(db_, db_.objects_[object_id], [&](HVersion_id_t, const StdVersion& version)
+    ::walk_signatures(db_, db_.versions_[idx], [&](HSignature_id_t, const StdSignature&)
     {
-        walk_signatures(db_, version, [&](HSignature_id_t, const StdSignature&)
-        {
-            found = true;
-            return WALK_STOP;
-        });
-        return found ? WALK_STOP : WALK_CONTINUE;
+        found = true;
+        return WALK_STOP;
     });
     return found;
 }
 
-void ViewObjects::walk_versions(HObject_id_t object_id, const OnVersionFn& fnWalk) const
+void ViewVersions::accept(VersionIndex idx, IModelVisitor& visitor) const
 {
-    ::walk_versions(db_, db_.objects_[object_id], [&](HVersion_id_t version_id, const StdVersion&)
-    {
-        return fnWalk({&db_.view_versions_, version_id});
-    });
+    accept_version(db_, db_.versions_[idx], visitor);
 }
 
-void ViewObjects::walk_xrefs_from(HObject_id_t object_id, const OnXrefFromFn& fnWalk) const
+YaToolObjectId ViewVersions::id(VersionIndex idx) const
 {
-    ::walk_versions(db_, db_.objects_[object_id], [&](HVersion_id_t, const StdVersion& ver)
-    {
-        ContinueWalking_e stop = WALK_CONTINUE;
-        walk_xrefs(db_, ver, [&](const StdXref& xref)
-        {
-            const auto object = db_.get_object(xref.id);
-            if(object.is_valid())
-                stop = fnWalk(xref.offset, xref.operand, object);
-            return stop;
-        });
-        return stop;
-    });
+    return db_.versions_[idx].id;
 }
 
-void ViewObjects::walk_xrefs_to(HObject_id_t object_id, const OnObjectFn& fnWalk) const
+YaToolObjectId ViewVersions::parent_id(VersionIndex idx) const
 {
-    ::walk_xrefs_to(db_, db_.objects_[object_id], [&](HObject_id_t from)
-    {
-        return fnWalk({this, from});
-    });
+    return db_.versions_[idx].parent;
 }
 
-bool ViewObjects::match(HObject_id_t object_id, const HObject& remote) const
+offset_t ViewVersions::size(VersionIndex idx) const
 {
-    bool match_found = false;
-    remote.walk_versions([&](const HVersion& remoteVersion)
-    {
-        const auto& local = db_.objects_[object_id];
-        ::walk_versions(db_, local, [&](const HVersion_id_t, const StdVersion& local)
-        {
-            if(local.size != remoteVersion.size())
-                return WALK_CONTINUE;
-
-            bool this_match_found = true;
-            int local_count = 0;
-            int remote_count = 0;
-            remoteVersion.walk_signatures([&](const HSignature& signature)
-            {
-                const auto signref = make_string_ref(signature.get());
-                local_count++;
-                int found = 0;
-                remote_count = 0;
-                //Look for all our signatures
-                walk_signatures(db_, local, [&](HSignature_id_t, const StdSignature& sign)
-                {
-                    remote_count++;
-                    found += !strcmp(signref.value, sign.value.buffer);
-                    return WALK_CONTINUE;
-                });
-                if(found != 1)
-                    this_match_found = false;
-                return WALK_CONTINUE;
-            });
-
-            match_found |= this_match_found && local_count == remote_count;
-            return WALK_CONTINUE;
-        });
-        if(match_found)
-            return WALK_STOP;
-        return WALK_CONTINUE;
-    });
-    return match_found;
+    return db_.versions_[idx].size;
 }
 
-void ViewVersions::accept(HVersion_id_t version_id, IModelVisitor& visitor) const
+YaToolObjectType_e ViewVersions::type(VersionIndex idx) const
 {
-    accept_version(db_, db_.versions_[version_id], visitor);
+    return db_.versions_[idx].type;
 }
 
-YaToolObjectId ViewVersions::id(HVersion_id_t version_id) const
+offset_t ViewVersions::address(VersionIndex idx) const
 {
-    return db_.versions_[version_id].id;
+    return db_.versions_[idx].address;
 }
 
-YaToolObjectId ViewVersions::parent_id(HVersion_id_t version_id) const
+const_string_ref ViewVersions::username(VersionIndex idx) const
 {
-    return db_.versions_[version_id].parent;
+    return make_string_ref(db_.versions_[idx].username.value);
 }
 
-offset_t ViewVersions::size(HVersion_id_t version_id) const
+int ViewVersions::username_flags(VersionIndex idx) const
 {
-    return db_.versions_[version_id].size;
+    return db_.versions_[idx].username.flags;
 }
 
-YaToolObjectType_e ViewVersions::type(HVersion_id_t version_id) const
+const_string_ref ViewVersions::prototype(VersionIndex idx) const
 {
-    return db_.versions_[version_id].type;
+    return make_string_ref(db_.versions_[idx].prototype);
 }
 
-offset_t ViewVersions::address(HVersion_id_t version_id) const
+flags_t ViewVersions::flags(VersionIndex idx) const
 {
-    return db_.versions_[version_id].address;
+    return db_.versions_[idx].flags;
 }
 
-const_string_ref ViewVersions::username(HVersion_id_t version_id) const
+int ViewVersions::string_type(VersionIndex idx) const
 {
-    return make_string_ref(db_.versions_[version_id].username.value);
+    return db_.versions_[idx].strtype;
 }
 
-int ViewVersions::username_flags(HVersion_id_t version_id) const
+const_string_ref ViewVersions::header_comment(VersionIndex idx, bool repeatable) const
 {
-    return db_.versions_[version_id].username.flags;
-}
-
-const_string_ref ViewVersions::prototype(HVersion_id_t version_id) const
-{
-    return make_string_ref(db_.versions_[version_id].prototype);
-}
-
-YaToolFlag_T ViewVersions::flags(HVersion_id_t version_id) const
-{
-    return db_.versions_[version_id].flags;
-}
-
-int ViewVersions::string_type(HVersion_id_t version_id) const
-{
-    return db_.versions_[version_id].strtype;
-}
-
-const_string_ref ViewVersions::header_comment(HVersion_id_t version_id, bool repeatable) const
-{
-    const auto& version = db_.versions_[version_id];
+    const auto& version = db_.versions_[idx];
     const auto& value = repeatable ? version.header_comment_repeatable : version.header_comment_nonrepeatable;
     return make_string_ref(value);
 }
 
-void ViewVersions::walk_signatures(HVersion_id_t version_id, const OnSignatureFn& fnWalk) const
+void ViewVersions::walk_signatures(VersionIndex idx, const OnSignatureFn& fnWalk) const
 {
-    ::walk_signatures(db_, db_.versions_[version_id], [&](HSignature_id_t id, const StdSignature&)
+    ::walk_signatures(db_, db_.versions_[idx], [&](HSignature_id_t id, const StdSignature&)
     {
         return fnWalk({&db_.view_signatures_, id});
     });
 }
 
-void ViewVersions::walk_xrefs_from(HVersion_id_t version_id, const OnXrefFromFn& fnWalk) const
+void ViewVersions::walk_xrefs_from(VersionIndex idx, const OnXrefFromFn& fnWalk) const
 {
-    ::walk_xrefs(db_, db_.versions_[version_id], [&](const StdXref& xref)
+    ::walk_xrefs(db_, db_.versions_[idx], [&](const StdXref& xref)
     {
-        const auto ref = db_.get_object(xref.id);
+        const auto ref = db_.get(xref.id);
         if(!ref.is_valid())
             return WALK_CONTINUE;
         return fnWalk(xref.offset, xref.operand, ref);
     });
 }
 
-void ViewVersions::walk_xrefs_to(HVersion_id_t version_id, const OnObjectFn& fnWalk) const
+void ViewVersions::walk_xrefs_to(VersionIndex idx, const OnVersionFn& fnWalk) const
 {
-    db_.view_objects_.walk_xrefs_to(db_.versions_[version_id].object_idx, fnWalk);
+    ::walk_xrefs_to(db_, db_.versions_[idx], [&](VersionIndex to)
+    {
+        return fnWalk({this, to});
+    });
 }
 
-void ViewVersions::walk_blobs(HVersion_id_t version_id, const OnBlobFn& fnWalk) const
+void ViewVersions::walk_blobs(VersionIndex idx, const OnBlobFn& fnWalk) const
 {
-    for(const auto& blob : db_.versions_[version_id].blobs)
+    for(const auto& blob : db_.versions_[idx].blobs)
         if(fnWalk(blob.offset, &blob.data[0], blob.data.size()) != WALK_CONTINUE)
             return;
 }
 
-void ViewVersions::walk_comments(HVersion_id_t version_id, const OnCommentFn& fnWalk) const
+void ViewVersions::walk_comments(VersionIndex idx, const OnCommentFn& fnWalk) const
 {
-    for(const auto& comment : db_.versions_[version_id].comments)
+    for(const auto& comment : db_.versions_[idx].comments)
         if(fnWalk(comment.offset, comment.type, make_string_ref(comment.value)) != WALK_CONTINUE)
             return;
 }
 
-void ViewVersions::walk_value_views(HVersion_id_t version_id, const OnValueViewFn& fnWalk) const
+void ViewVersions::walk_value_views(VersionIndex idx, const OnValueViewFn& fnWalk) const
 {
-    for(const auto& view : db_.versions_[version_id].valueviews)
+    for(const auto& view : db_.versions_[idx].valueviews)
         if(fnWalk(view.offset, view.operand, make_string_ref(view.value)) != WALK_CONTINUE)
             return;
 }
 
-void ViewVersions::walk_register_views(HVersion_id_t version_id, const OnRegisterViewFn& fnWalk) const
+void ViewVersions::walk_register_views(VersionIndex idx, const OnRegisterViewFn& fnWalk) const
 {
-    for(const auto& view : db_.versions_[version_id].registerviews)
+    for(const auto& view : db_.versions_[idx].registerviews)
         if(fnWalk(view.offset, view.end_offset, make_string_ref(view.name), make_string_ref(view.new_name)) != WALK_CONTINUE)
             return;
 }
 
-void ViewVersions::walk_hidden_areas(HVersion_id_t version_id, const OnHiddenAreaFn& fnWalk) const
+void ViewVersions::walk_hidden_areas(VersionIndex idx, const OnHiddenAreaFn& fnWalk) const
 {
-    for(const auto& hidden : db_.versions_[version_id].hiddenareas)
+    for(const auto& hidden : db_.versions_[idx].hiddenareas)
         if(fnWalk(hidden.offset, hidden.area_size, make_string_ref(hidden.value)) != WALK_CONTINUE)
             return;
 }
 
-void ViewVersions::walk_xrefs(HVersion_id_t version_id, const OnXrefFn& fnWalk) const
+void ViewVersions::walk_xrefs(VersionIndex idx, const OnXrefFn& fnWalk) const
 {
-    ::walk_xrefs(db_, db_.versions_[version_id], [&](const StdXref& xref)
+    ::walk_xrefs(db_, db_.versions_[idx], [&](const StdXref& xref)
     {
         return fnWalk(xref.offset, xref.operand, xref.id, reinterpret_cast<const XrefAttributes*>(&xref));
     });
 }
 
-void ViewVersions::walk_xref_attributes(HVersion_id_t, const XrefAttributes* hattr, const OnAttributeFn& fnWalk) const
+void ViewVersions::walk_xref_attributes(VersionIndex, const XrefAttributes* hattr, const OnAttributeFn& fnWalk) const
 {
     const StdXref* xref = reinterpret_cast<const StdXref*>(hattr);
     for(const auto& attr : xref->attributes)
@@ -1155,9 +934,9 @@ void ViewVersions::walk_xref_attributes(HVersion_id_t, const XrefAttributes* hat
             return;
 }
 
-void ViewVersions::walk_attributes(HVersion_id_t version_id, const OnAttributeFn& fnWalk) const
+void ViewVersions::walk_attributes(VersionIndex idx, const OnAttributeFn& fnWalk) const
 {
-    for(const auto& attr : db_.versions_[version_id].attributes)
+    for(const auto& attr : db_.versions_[idx].attributes)
         if(fnWalk(make_string_ref(attr.key), make_string_ref(attr.value)) != WALK_CONTINUE)
             return;
 }

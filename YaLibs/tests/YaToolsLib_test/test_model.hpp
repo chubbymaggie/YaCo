@@ -45,7 +45,7 @@ std::shared_ptr<IModel> create_fbmodel_with(const T& operand)
     const auto get_mmap = [&]
     {
         auto exporter = MakeFlatBufferVisitor();
-        operand(exporter);
+        operand(*exporter);
         const auto buf = exporter->GetBuffer();
         return std::make_shared<Buffer>(buf.value, buf.size);
     };
@@ -95,10 +95,5 @@ std::string str(YaToolObjectId id)
 std::string str(const HVersion& hver)
 {
     return get_object_type_string(hver.type()) + std::string("_") + str(hver.id());
-}
-
-std::string str(const HObject& href)
-{
-    return get_object_type_string(href.type()) + std::string("_") + str(href.id());
 }
 }

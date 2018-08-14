@@ -15,7 +15,7 @@
 
 # yatools dependencies
 get_filename_component(farm_dir     "${ya_dir}/deps/farmhash-1.1"       ABSOLUTE)
-get_filename_component(git_dir      "${ya_dir}/deps/libgit2-0.27.0-rc1" ABSOLUTE)
+get_filename_component(git_dir      "${ya_dir}/deps/libgit2-0.27.2"     ABSOLUTE)
 get_filename_component(gtest_dir    "${ya_dir}/deps/gtest-1.7.0"        ABSOLUTE)
 get_filename_component(ico_dir      "${ya_dir}/deps/libiconv-1.14"      ABSOLUTE)
 get_filename_component(mbed_dir     "${ya_dir}/deps/mbedtls-2.4.2"      ABSOLUTE)
@@ -260,6 +260,7 @@ target_include_directories(git2 PUBLIC
     "${git_dir}/include"
 )
 target_compile_definitions(git2 PRIVATE
+    GIT_ARCH_64
     GIT_SSH
     GIT_THREADS
     GIT_USE_ICONV
@@ -336,3 +337,6 @@ target_include_directories(farmhash PUBLIC "${farm_dir}/src")
 if(WIN32)
     target_compile_definitions(farmhash PRIVATE FARMHASH_NO_BUILTIN_EXPECT)
 endif()
+
+# capstone
+include(capstone.cmake)

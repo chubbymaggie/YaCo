@@ -21,12 +21,11 @@
 #include "Hash.hpp"
 #include "IModelSink.hpp"
 #include "HVersion.hpp"
-#include "HObject.hpp"
 #include "IModel.hpp"
-#include "Logger.h"
-#include "Yatools.h"
+#include "Yatools.hpp"
 #include "YaHelpers.hpp"
 #include "Pool.hpp"
+#include "Helpers.h"
 #include "Plugins.hpp"
 #include "FlatBufferModel.hpp"
 #include "Utils.hpp"
@@ -50,19 +49,7 @@ using namespace nonstd;
 using namespace std::experimental;
 #endif
 
-#define LOG(LEVEL, FMT, ...) CONCAT(YALOG_, LEVEL)("ida_exporter", (FMT), ## __VA_ARGS__)
-
-#ifdef __EA64__
-#define PRIxEA "llx"
-#define PRIXEA "llX"
-#define PRIuEA "llu"
-#define EA_SIZE "16"
-#else
-#define PRIxEA "x"
-#define PRIXEA "X"
-#define PRIuEA "u"
-#define EA_SIZE "8"
-#endif
+#define LOG(LEVEL, FMT, ...) CONCAT(YALOG_, LEVEL)("import", (FMT), ## __VA_ARGS__)
 
 namespace
 {
@@ -322,18 +309,8 @@ namespace
     MAKE_TO_TYPE_FUNCTION(to_int,     int,              "%d");
     MAKE_TO_TYPE_FUNCTION(to_sel,     sel_t,            "%" PRIuEA);
     MAKE_TO_TYPE_FUNCTION(to_bgcolor, bgcolor_t,        "%u");
-    MAKE_TO_TYPE_FUNCTION(to_yaid,    YaToolObjectId,   "%" PRIx64);
     MAKE_TO_TYPE_FUNCTION(to_path,    uint32_t,         "0x%08X");
     MAKE_TO_TYPE_FUNCTION(to_xmlea,   ea_t,             "0x%0" EA_SIZE PRIXEA);
-
-    template<typename T>
-    int find_int(const T& data, const char* key)
-    {
-        const auto it = data.find(key);
-        if(it == data.end())
-            return 0;
-        return to_int(it->second.data());
-    }
 
     segment_t* check_segment(ea_t ea, ea_t end)
     {
@@ -607,21 +584,17 @@ namespace
 
             const auto blob_ea = static_cast<ea_t>(ea + offset);
             visitor.buffer_.resize(szbuf);
-            auto ok = get_bytes(&visitor.buffer_[0], szbuf, blob_ea, GMB_READALL);
-            if(!ok)
-            {
-                LOG(ERROR, "make_segment_chunk: 0x%" PRIxEA " unable to read %zd bytes\n", blob_ea, szbuf);
-                return WALK_CONTINUE;
-            }
-            if(!memcmp(&visitor.buffer_[0], pbuf, szbuf))
+            const auto nr = get_bytes(&visitor.buffer_[0], szbuf, blob_ea, GMB_READALL);
+            if(nr == static_cast<ssize_t>(szbuf) && !memcmp(&visitor.buffer_[0], pbuf, szbuf))
                 return WALK_CONTINUE;
 
-            // put_many_bytes does not return any error code...
+            // unable to read first, so write & check
             put_bytes(blob_ea, pbuf, szbuf);
-            ok = get_bytes(&visitor.buffer_[0], szbuf, blob_ea, GMB_READALL);
-            if(!ok || memcmp(&visitor.buffer_[0], pbuf, szbuf))
-                LOG(ERROR, "make_segment_chunk: 0x%" PRIxEA " unable to write %zd bytes\n", blob_ea, szbuf);
+            const auto nw = get_bytes(&visitor.buffer_[0], szbuf, blob_ea, GMB_READALL);
+            if(nw == static_cast<ssize_t>(szbuf) && !memcmp(&visitor.buffer_[0], pbuf, szbuf))
+                return WALK_CONTINUE;
 
+            LOG(ERROR, "make_segment_chunk: 0x%" PRIxEA " unable to write %zd bytes\n", blob_ea, szbuf);
             return WALK_CONTINUE;
         });
     }
@@ -640,56 +613,11 @@ namespace
     }
 
     const std::regex r_trailing_identifier{"\\s*<?[a-zA-Z_0-9]+>?\\s*$"}; // match c/c++ identifiers
-    const std::regex r_type_id{"/\\*%(.+?)#([A-F0-9]{16})%\\*/"};         // match yaco ids /*%name:ID%*/
     const std::regex r_trailing_comma{"\\s*;\\s*$"};                      // match trailing ;
     const std::regex r_trailing_whitespace{"\\s+$"};                      // match trailing whitespace
     const std::regex r_leading_whitespace{"^\\s+"};                       // match leading whitespace
     const std::regex r_trailing_const_pointer{"\\*\\s*const\\s*$"};       // match trailing * const
     const std::regex r_trailing_pointer{"\\*\\s*$"};                      // match trailing *
-
-    void replace_inline(std::string& value, const std::string& pattern, const std::string& replace)
-    {
-        size_t pos = 0;
-        while(true)
-        {
-            pos = value.find(pattern, pos);
-            if(pos == std::string::npos)
-                break;
-
-            value.replace(pos, pattern.size(), replace);
-            pos += replace.size();
-        }
-    }
-
-    std::string patch_prototype(const Visitor& visitor, const std::string& src, ea_t ea)
-    {
-        // remove/patch struct ids
-        auto dst = src;
-        qstring buffer;
-        for(std::sregex_iterator it = {src.begin(), src.end(), r_type_id}, end; it != end; ++it)
-        {
-            const auto id = it->str(2);
-            const auto name = it->str(1);
-            // always remove special struct comment
-            replace_inline(dst, "/*%" + name + "#" + id + "%*/", "");
-            const auto k = visitor.tids_.find(to_yaid(id.data()));
-            if(k == visitor.tids_.end())
-            {
-                LOG(WARNING, "make_prototype: 0x%" PRIxEA " unknown struct %s id %s\n", ea, name.data(), id.data());
-                continue;
-            }
-            if(k->second.type != OBJECT_TYPE_STRUCT)
-                continue;
-            const auto tid = static_cast<tid_t>(k->second.tid);
-            ya::wrap(&get_struc_name, buffer, tid);
-            // replace struct name with new name
-            replace_inline(dst, name, buffer.c_str());
-        }
-
-        // remove trailing whitespace
-        dst = std::regex_replace(dst, r_trailing_whitespace, "");
-        return dst;
-    }
 
     tinfo_t make_simple_type(type_t type)
     {
@@ -892,28 +820,27 @@ namespace
     }
 
     template<typename T>
-    bool try_set_type(const Visitor* visitor, ea_t ea, const std::string& value, const T& operand)
+    bool try_set_type(ea_t ea, const std::string& value, const T& operand)
     {
         if(value.empty())
             return false;
 
-        const auto patched = visitor ? patch_prototype(*visitor, value, ea) : value;
-        const auto tif = try_find_type(ea, patched.data());
+        const auto tif = try_find_type(ea, value.data());
         if(tif.empty())
         {
-            LOG(ERROR, "set_type: 0x%" PRIxEA " unknown type %s\n", ea, patched.data());
+            LOG(ERROR, "set_type: 0x%" PRIxEA " unknown type %s\n", ea, value.data());
             return false;
         }
 
         const auto ok = operand(tif);
         if(!ok)
-            LOG(ERROR, "set_type: 0x%" PRIxEA " unable to set type %s\n", ea, patched.data());
+            LOG(ERROR, "set_type: 0x%" PRIxEA " unable to set type %s\n", ea, value.data());
         return ok;
     }
 
-    bool set_type(const Visitor* visitor, ea_t ea, const std::string& value)
+    bool set_type(ea_t ea, const std::string& value)
     {
-        return try_set_type(visitor, ea, value, [&](const tinfo_t& tif)
+        return try_set_type(ea, value, [&](const tinfo_t& tif)
         {
             tinfo_t check;
             get_tinfo(&check, ea);
@@ -923,9 +850,9 @@ namespace
         });
     }
 
-    bool set_struct_member_type(const Visitor* visitor, ea_t ea, const std::string& value)
+    bool set_struct_member_type(ea_t ea, const std::string& value)
     {
-        return try_set_type(visitor, ea, value, [&](const tinfo_t& original_tif)
+        return try_set_type(ea, value, [&](const tinfo_t& original_tif)
         {
             struc_t* s = nullptr;
             auto* m = get_member_by_id(ea, &s);
@@ -934,7 +861,7 @@ namespace
             auto tif = original_tif;
             // applying int32_t[] to a member of 8 bytes create int32_t[][]
             // so we remove array before applying it & let ida add it itself
-            if(tif.is_array() && static_cast<asize_t>(tif.get_size()) != get_member_size(m))
+            if(tif.get_array_nelems() == 0 && static_cast<asize_t>(tif.get_size()) != get_member_size(m))
                 tif.remove_ptr_or_array();
             const auto err = set_member_tinfo(s, m, 0, tif, 0);
             static_assert(SMT_FAILED == 0, "smt_code_t has been modified");
@@ -942,7 +869,7 @@ namespace
         });
     }
 
-    bool set_function_flags(func_t* func, YaToolFlag_T flags)
+    bool set_function_flags(func_t* func, flags_t flags)
     {
         const auto uflags = static_cast<ushort>(flags);
         if(uflags == func->flags)
@@ -954,19 +881,23 @@ namespace
 
     func_t* add_function(ea_t ea, const HVersion& version)
     {
-        const auto func = get_func(ea);
+        auto func = get_func(ea);
         const auto flags = get_flags(ea);
         if(is_func(flags) && func && func->start_ea == ea)
             return func;
 
-        auto_make_proc(ea);
+        const auto end = static_cast<ea_t>(ea + version.size());
         // we really really need sp-analysis on created functions
-        if(!get_func(ea))
-            plan_and_wait(ea, static_cast<ea_t>(ea + version.size()));
+        auto_make_proc(ea);
+        func = get_func(ea);
+        if(func)
+            return func;
+
+        plan_and_wait(ea, end);
         return get_func(ea);
     }
 
-    void make_function(const Visitor& visitor, const HVersion& version, ea_t ea)
+    void make_function(const HVersion& version, ea_t ea)
     {
         const auto func = add_function(ea, version);
         if(!func)
@@ -985,7 +916,7 @@ namespace
         if(!ok)
             LOG(ERROR, "make_function: 0x%" PRIxEA " unable to set function end 0x%" PRIxEA "\n", ea, end);
 
-        set_type(&visitor, ea, make_string(version.prototype()));
+        set_type(ea, make_string(version.prototype()));
         for(const auto repeat : {false, true})
         {
             const auto cmt = version.header_comment(repeat);
@@ -1074,7 +1005,7 @@ namespace
     {
         const auto ok = try_make_valueview(ea, operand, view);
         if(!ok)
-            LOG(ERROR, "make_valueview: 0x%" PRIxEA " unable to make value view\n", ea);
+            LOG(ERROR, "make_valueview: 0x%" PRIxEA " unable to make %s value view\n", ea, view.data());
     }
 
     void make_registerview(ea_t ea, offset_t offset, const std::string& name, offset_t end, const std::string& newname)
@@ -1086,8 +1017,8 @@ namespace
             return;
         }
 
-        const auto ea0 = static_cast<ea_t>(func->start_ea + offset);
-        const auto ea1 = static_cast<ea_t>(func->start_ea + end);
+        const auto ea0 = static_cast<ea_t>(ea + offset);
+        const auto ea1 = static_cast<ea_t>(ea + end);
         const auto regvar = find_regvar(func, ea0, ea1, name.data(), newname.data());
         if(regvar)
         {
@@ -1172,20 +1103,40 @@ namespace
         });
     }
 
-    void try_make_code(const HVersion& version, ea_t ea)
+    void make_insn(const HVersion& version, ea_t ea)
     {
-        const auto flags = get_flags(ea);
-        if(is_code(flags))
-            return;
+        insn_t insn;
+        const auto end = static_cast<ea_t>(ea + version.size());
+        bool dirty = false;
+        for(ea_t it = ea, len = 0; it < end; it += len)
+        {
+            if(is_code(get_flags(it)))
+            {
+                len = static_cast<int>(get_item_end(it) - it);
+                continue;
+            }
+            dirty = true;
+            len = create_insn(it, nullptr);
+            if(len)
+                continue;
 
-        create_insn(ea);
-        plan_and_wait(ea, static_cast<ea_t>(ea + version.size()));
+            len = decode_insn(&insn, it);
+            del_items(it, 0, len);
+            len = create_insn(it, nullptr);
+            if(len)
+                continue;
+             
+            LOG(ERROR, "make_insn: 0x%" PRIxEA " unable to create instruction at 0x%" PRIxEA "\n", ea, it);
+            return;
+        }
+        if(dirty) // it can be extremely slow to plan & wait all insn chunks
+            plan_and_wait(ea, end);
     }
 
     void make_code(Visitor& visitor, const HVersion& version, ea_t ea)
     {
         del_func(ea);
-        try_make_code(version, ea);
+        make_insn(version, ea);
         make_name(visitor, version, ea);
         make_views(version, ea);
     }
@@ -1194,12 +1145,13 @@ namespace
     {
         const auto size = std::max(static_cast<offset_t>(1), version.size());
 
-        if(!is_unknown(get_flags(ea)))
-            if(!del_items(ea, DELIT_EXPAND, static_cast<asize_t>(size)))
-            {
-                LOG(ERROR, "make_data: 0x%" PRIxEA " unable to set unknown\n", ea);
-                return;
-            }
+        // we don't check del_items return code because it fails on unexplored bytes
+        del_items(ea, DELIT_DELNAMES, static_cast<asize_t>(size));
+        tinfo_t tif;
+        // we don't check apply_tinfo because it fails on empty tinfo_t
+        // but it does reset target ea type info
+        apply_tinfo(ea, tif, TINFO_DEFINITE);
+
         const auto flags = version.flags();
         if(!flags)
         {
@@ -1227,10 +1179,11 @@ namespace
                 if(fi == visitor.tids_.end())
                     return WALK_CONTINUE;
 
-                del_items(ea, DELIT_DELNAMES, static_cast<asize_t>(size));
                 auto ok = create_struct(ea, static_cast<asize_t>(size), fi->second.tid);
                 if(!ok)
-                    LOG(ERROR, "make_data: 0x%" PRIxEA " unable to set struct %016" PRIx64 " size %zd\n", ea, id, size);
+                    ok = create_struct(ea, 0, fi->second.tid);
+                if(!ok)
+                    LOG(ERROR, "make_data: 0x%" PRIxEA " unable to set struct %016" PRIx64 "\n", ea, id);
                 found = true;
                 return WALK_CONTINUE;
             });
@@ -1248,11 +1201,58 @@ namespace
             LOG(ERROR, "make_data: 0x%" PRIxEA " unable to set data type 0x%" PRIx64 " size %zd\n", ea, static_cast<uint64_t>(type_flags), size);
     }
 
+    void make_sign(ea_t ea, int n, flags_t flags, flags_t want_flags)
+    {
+        const auto got  = is_invsign(ea, flags, n);
+        const auto want = is_invsign(ea, want_flags, n);
+        if(got == want)
+            return;
+
+        const auto ok = toggle_sign(ea, 0);
+        if(!ok)
+            LOG(ERROR, "make_data: 0x%" PRIxEA " unable to set invsign to %s", ea, want ? "true" : "false");
+    }
+
+    void make_bnot(ea_t ea, int n, flags_t flags, flags_t want_flags)
+    {
+        const auto got  = is_bnot(ea, flags, n);
+        const auto want = is_bnot(ea, want_flags, n);
+        if(got == want)
+            return;
+
+        const auto ok = toggle_bnot(ea, 0);
+        if(!ok)
+            LOG(ERROR, "make_data: 0x%" PRIxEA " unable to set bnot to %s", ea, want ? "true" : "false");
+    }
+
+    void make_op_type(ea_t ea, int n, flags_t flags, flags_t want_flags)
+    {
+        const auto got  = is_defarg(flags, n);
+        const auto want = is_defarg(want_flags, n);
+        if(got == want)
+            return;
+
+        const auto mask = n ? MS_1TYPE : MS_0TYPE;
+        const auto ok = set_op_type(ea, want_flags & mask, n);
+        if(!ok)
+            LOG(ERROR, "make_data: 0x%" PRIxEA " unable to set op_type to %s", ea, ya::dump_flags(want_flags & mask).data());
+    }
+
+    void make_flags(ea_t ea, const HVersion& version)
+    {
+        const auto flags        = get_flags(ea);
+        const auto want_flags   = version.flags();
+        make_sign(ea, 0, flags, want_flags);
+        make_bnot(ea, 0, flags, want_flags);
+        make_op_type(ea, 0, flags, want_flags);
+    }
+
     void make_data(Visitor& visitor, const HVersion& version, ea_t ea)
     {
         set_data_type(visitor, version, ea);
         make_name(visitor, version, ea);
-        set_type(&visitor, ea, make_string(version.prototype()));
+        set_type(ea, make_string(version.prototype()));
+        make_flags(ea, version);
     }
 
     bool is_member(const Visitor& visitor, YaToolObjectId parent, YaToolObjectId id)
@@ -1480,7 +1480,7 @@ namespace
     void make_basic_block(Visitor& visitor, const HVersion& version, ea_t ea)
     {
         Paths paths;
-        try_make_code(version, ea);
+        make_insn(version, ea);
         make_name(visitor, version, ea);
         make_views(version, ea);
         version.walk_xrefs([&](offset_t offset, operand_t operand, YaToolObjectId xref_id, const XrefAttributes* attrs)
@@ -1519,17 +1519,6 @@ namespace
             set_path(path, ea);
     }
 
-    void set_struct_member(qstring& buffer, const char* where, struc_t* struc, ea_t ea, asize_t size, func_t* func, const opinfo_t* pop)
-    {
-        const auto defname = ya::get_default_name(buffer, ea, func);
-        auto ok = set_member_name(struc, ea, defname.value);
-        if(!ok)
-            LOG(ERROR, "%s: 0x%" PRIxEA ":%" PRIxEA " unable to set member name %s\n", where, struc->id, ea, ""/*defname.value*/);
-        ok = set_member_type(struc, ea, FF_BYTE, pop, size);
-        if(!ok)
-            LOG(ERROR, "%s: 0x%" PRIxEA ":%" PRIxEA " unable to set member type to 0x%" PRIxEA " bytes\n", where, struc->id, ea, size);
-    }
-
     void clear_struct_fields(Visitor& visitor, const char* where, const HVersion& version, ea_t struct_id)
     {
         begin_type_updating(UTP_STRUCT);
@@ -1559,7 +1548,7 @@ namespace
             auto member = get_member(struc, aoff);
             if(member && member->soff < offset)
             {
-                set_member_type(struc, member->soff, FF_BYTE, nullptr, 1);
+                set_member_type(struc, member->soff, byte_flag(), nullptr, 1);
                 member = get_member(struc, aoff);
             }
             if(member && get_member_name(&member_name, member->id) > 0)
@@ -1568,15 +1557,18 @@ namespace
             new_fields.insert(offset);
             const auto defname = ya::get_default_name(member_name, aoff, func);
             const auto field_size = offset == last_offset && offset == size ? 0 : 1;
-            const auto err = add_struc_member(struc, defname.value, aoff, FF_BYTE, nullptr, field_size);
+            const auto err = add_struc_member(struc, defname.value, aoff, byte_flag(), nullptr, field_size);
             if(err != STRUC_ERROR_MEMBER_OK)
                 LOG(ERROR, "clear_%s: 0x%" PRIxEA ":%" PRIx64 " unable to add member %s size %d\n", where, struct_id, offset, defname.value, field_size);
         }
 
         for(size_t i = 0; i < struc->memqty; ++i)
         {
-            // ignore new fields
             auto& m = struc->members[i];
+            if(is_special_member(m.id))
+                    continue;
+
+            // ignore new fields
             const auto offset = m.soff;
             const auto is_new = new_fields.count(offset);
             if(is_new)
@@ -1597,27 +1589,59 @@ namespace
                 continue;
             }
 
-            // reset known fields
-            const auto field_size = offset == last_offset && offset == size ? 0 : 1;
-            const auto id = hash::hash_member(vid, offset);
-            const auto key = get_tid(visitor, id);
-            // skip fields which have already been exported
-            if(key.tid != BADADDR)
-                continue;
-
-            set_struct_member(member_name, where, struc, offset, field_size, func, nullptr);
+            // reset known fields but take special care of last field so that struc size is not modified
+            auto field_size = static_cast<int>(offset == last_offset ? get_member_size(&m) : 1);
+            field_size = std::min(field_size, std::max(0, static_cast<int>(size) - static_cast<int>(offset)));
+            const auto ok = set_member_type(struc, offset, byte_flag(), nullptr, field_size);
+            if(!ok)
+                LOG(ERROR, "%s: 0x%" PRIxEA ":%" PRIxEA " unable to set member type to 0x%d bytes\n", where, struc->id, offset, field_size);
             for(const auto repeat : {false, true})
-            {
-                const auto ok = set_member_cmt(&m, g_empty.value, repeat);
-                if(!ok)
+                if(!set_member_cmt(&m, g_empty.value, repeat))
                     LOG(ERROR, "clear_%s: 0x%" PRIxEA ":%" PRIxEA " unable to reset %s comment\n", where, struct_id, offset, repeat ? "repeatable" : "non-repeatable");
-            }
         }
+
+        // reset field names in two pass so that name conflicts get fixed on the second pass
+        for(auto pass = 0; pass < 2; ++pass)
+            for(size_t i = 0; i < struc->memqty; ++i)
+            {
+                auto& m = struc->members[i];
+                if(is_special_member(m.id))
+                    continue;
+
+                const auto defname = ya::get_default_name(member_name, m.soff, func);
+                const auto ok = set_member_name(struc, m.soff, defname.value);
+                if(pass && !ok)
+                    LOG(ERROR, "%s: 0x%" PRIxEA ":%" PRIxEA " unable to reset member name to %s\n", where, struc->id, m.soff, defname.value);
+            }
 
         end_type_updating(UTP_STRUCT);
     }
 
-    struc_t* get_or_add_frame(const HVersion& version, ea_t func_ea)
+    struct FrameState
+    {
+        asize_t vars;
+        ushort  saved;
+        asize_t args;
+    };
+
+    FrameState get_frame_state(const HVersion& version)
+    {
+        FrameState state;
+        memset(&state, 0, sizeof state);
+        version.walk_attributes([&](const const_string_ref& key, const const_string_ref& val)
+        {
+            if(key == g_stack_lvars)
+                state.vars = to_xmlea(make_string(val).data());
+            else if(key == g_stack_regvars)
+                state.saved = static_cast<ushort>(to_xmlea(make_string(val).data()));
+            else if(key == g_stack_args)
+                state.args = to_xmlea(make_string(val).data());
+            return WALK_CONTINUE;
+        });
+        return state;
+    }
+
+    struc_t* get_or_add_frame(ea_t func_ea, const HVersion& version)
     {
         auto frame = get_frame(func_ea);
         if(frame)
@@ -1627,37 +1651,23 @@ namespace
         if(!func)
             return nullptr;
 
-        ea_t lvars = 0;
-        ushort regvars = 0;
-        ea_t args = 0;
-        version.walk_attributes([&](const const_string_ref& key, const const_string_ref& val)
-        {
-            if(key == g_stack_lvars)
-                lvars = to_xmlea(make_string(val).data());
-            else if(key == g_stack_regvars)
-                regvars = static_cast<ushort>(to_xmlea(make_string(val).data()));
-            else if(key == g_stack_args)
-                args = to_xmlea(make_string(val).data());
-            return WALK_CONTINUE;
-        });
-        const auto ok = add_frame(func, lvars, regvars, args);
-        if(!ok)
-            set_frame_size(func, lvars, regvars, args);
+        const auto state = get_frame_state(version);
+        add_frame(func, state.vars, state.saved, state.args);
         return get_frame(func);
     }
 
     void make_stackframe(Visitor& visitor, const HVersion& version, ea_t ea)
     {
-        const auto frame = get_or_add_frame(version, ea);
+        const auto frame = get_or_add_frame(ea, version);
         if(!frame)
         {
-            LOG(ERROR, "make_stackframe: 0x%" PRIxEA " unable to create function\n", ea);
+            LOG(ERROR, "make_frame: 0x%" PRIxEA " unable to create function\n", ea);
             return;
         }
 
         const auto id = version.id();
         set_tid(visitor, id, frame->id, version.size(), OBJECT_TYPE_STACKFRAME);
-        clear_struct_fields(visitor, "stackframe_fields", version, frame->id);
+        clear_struct_fields(visitor, "frame", version, frame->id);
     }
 
     optional<YaToolObjectId> get_xref_at(const HVersion& version, offset_t offset, operand_t operand)
@@ -1750,13 +1760,16 @@ namespace
 
         const auto sname = visitor.qpool_.acquire();
         ya::wrap(&get_struc_name, *sname, parent.tid);
-        const auto qbuf = visitor.qpool_.acquire();
         const auto func = get_func(get_func_by_frame(struc->id));
+        if(func)
+            ya::wrap(&get_func_name, *sname, func->start_ea);
+
+        const auto qbuf = visitor.qpool_.acquire();
         for(auto it = get_struc_last_offset(struc); struc->is_union() && it != BADADDR && it < ea; ++it)
         {
             const auto offset = it + 1;
             const auto defname = ya::get_default_name(*qbuf, offset, func);
-            const auto err = add_struc_member(struc, defname.value, BADADDR, FF_BYTE | FF_DATA, nullptr, 1);
+            const auto err = add_struc_member(struc, defname.value, BADADDR, byte_flag(), nullptr, 1);
             if(err != STRUC_ERROR_MEMBER_OK)
                 LOG(ERROR, "make_%s: %s:%" PRIxEA ": unable to add member %s %" PRIxEA " (error %d)\n", where, sname->c_str(), ea, defname.value, offset, err);
         }
@@ -1772,10 +1785,8 @@ namespace
         const auto flags = version.flags();
         auto size = static_cast<asize_t>(version.size());
         const auto pop = get_member_info(&op, size, visitor, version, flags);
-        auto ok = set_member_type(struc, ea, (flags & DT_TYPE) | FF_DATA, pop, size);
-        const auto is_struct_applied = ok && is_struct(flags);
-        if(!ok)
-            LOG(ERROR, "make_%s: %s.%s: unable to set member type %x to %" PRIuEA " bytes\n", where, sname->c_str(), name.data(), flags, size);
+        auto ok_type = set_member_type(struc, ea, (flags & DT_TYPE) | FF_DATA, pop, size);
+        const auto is_struct_applied = ok_type && is_struct(flags);
 
         const auto member = get_member(struc, ea);
         if(!member)
@@ -1788,7 +1799,7 @@ namespace
         {
             const auto cmt = version.header_comment(repeat);
             const auto strcmt = make_string(cmt);
-            ok = set_member_cmt(member, strcmt.data(), repeat);
+            const auto ok = set_member_cmt(member, strcmt.data(), repeat);
             if(!ok)
                 LOG(ERROR, "make_%s: %s.%s: unable to set %s comment to '%s'\n", where, sname->c_str(), name.data(), repeat ? "repeatable" : "non-repeatable", strcmt.data());
         }
@@ -1798,11 +1809,15 @@ namespace
         if(prototype.size && !is_struct_applied)
         {
             const auto strtype = make_string(prototype);
-            ok = set_struct_member_type(&visitor, member->id, strtype);
+            const auto ok = set_struct_member_type(member->id, strtype);
+            ok_type |= ok;
             if(!ok)
                 LOG(ERROR, "make_%s: %s.%s: unable to set prototype '%s'\n", where, sname->c_str(), name.data(), strtype.data());
         }
         set_tid(visitor, version.id(), member->id, 0, struc->props & SF_FRAME ? OBJECT_TYPE_STACKFRAME_MEMBER : OBJECT_TYPE_STRUCT_MEMBER);
+
+        if(!ok_type)
+            LOG(ERROR, "make_%s: %s.%s: unable to set member type %s to %" PRIuEA " bytes\n", where, sname->c_str(), name.data(), ya::dump_flags(flags).data(), size);
     }
 
     struc_t* try_get_struc(const HVersion& version, const char* name)
@@ -1898,7 +1913,7 @@ namespace
 
             case OBJECT_TYPE_STACKFRAME_MEMBER:
                 if(visitor.use_stack_)
-                    make_struct_member(visitor, "stackframe_member", version, ea);
+                    make_struct_member(visitor, "frame_member", version, ea);
                 break;
 
             case OBJECT_TYPE_ENUM:
@@ -1913,7 +1928,7 @@ namespace
             case OBJECT_TYPE_FUNCTION:
                 if(visitor.plugin_)
                     visitor.plugin_->make_function_enter(version, ea);
-                make_function(visitor, version, ea);
+                make_function(version, ea);
                 if(visitor.plugin_)
                     visitor.plugin_->make_function_exit(version, ea);
                 break;
@@ -1957,13 +1972,9 @@ namespace
 
 void Visitor::update(const IModel& model)
 {
-    model.walk_objects([&](YaToolObjectId /*id*/, const HObject& hobj)
+    model.walk([&](const HVersion& hver)
     {
-        hobj.walk_versions([&](const HVersion& hver)
-        {
-            update_version(*this, hver);
-            return WALK_CONTINUE;
-        });
+        update_version(*this, hver);
         return WALK_CONTINUE;
     });
 }
@@ -1975,12 +1986,12 @@ void Visitor::remove(const IModel& model)
 
 bool set_type_at(ea_t ea, const std::string& prototype)
 {
-    return set_type(nullptr, ea, prototype);
+    return set_type(ea, prototype);
 }
 
 bool set_struct_member_type_at(ea_t ea, const std::string& prototype)
 {
-    return set_struct_member_type(nullptr, ea, prototype);
+    return set_struct_member_type(ea, prototype);
 }
 
 std::shared_ptr<IModelSink> MakeIdaSink()

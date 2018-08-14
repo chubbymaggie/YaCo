@@ -16,20 +16,18 @@
 #include "Ida.h"
 #include "Events.hpp"
 
-#define  MODULE_NAME "events"
 #include "YaTypes.hpp"
 #include "Pool.hpp"
 #include "Hash.hpp"
 #include "YaHelpers.hpp"
-#include "HObject.hpp"
 #include "Repository.hpp"
 #include "Helpers.h"
 #include "HVersion.hpp"
 #include "IdaModel.hpp"
-#include "IdaUtils.hpp"
-#include "XmlModel.hpp"
+#include "XmlAccept.hpp"
 #include "MemoryModel.hpp"
 #include "IModel.hpp"
+#include "Yatools.hpp"
 #include "XmlVisitor.hpp"
 #include "Utils.hpp"
 #include "IdaVisitor.hpp"
@@ -45,6 +43,8 @@
 #else
 #   include <experimental/filesystem>
 #endif
+
+#define LOG(LEVEL, FMT, ...) CONCAT(YALOG_, LEVEL)("events", (FMT), ## __VA_ARGS__)
 
 namespace fs = std::experimental::filesystem;
 
@@ -104,6 +104,7 @@ namespace
 
         void save               () override;
         void update             () override;
+        void touch              () override;
 
         IRepository&    repo_;     
         Pool<qstring>   qpool_;
@@ -282,12 +283,27 @@ namespace
             add_ea(ev, hash::hash_ea(ea), func ? OBJECT_TYPE_BASIC_BLOCK : OBJECT_TYPE_CODE, ea);
             return;
         }
-        if(is_data(flags))
-        {
-            ea = get_item_head(ea);
-            add_ea(ev, hash::hash_ea(ea), OBJECT_TYPE_DATA, ea);
-            return;
-        }
+        const auto seg = getseg(ea);
+        if(seg)
+            return add_ea(ev, hash::hash_ea(ea), OBJECT_TYPE_DATA, ea);
+
+        auto struc = get_struc(ea);
+        if(struc)
+            return ev.touch_struc(struc->id);
+
+        const auto member = get_member_by_id(ea, &struc);
+        if(member)
+            return ev.touch_struc(struc->id);
+
+        const auto idx = get_enum_idx(ea);
+        if(idx != BADADDR)
+            return ev.touch_enum(ea);
+
+        const auto eid = get_enum_member_enum(ea);
+        if(eid != BADADDR)
+            return ev.touch_enum(eid);
+
+        LOG(ERROR, "add_ea: invalid ea 0x%" PRIxEA, ea);
     }
 
     void update_struc_member(Events& ev, struc_t* struc, const qstring& name, member_t* m)
@@ -370,9 +386,6 @@ void Events::touch_ea(ea_t ea)
 void Events::touch_func(ea_t ea)
 {
     add_ea(*this, ea);
-    const auto frame = get_frame(ea);
-    if(frame)
-        update_struc(*this, frame->id);
 }
 
 void Events::touch_code(ea_t ea)
@@ -383,7 +396,6 @@ void Events::touch_code(ea_t ea)
 
 void Events::touch_data(ea_t ea)
 {
-    ea = get_item_head(ea);
     add_ea(*this, hash::hash_ea(ea), OBJECT_TYPE_DATA, ea);
 }
 
@@ -407,7 +419,7 @@ namespace
         for(const auto p : ev.strucs_)
         {
             // if frame, we need to update parent function
-            if(p.second.func_ea != BADADDR)
+            if(get_func(p.second.func_ea))
                 model.accept_function(visitor, p.second.func_ea);
             if(try_accept_struc(p.first, p.second, *qbuf))
                 model.accept_struct(visitor, p.second.func_ea, p.second.id);
@@ -500,9 +512,11 @@ namespace
 
     void save_data(IModelIncremental& model, IModelVisitor& visitor, YaToolObjectId id, ea_t ea)
     {
+        // resolve real data item at the very end so we can delete now invalidated data items
+        ea = get_item_head(ea);
         const auto got = hash::hash_ea(ea);
         const auto flags = get_flags(ea);
-        if(got != id || !is_data(flags))
+        if(got != id || !ya::is_item(flags))
         {
             model.delete_version(visitor, OBJECT_TYPE_DATA, id);
             model.accept_ea(visitor, ea);
@@ -521,10 +535,13 @@ namespace
         if(got != id || !func)
         {
             model.delete_version(visitor, OBJECT_TYPE_BASIC_BLOCK, id);
+            model.accept_ea(visitor, ea);
             return;
         }
 
         model.accept_ea(visitor, ea);
+        model.delete_version(visitor, OBJECT_TYPE_CODE, got);
+        model.delete_version(visitor, OBJECT_TYPE_DATA, got);
     }
 
     void save_eas(Events& ev, IModelIncremental& model, IModelVisitor& visitor)
@@ -540,34 +557,32 @@ namespace
             }
     }
 
-    std::string get_cache_folder_path()
-    {
-        std::string cache_folder_path = get_path(PATH_TYPE_IDB);
-        remove_substring(cache_folder_path, fs::path(cache_folder_path).filename().string());
-        cache_folder_path += "cache";
-        return cache_folder_path;
-    }
-
     void save(Events& ev)
     {
-        LOG(DEBUG, "Saving cache...");
+        LOG(DEBUG, "Saving cache...\n");
         const auto time_start = std::chrono::system_clock::now();
 
         const auto db = MakeMemoryModel();
         db->visit_start();
         {
             const auto model = MakeIncrementalIdaModel();
+            if(!ev.strucs_.empty() || !ev.struc_members_.empty())
+                LOG(INFO, "processing %zd:%zd struct events\n", ev.strucs_.size(), ev.struc_members_.size());
             save_structs(ev, *model, *db);
+            if(!ev.enums_.empty() || !ev.enum_members_.empty())
+                LOG(INFO, "processing %zd:%zd enum events\n", ev.enums_.size(), ev.enum_members_.size());
             save_enums(ev, *model, *db);
+            if(!ev.eas_.empty())
+                LOG(INFO, "processing %zd ea events\n", ev.eas_.size());
             save_eas(ev, *model, *db);
         }
         db->visit_end();
-        db->accept(*MakeXmlVisitor(get_cache_folder_path()));
+        db->accept(*MakeXmlVisitor(ev.repo_.get_cache()));
 
         const auto time_end = std::chrono::system_clock::now();
         const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(time_end - time_start).count();
         if(elapsed)
-            IDA_LOG_INFO("cache: exported in %d seconds", static_cast<int>(elapsed));
+            LOG(INFO, "cache: exported in %d seconds\n", static_cast<int>(elapsed));
     }
 }
 
@@ -576,7 +591,7 @@ void Events::save()
     ::save(*this);
     if(!repo_.commit_cache())
     {
-        IDA_LOG_WARNING("An error occurred during YaCo commit");
+        LOG(WARNING, "An error occurred during YaCo commit\n");
         warning("An error occured during YaCo commit: please relaunch IDA");
     }
     eas_.clear();
@@ -602,12 +617,12 @@ namespace
     };
 
     // will add id to model on first insertion
-    bool try_add_id(DepCtx& ctx, YaToolObjectId id, const HObject& hobj)
+    bool try_add_id(DepCtx& ctx, YaToolObjectId id, const HVersion& hver)
     {
         // remember which ids have been seen already
         const auto inserted = ctx.seen.emplace(id).second;
         if(inserted)
-            hobj.accept(ctx.visitor);
+            hver.accept(ctx.visitor);
         return inserted;
     }
 
@@ -627,54 +642,51 @@ namespace
 
     void add_id_and_dependencies(DepCtx& ctx, YaToolObjectId id, DepsMode mode)
     {
-        const auto hobj = ctx.model.get_object(id);
-        if(!hobj.is_valid())
+        const auto hver = ctx.model.get(id);
+        if(!hver.is_valid())
             return;
 
-        const auto ok = try_add_id(ctx, id, hobj);
-        if(!ok)
+        const auto ok = try_add_id(ctx, id, hver);
+        // due to dependencies, we may visit an id twice and first with
+        // SKIP_DEPENDENCIES, this is bad because we won't visit this
+        // id xrefs, so if we have seen this id already, only skip it
+        // if it's a side effect
+        if(!ok && mode == SKIP_DEPENDENCIES)
             return;
 
-        hobj.walk_versions([&](const HVersion& hver)
+        // add parent id & its dependencies
+        add_id_and_dependencies(ctx, hver.parent_id(), SKIP_DEPENDENCIES);
+        if(mode != USE_DEPENDENCIES && !must_add_dependencies(hver.type()))
+            return;
+        hver.walk_xrefs([&](offset_t, operand_t, auto xref_id, auto)
         {
-            // add parent id & its dependencies
-            add_id_and_dependencies(ctx, hver.parent_id(), SKIP_DEPENDENCIES);
-            if(mode != USE_DEPENDENCIES && !must_add_dependencies(hver.type()))
-                return WALK_CONTINUE;
-            hver.walk_xrefs([&](offset_t, operand_t, auto xref_id, auto)
-            {
-                // add xref id & its dependencies
-                add_id_and_dependencies(ctx, xref_id, SKIP_DEPENDENCIES);
-                return WALK_CONTINUE;
-            });
+            // add xref id & its dependencies
+            add_id_and_dependencies(ctx, xref_id, SKIP_DEPENDENCIES);
             return WALK_CONTINUE;
         });
     }
 
     void add_missing_parents_from_deletions(DepCtx& deps, const IModel& deleted)
     {
-        if(!deleted.num_objects())
+        if(!deleted.size())
             return;
 
-        deps.model.walk_objects([&](YaToolObjectId id, const HObject& hobj)
+        deps.model.walk([&](const HVersion& hver)
         {
-            if(!must_add_dependencies(hobj.type()))
+            if(!must_add_dependencies(hver.type()))
                 return WALK_CONTINUE;
-            hobj.walk_versions([&](const HVersion& hver)
+            const auto id = hver.id();
+            hver.walk_xrefs([&](offset_t, operand_t, YaToolObjectId xref_id, const XrefAttributes*)
             {
-                hver.walk_xrefs([&](offset_t, operand_t, auto xref_id, auto)
-                {
-                    if(deleted.has_object(xref_id))
-                        add_id_and_dependencies(deps, id, USE_DEPENDENCIES);
-                    return WALK_CONTINUE;
-                });
+                if(deleted.has(xref_id))
+                    add_id_and_dependencies(deps, id, USE_DEPENDENCIES);
                 return WALK_CONTINUE;
             });
             return WALK_CONTINUE;
         });
     }
 
-    std::shared_ptr<IModel> get_all_updates(const IModel& updated, const IModel& deleted)
+    std::shared_ptr<IModel> get_all_updates(IRepository& repo, const IModel& updated, const IModel& deleted)
     {
         // two things we need to watch for:
         // * applying a struc in a basic block, make sure the struc is reloaded
@@ -682,7 +694,7 @@ namespace
 
         // load all xml files into a model we can query
         const auto full = MakeMemoryModel();
-        MakeXmlAllModel(".")->accept(*full);
+        AcceptXmlCache(*full, repo.get_cache());
 
         // prepare final updated model
         const auto all_updates = MakeMemoryModel();
@@ -693,10 +705,10 @@ namespace
         add_missing_parents_from_deletions(deps, deleted);
 
         // load all modified objects
-        updated.walk_objects([&](auto id, const HObject& /*hobj*/)
+        updated.walk([&](const HVersion& hver)
         {
             // add this id & its dependencies
-            add_id_and_dependencies(deps, id, USE_DEPENDENCIES);
+            add_id_and_dependencies(deps, hver.id(), USE_DEPENDENCIES);
             return WALK_CONTINUE;
         });
 
@@ -708,23 +720,27 @@ namespace
     {
         // load updated & deleted models
         const auto commit = repo.update_cache();
+        if(commit.empty())
+            return;
+
         const auto updated = MakeMemoryModel();
         const auto deleted = MakeMemoryModel();
         updated->visit_start();
         deleted->visit_start();
         repo.diff_index(commit, [&](const char* /*path*/, bool added, const void* ptr, size_t size)
         {
-            MakeXmlMemoryModel(ptr, size)->accept(added ? *updated : *deleted);
+            AcceptXmlMemoryChunk(added ? *updated : *deleted, ptr, size);
             return 0;
         });
         deleted->visit_end();
         updated->visit_end();
-        if(updated->num_objects() || deleted->num_objects())
-            IDA_LOG_INFO("rebase: %zd updated %zd deleted", updated->num_objects(), deleted->num_objects());
+        if(!updated->size() && !deleted->size())
+            return;
 
         // apply changes on ida
+        LOG(INFO, "rebase: %zd updated %zd deleted\n", updated->size(), deleted->size());
         sink.remove(*deleted);
-        sink.update(*get_all_updates(*updated, *deleted));
+        sink.update(*get_all_updates(repo, *updated, *deleted));
     }
 }
 
@@ -732,6 +748,7 @@ void Events::update()
 {
     // update cache and export modifications to IDA
     update_from_cache(*MakeIdaSink(), repo_);
+    repo_.push();
 
     // Let IDA apply modifications
     const auto time_start = std::chrono::system_clock::now();
@@ -743,5 +760,10 @@ void Events::update()
     const auto time_end = std::chrono::system_clock::now();
     const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(time_end - time_start).count();
     if(elapsed)
-        IDA_LOG_INFO("ida: analyzed in %d seconds", static_cast<int>(elapsed));
+        LOG(INFO, "ida: analyzed in %d seconds\n", static_cast<int>(elapsed));
+}
+
+void Events::touch()
+{
+    repo_.touch();
 }

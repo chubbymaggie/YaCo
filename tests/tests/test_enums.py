@@ -23,7 +23,7 @@ class Fixture(runtests.Fixture):
     def test_enums(self):
         a, b = self.setup_repos()
         a.run(
-            self.script("idc.AddEnum(-1, 'name_a', idaapi.hexflag())"),
+            self.script("idaapi.add_enum(idaapi.BADADDR, 'name_a', idaapi.hexflag())"),
             self.save_enum("name_a"),
         )
         a.check_git(added=["enum"])
@@ -33,7 +33,7 @@ class Fixture(runtests.Fixture):
             self.save_enum("name_a"),
             self.save_enum("name_b"),
         )
-        b.check_git(moved=["enum"])
+        b.check_git(added=["enum"], deleted=["enum"])
         self.assertEqual(self.enums["name_a"][1], "")
         a.run(
             self.check_enum("name_a"),
@@ -47,7 +47,7 @@ class Fixture(runtests.Fixture):
     def test_enum_members(self):
         a, b = self.setup_repos()
         a.run(
-            self.script("idaapi.add_enum_member(idc.AddEnum(-1, 'name_a', idaapi.hexflag()), 'field_a', 0, -1)"),
+            self.script("idaapi.add_enum_member(idaapi.add_enum(idaapi.BADADDR, 'name_a', idaapi.hexflag()), 'field_a', 0, -1)"),
             self.save_enum("name_a"),
         )
         a.check_git(added=["enum", "enum_member"])
@@ -56,14 +56,14 @@ class Fixture(runtests.Fixture):
             self.script("idaapi.set_enum_member_name(idaapi.get_enum_member_by_name('field_a'), 'field_b')"),
             self.save_enum("name_a"),
         )
-        b.check_git(modified=["enum"], moved=["enum_member"])
+        b.check_git(modified=["enum"], added=["enum_member"], deleted=["enum_member"])
         a.run(
             self.check_enum("name_a"),
             self.script("idaapi.set_enum_name(idaapi.get_enum('name_a'), 'name_b')"),
             self.save_enum("name_a"),
             self.save_enum("name_b"),
         )
-        a.check_git(moved=["enum", "enum_member"])
+        a.check_git(added=["enum", "enum_member"], deleted=["enum", "enum_member"])
         self.assertEqual(self.enums["name_a"][1], "")
         b.run(
             self.check_enum("name_a"),
@@ -102,7 +102,7 @@ eidx = 0
 for (flags, bits, bitfield, ea, operand, fields) in enums:
     name = "enum_%x" % eidx
     eidx += 1
-    eid = idc.AddEnum(-1, name, flags)
+    eid = idaapi.add_enum(idaapi.BADADDR, name, flags)
     if bits != 0:
         idaapi.set_enum_width(eid, bits)
     if bitfield:
@@ -191,4 +191,50 @@ for (flags, bits, bitfield, ea, operand, fields) in enums:
             self.check_enum("enum_2"),
             self.check_enum("enum_3"),
             self.check_enum("enum_4"),
+        )
+
+    def test_enum_bf(self):
+        a, b = self.setup_repos()
+        a.run(
+            self.script("idaapi.add_enum(idaapi.BADADDR, 'name_a', idaapi.hexflag())"),
+            self.save_enum("name_a"),
+        )
+        a.check_git(added=["enum"])
+        b.run(
+            self.check_enum("name_a"),
+            self.script("idaapi.set_enum_bf(idaapi.get_enum('name_a'), True)"),
+            self.save_enum("name_a"),
+        )
+        b.check_git(modified=["enum"])
+        a.run(
+            self.check_enum("name_a"),
+            self.script("idaapi.set_enum_bf(idaapi.get_enum('name_a'), False)"),
+            self.save_enum("name_a"),
+        )
+        a.check_git(modified=["enum"])
+        b.run(
+            self.check_enum("name_a"),
+        )
+
+    def test_enum_cmt(self):
+        a, b = self.setup_repos()
+        a.run(
+            self.script("idaapi.add_enum(idaapi.BADADDR, 'name_a', idaapi.hexflag())"),
+            self.save_enum("name_a"),
+        )
+        a.check_git(added=["enum"])
+        b.run(
+            self.check_enum("name_a"),
+            self.script("idaapi.set_enum_cmt(idaapi.get_enum('name_a'), 'some_comment', False)"),
+            self.save_enum("name_a"),
+        )
+        b.check_git(modified=["enum"])
+        a.run(
+            self.check_enum("name_a"),
+            self.script("idaapi.set_enum_cmt(idaapi.get_enum('name_a'), '', False)"),
+            self.save_enum("name_a"),
+        )
+        a.check_git(modified=["enum"])
+        b.run(
+            self.check_enum("name_a"),
         )

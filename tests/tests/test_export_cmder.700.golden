@@ -1,4 +1,4 @@
-objects: 9388
+objects: 11014
 
 bin: 1
 bin_400000 Cmder.exe
@@ -10,26 +10,26 @@ str_35 TryBlockMapEntry
 str_34 UnwindMapEntry
 
 stm: 20
-stm_0  magicNumber
-stm_4  maxState
-stm_8  pUnwindMap void *
-stm_c  nTryBlocks
-stm_10 pTryBlockMap void *
-stm_14 nIPMapEntries
-stm_18 pIPtoStateMap void *
-stm_1c pESTypeList void *
-stm_20 EHFlags
-stm_0  adjectives
-stm_4  pType void *
-stm_8  dispCatchObj
-stm_c  addressOfHandler void *
-stm_0  tryLow
-stm_4  tryHigh
-stm_8  catchHigh
-stm_c  nCatches
-stm_10 pHandlerArray void *
-stm_0  toState
-stm_4  action void *
+stm_FuncInfo:0  magicNumber
+stm_FuncInfo:4  maxState
+stm_FuncInfo:8  pUnwindMap void *
+stm_FuncInfo:c  nTryBlocks
+stm_FuncInfo:10 pTryBlockMap void *
+stm_FuncInfo:14 nIPMapEntries
+stm_FuncInfo:18 pIPtoStateMap void *
+stm_FuncInfo:1c pESTypeList void *
+stm_FuncInfo:20 EHFlags
+stm_HandlerType:0  adjectives
+stm_HandlerType:4  pType void *
+stm_HandlerType:8  dispCatchObj
+stm_HandlerType:c  addressOfHandler void *
+stm_TryBlockMapEntry:0  tryLow
+stm_TryBlockMapEntry:4  tryHigh
+stm_TryBlockMapEntry:8  catchHigh
+stm_TryBlockMapEntry:c  nCatches
+stm_TryBlockMapEntry:10 pHandlerArray void *
+stm_UnwindMapEntry:0  toState
+stm_UnwindMapEntry:4  action void *
 
 enu: 0
 
@@ -57,7 +57,7 @@ fun_4011cd  int __cdecl sub(wchar_t *, int, int, int, int, int, int, int, int, i
 fun_40162d
 fun_401702
 fun_4018f0
-fun_40197e  int __stdcall sub(HINSTANCE /*%HINSTANCE__#DD664C352E9B6326%*/ hInstance, HINSTANCE /*%HINSTANCE__#DD664C352E9B6326%*/ hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+fun_40197e  int __stdcall sub(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 fun_401bad
 fun_401bb2  int __stdcall sub(wchar_t *)
 fun_401bd7
@@ -91,7 +91,7 @@ fun_40219f
 fun_4021b1  int __cdecl sub()
 fun_402322
 fun_40232c  int __thiscall sub(LPVOID lpMem, char)
-fun_40234f  int __cdecl sub(struct _EXCEPTION_POINTERS /*%_EXCEPTION_POINTERS#D9443E4AA8E6A18C%*/ *ExceptionInfo)
+fun_40234f  int __cdecl sub(struct _EXCEPTION_POINTERS *ExceptionInfo)
 fun_402377
 fun_402472  int __stdcall sub(struct std::exception *)
 fun_40248d
@@ -124,7 +124,7 @@ fun_40286f
 fun_40298b
 fun_4029be
 fun_402a02
-fun_402a0e  LONG __stdcall sub(struct _EXCEPTION_POINTERS /*%_EXCEPTION_POINTERS#D9443E4AA8E6A18C%*/ *ExceptionInfo)
+fun_402a0e  LONG __stdcall sub(struct _EXCEPTION_POINTERS *ExceptionInfo)
 fun_402a4f
 fun_402a57
 fun_402a82  void __cdecl sub()
@@ -170,7 +170,7 @@ fun_4042a7
 fun_4042bf  void *__cdecl sub(struct EHExceptionRecord *, struct EHRegistrationNode *, struct _CONTEXT *, const struct _s_FuncInfo *, void *, int, unsigned int)
 fun_40447b  void __cdecl sub(const struct _s_ESTypeList *)
 fun_4044b5  void __cdecl sub(PEXCEPTION_RECORD ExceptionRecord, struct EHRegistrationNode *, struct _CONTEXT *, void *, const struct _s_FuncInfo *, const struct _s_HandlerType *, const struct _s_CatchableType *, const struct _s_TryBlockMapEntry *, int, PVOID TargetFrame, unsigned __int8)
-fun_40452e  int __cdecl sub(struct _EXCEPTION_POINTERS /*%_EXCEPTION_POINTERS#D9443E4AA8E6A18C%*/ *)
+fun_40452e  int __cdecl sub(struct _EXCEPTION_POINTERS *)
 fun_404578  void __cdecl sub(PEXCEPTION_RECORD ExceptionRecord, struct EHRegistrationNode *, struct _CONTEXT *, void *, const struct _s_FuncInfo *, char, int, PVOID TargetFrame)
 fun_4048d9  void __cdecl sub(PEXCEPTION_RECORD ExceptionRecord, struct EHRegistrationNode *, struct _CONTEXT *, void *, const struct _s_FuncInfo *, int, int, PVOID TargetFrame)
 fun_4049f4  unsigned __int8 __cdecl sub(struct EHExceptionRecord *, const struct _s_ESTypeList *)
@@ -199,7 +199,7 @@ fun_40528f
 fun_4052c9  int __cdecl sub(DWORD dwTlsIndex)
 fun_405303  int __cdecl sub(DWORD dwTlsIndex)
 fun_40533d  int __cdecl sub(DWORD dwTlsIndex, LPVOID lpTlsValue)
-fun_40537a  int __cdecl sub(LPCRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/ lpCriticalSection, DWORD dwSpinCount, int)
+fun_40537a  int __cdecl sub(LPCRITICAL_SECTION lpCriticalSection, DWORD dwSpinCount, int)
 fun_4053c0
 fun_4053fa
 fun_40542c
@@ -266,7 +266,7 @@ fun_406ad9
 fun_406b64  int __stdcall sub(void *, int, int, int)
 fun_406bfe  int __cdecl sub(int, int, int, int, int, struct __crt_locale_pointers *, int)
 fun_406c22  int __cdecl sub(const wchar_t *, const wchar_t *)
-fun_406cb7  int __cdecl sub(const wchar_t *Str1, const wchar_t *Str2, _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/ Locale)
+fun_406cb7  int __cdecl sub(const wchar_t *Str1, const wchar_t *Str2, _locale_t Locale)
 fun_406d97  errno_t __cdecl sub(wchar_t *Dst, rsize_t SizeInWords, const wchar_t *Src)
 fun_406dfb  size_t __cdecl sub(const wchar_t *)
 fun_406e16
@@ -343,7 +343,7 @@ fun_4082dd
 fun_408310  int __cdecl sub(struct __crt_locale_pointers *, int, int, int, char)
 fun_4089f5
 fun_408a21
-fun_408a4b  int __cdecl sub(int C, int Type, _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/ Locale)
+fun_408a4b  int __cdecl sub(int C, int Type, _locale_t Locale)
 fun_408abf
 fun_408ad6
 fun_408b07
@@ -353,18 +353,18 @@ fun_408c35
 fun_408c8b  int __stdcall sub(DWORD dwTlsIndex)
 fun_408ce1  int __stdcall sub(DWORD dwTlsIndex)
 fun_408d37  int __stdcall sub(DWORD dwTlsIndex, LPVOID lpTlsValue)
-fun_408d90  int __stdcall sub(LPCRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/ lpCriticalSection, DWORD dwSpinCount, int)
+fun_408d90  int __stdcall sub(LPCRITICAL_SECTION lpCriticalSection, DWORD dwSpinCount, int)
 fun_408df2  int __stdcall sub(wchar_t *, DWORD dwMapFlags, LPCWSTR lpSrcStr, int cchSrc, LPWSTR lpDestStr, int cchDest, int, int, int)
 fun_408e7a  int __stdcall sub(wchar_t *, int)
 fun_408ed6
 fun_408efc
 fun_408f83
 fun_408f85
-fun_408fb9  int __cdecl sub(int C, _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/ Locale)
+fun_408fb9  int __cdecl sub(int C, _locale_t Locale)
 fun_408ff1  int __cdecl sub(int)
 fun_40901e  int __cdecl sub(int C, DWORD dwMapFlags, struct __crt_locale_pointers *)
-fun_409168  bool __cdecl sub(int C, _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/ Locale)
-fun_409185  int __cdecl sub(int C, _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/ Locale)
+fun_409168  bool __cdecl sub(int C, _locale_t Locale)
+fun_409185  int __cdecl sub(int C, _locale_t Locale)
 fun_40919f  int __cdecl sub(int)
 fun_4091cf
 fun_409212
@@ -372,7 +372,7 @@ fun_409235  unsigned int *__cdecl sub()
 fun_409248  int *__cdecl sub()
 fun_40925b
 fun_409276  int __cdecl sub(const wchar_t *, wchar_t **, int)
-fun_4092a2  int __cdecl sub(wchar_t *DstCh, const char *SrcCh, size_t SrcSizeInBytes, _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/ Locale)
+fun_4092a2  int __cdecl sub(wchar_t *DstCh, const char *SrcCh, size_t SrcSizeInBytes, _locale_t Locale)
 fun_40939c  int __cdecl sub(wchar_t *, const char *, size_t)
 fun_4093b6  size_t __cdecl sub(const wchar_t *Src, size_t MaxCount)
 fun_40956d
@@ -412,7 +412,7 @@ fun_40a5ff  int __cdecl sub()
 fun_40a614  void __cdecl sub()
 fun_40a6ca  void __cdecl sub()
 fun_40a780
-fun_40a802  wint_t __cdecl sub(wint_t C, _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/ Locale)
+fun_40a802  wint_t __cdecl sub(wint_t C, _locale_t Locale)
 fun_40a8cb  int __cdecl sub(const void *, const void *)
 fun_40a8e3
 fun_40aab0  int __cdecl sub(wchar_t *, wchar_t *Src, rsize_t MaxCount, int)
@@ -437,7 +437,7 @@ fun_40b594
 fun_40b597  const wchar_t *__cdecl sub(const wchar_t *const)
 fun_40b5ce
 fun_40b61e
-fun_40b698  int __cdecl sub(LPCRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/ lpCriticalSection)
+fun_40b698  int __cdecl sub(LPCRITICAL_SECTION lpCriticalSection)
 fun_40b6cd
 fun_40b765
 fun_40b788
@@ -477,10 +477,10 @@ fun_40c5c3  unsigned int __cdecl sub()
 fun_40c6a1  unsigned int __cdecl sub(unsigned int, unsigned int)
 fun_40c9a3
 fun_40ca3c  int __cdecl sub(wint_t, wctype_t)
-fun_40ca9b  int __cdecl sub(int C, int Type, _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/ Locale)
+fun_40ca9b  int __cdecl sub(int C, int Type, _locale_t Locale)
 fun_40cb6d  int __cdecl sub(const wchar_t *)
 fun_40cc29  int __cdecl sub(wchar_t *)
-fun_40cc55  int __cdecl sub(int C, _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/ Locale)
+fun_40cc55  int __cdecl sub(int C, _locale_t Locale)
 fun_40cc8e  int __cdecl sub(struct __crt_locale_pointers *, const wchar_t *, DWORD dwMapFlags, LPCSTR lpMultiByteStr, int cbMultiByte, LPWSTR lpDestStr, int cchDest, UINT CodePage, int)
 fun_40ceab  int __cdecl sub(struct __crt_locale_pointers *, wchar_t *, DWORD dwMapFlags, LPCSTR lpMultiByteStr, int cbMultiByte, LPWSTR lpDestStr, int cchDest, UINT CodePage, int)
 fun_40cef6  int __cdecl sub(void *, int, int, int)
@@ -524,8 +524,8 @@ fun_40f8f2
 fun_40f9e0
 fun_40fb0d  int __cdecl sub(int, const void *, unsigned int)
 fun_40fbf8  int __cdecl sub(int, LPCVOID lpBuffer, int)
-fun_40fe04  int __cdecl sub(int, LARGE_INTEGER /*%LARGE_INTEGER#6F2DECE5B9963D4B%*/ liDistanceToMove, DWORD dwMoveMethod)
-fun_40fe82  int __cdecl sub(int, LARGE_INTEGER /*%LARGE_INTEGER#6F2DECE5B9963D4B%*/ liDistanceToMove, DWORD dwMoveMethod)
+fun_40fe04  int __cdecl sub(int, LARGE_INTEGER liDistanceToMove, DWORD dwMoveMethod)
+fun_40fe82  int __cdecl sub(int, LARGE_INTEGER liDistanceToMove, DWORD dwMoveMethod)
 fun_40fe9d  int __cdecl sub(FILE *File)
 fun_40ff13  int __cdecl sub(FILE *)
 fun_40ff93
@@ -614,2084 +614,2054 @@ fun_412470  char *__cdecl sub(const char *, int)
 fun_4125b0  char *__cdecl sub(const char *, int)
 
 stk: 556
-stk_401000 $ F401000
-stk_401006 $ F401006
-stk_40108c $ F40108C
-stk_4011a6 $ F4011A6
-stk_4011cd $ F4011CD
-stk_40162d $ F40162D
-stk_401702 $ F401702
-stk_4018f0 $ F4018F0
-stk_40197e $ F40197E
-stk_401bad $ F401BAD
-stk_401bb2 $ F401BB2
-stk_401bd7 $ F401BD7
-stk_401c3c $ F401C3C
-stk_401c97 $ F401C97
-stk_401d3d $ F401D3D
-stk_401d74 $ F401D74
-stk_401da5 $ F401DA5
-stk_401dd6 $ F401DD6
-stk_401e07 $ F401E07
-stk_401f2f $ F401F2F
-stk_401f4a $ F401F4A
-stk_401f62 $ F401F62
-stk_401f8e $ F401F8E
-stk_401fc5 $ F401FC5
-stk_401fe0 $ F401FE0
-stk_402001 $ F402001
-stk_40201c $ F40201C
-stk_40202d $ F40202D
-stk_40205a $ F40205A
-stk_402077 $ F402077
-stk_402097 $ F402097
-stk_4020a4 $ F4020A4
-stk_4020b5 $ F4020B5
-stk_4020e5 $ F4020E5
-stk_4020f3 $ F4020F3
-stk_402197 $ F402197
-stk_40219f $ F40219F
-stk_4021b1 $ F4021B1
-stk_402322 $ F402322
-stk_40232c $ F40232C
-stk_40234f $ F40234F
-stk_402377 $ F402377
-stk_402472 $ F402472
-stk_40248d $ F40248D
-stk_4024a5 $ F4024A5
-stk_4024c2 $ F4024C2
-stk_4024c7 $ F4024C7
-stk_4024e4 $ F4024E4
-stk_402528 $ F402528
-stk_40255d $ F40255D
-stk_402596 $ F402596
-stk_402640 $ F402640
-stk_4026ca $ F4026CA
-stk_4026e7 $ F4026E7
-stk_40270f $ F40270F
-stk_40274a $ F40274A
-stk_40275f $ F40275F
-stk_4027ae $ F4027AE
-stk_4027f9 $ F4027F9
-stk_4027fd $ F4027FD
-stk_402800 $ F402800
-stk_402806 $ F402806
-stk_402812 $ F402812
-stk_402833 $ F402833
-stk_402834 $ F402834
-stk_40283a $ F40283A
-stk_402857 $ F402857
-stk_402863 $ F402863
-stk_402869 $ F402869
-stk_40286f $ F40286F
-stk_40298b $ F40298B
-stk_4029be $ F4029BE
-stk_402a02 $ F402A02
-stk_402a0e $ F402A0E
-stk_402a4f $ F402A4F
-stk_402a57 $ F402A57
-stk_402a82 $ F402A82
-stk_402aad $ F402AAD
-stk_402ac0 $ F402AC0
-stk_402b06 $ F402B06
-stk_402b1b $ F402B1B
-stk_402cb4 $ F402CB4
-stk_402cc0 $ F402CC0
-stk_402d20 $ F402D20
-stk_402dfd $ F402DFD
-stk_402e75 $ F402E75
-stk_402ea7 $ F402EA7
-stk_402efc $ F402EFC
-stk_402f2d $ F402F2D
-stk_402f51 $ F402F51
-stk_402f96 $ F402F96
-stk_403035 $ F403035
-stk_403070 $ F403070
-stk_4035f0 $ F4035F0
-stk_403b64 $ F403B64
-stk_403bf9 $ F403BF9
-stk_403c06 $ F403C06
-stk_403c2c $ F403C2C
-stk_403c51 $ F403C51
-stk_403c96 $ F403C96
-stk_403cf9 $ F403CF9
-stk_403d18 $ F403D18
-stk_403d90 $ F403D90
-stk_403dd0 $ F403DD0
-stk_403f2d $ F403F2D
-stk_403f56 $ F403F56
-stk_403f75 $ F403F75
-stk_403fc0 $ F403FC0
-stk_40411a $ F40411A
-stk_404136 $ F404136
-stk_404144 $ F404144
-stk_4041d6 $ F4041D6
-stk_40421c $ F40421C
-stk_404240 $ F404240
-stk_40428c $ F40428C
-stk_4042a7 $ F4042A7
-stk_4042bf $ F4042BF
-stk_40447b $ F40447B
-stk_4044b5 $ F4044B5
-stk_40452e $ F40452E
-stk_404578 $ F404578
-stk_4048d9 $ F4048D9
-stk_4049f4 $ F4049F4
-stk_404a90 $ F404A90
-stk_404acf $ F404ACF
-stk_404adf $ F404ADF
-stk_404af2 $ F404AF2
-stk_404b81 $ F404B81
-stk_404cb4 $ F404CB4
-stk_404d81 $ F404D81
-stk_404e7d $ F404E7D
-stk_404f0b $ F404F0B
-stk_404f3b $ F404F3B
-stk_404f70 $ F404F70
-stk_405000 $ F405000
-stk_405048 $ F405048
-stk_405070 $ F405070
-stk_4050a4 $ F4050A4
-stk_4050c0 $ F4050C0
-stk_4050d7 $ F4050D7
-stk_405113 $ F405113
-stk_405142 $ F405142
-stk_405208 $ F405208
-stk_40528f $ F40528F
-stk_4052c9 $ F4052C9
-stk_405303 $ F405303
-stk_40533d $ F40533D
-stk_40537a $ F40537A
-stk_4053c0 $ F4053C0
-stk_4053fa $ F4053FA
-stk_40542c $ F40542C
-stk_405450 $ F405450
-stk_405471 $ F405471
-stk_4054b6 $ F4054B6
-stk_40553a $ F40553A
-stk_40555c $ F40555C
-stk_405560 $ F405560
-stk_40556c $ F40556C
-stk_40558b $ F40558B
-stk_40558e $ F40558E
-stk_4055aa $ F4055AA
-stk_4055bd $ F4055BD
-stk_4056d6 $ F4056D6
-stk_405717 $ F405717
-stk_405781 $ F405781
-stk_405790 $ F405790
-stk_40579f $ F40579F
-stk_4057ae $ F4057AE
-stk_4057c4 $ F4057C4
-stk_4057fc $ F4057FC
-stk_405812 $ F405812
-stk_405997 $ F405997
-stk_405a11 $ F405A11
-stk_405a29 $ F405A29
-stk_405aaf $ F405AAF
-stk_405afe $ F405AFE
-stk_405b1c $ F405B1C
-stk_405b91 $ F405B91
-stk_405c19 $ F405C19
-stk_405c4a $ F405C4A
-stk_405c96 $ F405C96
-stk_405cd2 $ F405CD2
-stk_405d07 $ F405D07
-stk_405d8a $ F405D8A
-stk_405da4 $ F405DA4
-stk_405dc8 $ F405DC8
-stk_405e1f $ F405E1F
-stk_405e56 $ F405E56
-stk_405eb2 $ F405EB2
-stk_405f10 $ F405F10
-stk_406040 $ F406040
-stk_40607d $ F40607D
-stk_40609c $ F40609C
-stk_4060b7 $ F4060B7
-stk_4060e0 $ F4060E0
-stk_40625c $ F40625C
-stk_4064b9 $ F4064B9
-stk_4064e5 $ F4064E5
-stk_406541 $ F406541
-stk_4065a4 $ F4065A4
-stk_406716 $ F406716
-stk_4067ae $ F4067AE
-stk_4068f8 $ F4068F8
-stk_40696c $ F40696C
-stk_40698b $ F40698B
-stk_4069a3 $ F4069A3
-stk_406a17 $ F406A17
-stk_406a57 $ F406A57
-stk_406a72 $ F406A72
-stk_406a94 $ F406A94
-stk_406ad9 $ F406AD9
-stk_406b64 $ F406B64
-stk_406bfe $ F406BFE
-stk_406c22 $ F406C22
-stk_406cb7 $ F406CB7
-stk_406d97 $ F406D97
-stk_406dfb $ F406DFB
-stk_406e16 $ F406E16
-stk_406f51 $ F406F51
-stk_406f65 $ F406F65
-stk_406fe0 $ F406FE0
-stk_406ff0 $ F406FF0
-stk_40700d $ F40700D
-stk_407040 $ F407040
-stk_40710d $ F40710D
-stk_407118 $ F407118
-stk_40712c $ F40712C
-stk_407170 $ F407170
-stk_4071c2 $ F4071C2
-stk_4071cd $ F4071CD
-stk_407340 $ F407340
-stk_407346 $ F407346
-stk_407355 $ F407355
-stk_407386 $ F407386
-stk_40739f $ F40739F
-stk_4073b3 $ F4073B3
-stk_4073fc $ F4073FC
-stk_407411 $ F407411
-stk_407530 $ F407530
-stk_4076b6 $ F4076B6
-stk_40770b $ F40770B
-stk_407716 $ F407716
-stk_40776a $ F40776A
-stk_407864 $ F407864
-stk_407893 $ F407893
-stk_4078d3 $ F4078D3
-stk_4078ee $ F4078EE
-stk_407909 $ F407909
-stk_407945 $ F407945
-stk_40798b $ F40798B
-stk_4079e7 $ F4079E7
-stk_407a2c $ F407A2C
-stk_407a69 $ F407A69
-stk_407a74 $ F407A74
-stk_407ac6 $ F407AC6
-stk_407b28 $ F407B28
-stk_407b2e $ F407B2E
-stk_407b5d $ F407B5D
-stk_407b63 $ F407B63
-stk_407b68 $ F407B68
-stk_407bb9 $ F407BB9
-stk_407c0a $ F407C0A
-stk_407c32 $ F407C32
-stk_407c5a $ F407C5A
-stk_407c79 $ F407C79
-stk_407d99 $ F407D99
-stk_407eda $ F407EDA
-stk_407ef0 $ F407EF0
-stk_407f0d $ F407F0D
-stk_407f4a $ F407F4A
-stk_407f6e $ F407F6E
-stk_407f80 $ F407F80
-stk_407f9a $ F407F9A
-stk_407fa2 $ F407FA2
-stk_407fdf $ F407FDF
-stk_407feb $ F407FEB
-stk_408062 $ F408062
-stk_408074 $ F408074
-stk_408086 $ F408086
-stk_4080e5 $ F4080E5
-stk_408121 $ F408121
-stk_40817b $ F40817B
-stk_4081b5 $ F4081B5
-stk_408246 $ F408246
-stk_4082a3 $ F4082A3
-stk_4082dd $ F4082DD
-stk_408310 $ F408310
-stk_4089f5 $ F4089F5
-stk_408a21 $ F408A21
-stk_408a4b $ F408A4B
-stk_408abf $ F408ABF
-stk_408ad6 $ F408AD6
-stk_408b07 $ F408B07
-stk_408b1e $ F408B1E
-stk_408bba $ F408BBA
-stk_408c35 $ F408C35
-stk_408c8b $ F408C8B
-stk_408ce1 $ F408CE1
-stk_408d37 $ F408D37
-stk_408d90 $ F408D90
-stk_408df2 $ F408DF2
-stk_408e7a $ F408E7A
-stk_408ed6 $ F408ED6
-stk_408efc $ F408EFC
-stk_408f83 $ F408F83
-stk_408f85 $ F408F85
-stk_408fb9 $ F408FB9
-stk_408ff1 $ F408FF1
-stk_40901e $ F40901E
-stk_409168 $ F409168
-stk_409185 $ F409185
-stk_40919f $ F40919F
-stk_4091cf $ F4091CF
-stk_409212 $ F409212
-stk_409235 $ F409235
-stk_409248 $ F409248
-stk_40925b $ F40925B
-stk_409276 $ F409276
-stk_4092a2 $ F4092A2
-stk_40939c $ F40939C
-stk_4093b6 $ F4093B6
-stk_40956d $ F40956D
-stk_4095bd $ F4095BD
-stk_40961e $ F40961E
-stk_409669 $ F409669
-stk_4096b1 $ F4096B1
-stk_4096d9 $ F4096D9
-stk_409701 $ F409701
-stk_409729 $ F409729
-stk_409751 $ F409751
-stk_4097ca $ F4097CA
-stk_4097eb $ F4097EB
-stk_409894 $ F409894
-stk_4098df $ F4098DF
-stk_409963 $ F409963
-stk_4099e8 $ F4099E8
-stk_409a14 $ F409A14
-stk_409a2e $ F409A2E
-stk_409a5b $ F409A5B
-stk_409a88 $ F409A88
-stk_409af4 $ F409AF4
-stk_409b12 $ F409B12
-stk_409e15 $ F409E15
-stk_409eb0 $ F409EB0
-stk_409ffb $ F409FFB
-stk_40a088 $ F40A088
-stk_40a15f $ F40A15F
-stk_40a227 $ F40A227
-stk_40a31f $ F40A31F
-stk_40a353 $ F40A353
-stk_40a49d $ F40A49D
-stk_40a4c3 $ F40A4C3
-stk_40a5d7 $ F40A5D7
-stk_40a5eb $ F40A5EB
-stk_40a5ff $ F40A5FF
-stk_40a614 $ F40A614
-stk_40a6ca $ F40A6CA
-stk_40a780 $ F40A780
-stk_40a802 $ F40A802
-stk_40a8cb $ F40A8CB
-stk_40a8e3 $ F40A8E3
-stk_40aab0 $ F40AAB0
-stk_40ab4e $ F40AB4E
-stk_40ad04 $ F40AD04
-stk_40ad29 $ F40AD29
-stk_40ad5e $ F40AD5E
-stk_40ade5 $ F40ADE5
-stk_40adf0 $ F40ADF0
-stk_40ae33 $ F40AE33
-stk_40ae5b $ F40AE5B
-stk_40af1f $ F40AF1F
-stk_40af5d $ F40AF5D
-stk_40afd0 $ F40AFD0
-stk_40b035 $ F40B035
-stk_40b1c9 $ F40B1C9
-stk_40b2ca $ F40B2CA
-stk_40b2e8 $ F40B2E8
-stk_40b38a $ F40B38A
-stk_40b57b $ F40B57B
-stk_40b594 $ F40B594
-stk_40b597 $ F40B597
-stk_40b5ce $ F40B5CE
-stk_40b61e $ F40B61E
-stk_40b698 $ F40B698
-stk_40b6cd $ F40B6CD
-stk_40b765 $ F40B765
-stk_40b788 $ F40B788
-stk_40b7ab $ F40B7AB
-stk_40b83c $ F40B83C
-stk_40b8a6 $ F40B8A6
-stk_40b8cc $ F40B8CC
-stk_40b9ca $ F40B9CA
-stk_40ba33 $ F40BA33
-stk_40ba6f $ F40BA6F
-stk_40bb53 $ F40BB53
-stk_40bb98 $ F40BB98
-stk_40bcb5 $ F40BCB5
-stk_40bcd5 $ F40BCD5
-stk_40bd52 $ F40BD52
-stk_40be9c $ F40BE9C
-stk_40bec5 $ F40BEC5
-stk_40bef5 $ F40BEF5
-stk_40bf1e $ F40BF1E
-stk_40bf9f $ F40BF9F
-stk_40c016 $ F40C016
-stk_40c066 $ F40C066
-stk_40c0de $ F40C0DE
-stk_40c0ef $ F40C0EF
-stk_40c0f9 $ F40C0F9
-stk_40c17c $ F40C17C
-stk_40c1c9 $ F40C1C9
-stk_40c223 $ F40C223
-stk_40c24b $ F40C24B
-stk_40c28d $ F40C28D
-stk_40c2b5 $ F40C2B5
-stk_40c2cc $ F40C2CC
-stk_40c307 $ F40C307
-stk_40c310 $ F40C310
-stk_40c518 $ F40C518
-stk_40c5c3 $ F40C5C3
-stk_40c6a1 $ F40C6A1
-stk_40c9a3 $ F40C9A3
-stk_40ca3c $ F40CA3C
-stk_40ca9b $ F40CA9B
-stk_40cb6d $ F40CB6D
-stk_40cc29 $ F40CC29
-stk_40cc55 $ F40CC55
-stk_40cc8e $ F40CC8E
-stk_40ceab $ F40CEAB
-stk_40cef6 $ F40CEF6
-stk_40cfb2 $ F40CFB2
-stk_40cfe0 $ F40CFE0
-stk_40d48e $ F40D48E
-stk_40e82a $ F40E82A
-stk_40e8ab $ F40E8AB
-stk_40e94b $ F40E94B
-stk_40e9b1 $ F40E9B1
-stk_40e9f8 $ F40E9F8
-stk_40ea01 $ F40EA01
-stk_40ead9 $ F40EAD9
-stk_40eb17 $ F40EB17
-stk_40eb6d $ F40EB6D
-stk_40ebb0 $ F40EBB0
-stk_40ec50 $ F40EC50
-stk_40ec90 $ F40EC90
-stk_40f030 $ F40F030
-stk_40f070 $ F40F070
-stk_40f07f $ F40F07F
-stk_40f0b2 $ F40F0B2
-stk_40f11b $ F40F11B
-stk_40f191 $ F40F191
-stk_40f1a4 $ F40F1A4
-stk_40f1d0 $ F40F1D0
-stk_40f22b $ F40F22B
-stk_40f23d $ F40F23D
-stk_40f259 $ F40F259
-stk_40f276 $ F40F276
-stk_40f2bf $ F40F2BF
-stk_40f310 $ F40F310
-stk_40f350 $ F40F350
-stk_40f3a8 $ F40F3A8
-stk_40f460 $ F40F460
-stk_40f57d $ F40F57D
-stk_40f730 $ F40F730
-stk_40f79d $ F40F79D
-stk_40f813 $ F40F813
-stk_40f8f2 $ F40F8F2
-stk_40f9e0 $ F40F9E0
-stk_40fb0d $ F40FB0D
-stk_40fbf8 $ F40FBF8
-stk_40fe04 $ F40FE04
-stk_40fe82 $ F40FE82
-stk_40fe9d $ F40FE9D
-stk_40ff13 $ F40FF13
-stk_40ff93 $ F40FF93
-stk_41002b $ F41002B
-stk_410053 $ F410053
-stk_4100c2 $ F4100C2
-stk_41013f $ F41013F
-stk_4101b2 $ F4101B2
-stk_410223 $ F410223
-stk_4102a3 $ F4102A3
-stk_410304 $ F410304
-stk_410365 $ F410365
-stk_4103a8 $ F4103A8
-stk_410450 $ F410450
-stk_4104d0 $ F4104D0
-stk_410550 $ F410550
-stk_410560 $ F410560
-stk_41057e $ F41057E
-stk_4108c7 $ F4108C7
-stk_410912 $ F410912
-stk_410931 $ F410931
-stk_41093e $ F41093E
-stk_410981 $ F410981
-stk_4109a6 $ F4109A6
-stk_4109e6 $ F4109E6
-stk_410aec $ F410AEC
-stk_410b07 $ F410B07
-stk_410b0a $ F410B0A
-stk_410b0f $ F410B0F
-stk_410bb6 $ F410BB6
-stk_410bdc $ F410BDC
-stk_410be3 $ F410BE3
-stk_410bf0 $ F410BF0
-stk_410c1c $ F410C1C
-stk_410c35 $ F410C35
-stk_410c78 $ F410C78
-stk_410cc5 $ F410CC5
-stk_410d80 $ F410D80
-stk_410d97 $ F410D97
-stk_410dd3 $ F410DD3
-stk_410feb $ F410FEB
-stk_4110a4 $ F4110A4
-stk_4110e9 $ F4110E9
-stk_41116b $ F41116B
-stk_411193 $ F411193
-stk_411212 $ F411212
-stk_4112ae $ F4112AE
-stk_4112f0 $ F4112F0
-stk_411351 $ F411351
-stk_4113bb $ F4113BB
-stk_4114e6 $ F4114E6
-stk_4115f1 $ F4115F1
-stk_411607 $ F411607
-stk_41163b $ F41163B
-stk_411709 $ F411709
-stk_4118e9 $ F4118E9
-stk_41190c $ F41190C
-stk_411bfd $ F411BFD
-stk_411c2c $ F411C2C
-stk_411cce $ F411CCE
-stk_411da2 $ F411DA2
-stk_411dd1 $ F411DD1
-stk_411e2f $ F411E2F
-stk_411e4e $ F411E4E
-stk_411e65 $ F411E65
-stk_411f09 $ F411F09
-stk_411f10 $ F411F10
-stk_411f60 $ F411F60
-stk_412020 $ F412020
-stk_412066 $ F412066
-stk_412077 $ F412077
-stk_4120ae $ F4120AE
-stk_4120f0 $ F4120F0
-stk_412190 $ F412190
-stk_4121d9 $ F4121D9
-stk_4121f0 $ F4121F0
-stk_412230 $ F412230
-stk_412310 $ F412310
-stk_412330 $ F412330
-stk_412360 $ F412360
-stk_412380 $ F412380
-stk_412440 $ F412440
-stk_412470 $ F412470
-stk_4125b0 $ F4125B0
+stk_401000
+stk_401006
+stk_40108c
+stk_4011a6
+stk_4011cd
+stk_40162d
+stk_401702
+stk_4018f0
+stk_40197e
+stk_401bad
+stk_401bb2
+stk_401bd7
+stk_401c3c
+stk_401c97
+stk_401d3d
+stk_401d74
+stk_401da5
+stk_401dd6
+stk_401e07
+stk_401f2f
+stk_401f4a
+stk_401f62
+stk_401f8e
+stk_401fc5
+stk_401fe0
+stk_402001
+stk_40201c
+stk_40202d
+stk_40205a
+stk_402077
+stk_402097
+stk_4020a4
+stk_4020b5
+stk_4020e5
+stk_4020f3
+stk_402197
+stk_40219f
+stk_4021b1
+stk_402322
+stk_40232c
+stk_40234f
+stk_402377
+stk_402472
+stk_40248d
+stk_4024a5
+stk_4024c2
+stk_4024c7
+stk_4024e4
+stk_402528
+stk_40255d
+stk_402596
+stk_402640
+stk_4026ca
+stk_4026e7
+stk_40270f
+stk_40274a
+stk_40275f
+stk_4027ae
+stk_4027f9
+stk_4027fd
+stk_402800
+stk_402806
+stk_402812
+stk_402833
+stk_402834
+stk_40283a
+stk_402857
+stk_402863
+stk_402869
+stk_40286f
+stk_40298b
+stk_4029be
+stk_402a02
+stk_402a0e
+stk_402a4f
+stk_402a57
+stk_402a82
+stk_402aad
+stk_402ac0
+stk_402b06
+stk_402b1b
+stk_402cb4
+stk_402cc0
+stk_402d20
+stk_402dfd
+stk_402e75
+stk_402ea7
+stk_402efc
+stk_402f2d
+stk_402f51
+stk_402f96
+stk_403035
+stk_403070
+stk_4035f0
+stk_403b64
+stk_403bf9
+stk_403c06
+stk_403c2c
+stk_403c51
+stk_403c96
+stk_403cf9
+stk_403d18
+stk_403d90
+stk_403dd0
+stk_403f2d
+stk_403f56
+stk_403f75
+stk_403fc0
+stk_40411a
+stk_404136
+stk_404144
+stk_4041d6
+stk_40421c
+stk_404240
+stk_40428c
+stk_4042a7
+stk_4042bf
+stk_40447b
+stk_4044b5
+stk_40452e
+stk_404578
+stk_4048d9
+stk_4049f4
+stk_404a90
+stk_404acf
+stk_404adf
+stk_404af2
+stk_404b81
+stk_404cb4
+stk_404d81
+stk_404e7d
+stk_404f0b
+stk_404f3b
+stk_404f70
+stk_405000
+stk_405048
+stk_405070
+stk_4050a4
+stk_4050c0
+stk_4050d7
+stk_405113
+stk_405142
+stk_405208
+stk_40528f
+stk_4052c9
+stk_405303
+stk_40533d
+stk_40537a
+stk_4053c0
+stk_4053fa
+stk_40542c
+stk_405450
+stk_405471
+stk_4054b6
+stk_40553a
+stk_40555c
+stk_405560
+stk_40556c
+stk_40558b
+stk_40558e
+stk_4055aa
+stk_4055bd
+stk_4056d6
+stk_405717
+stk_405781
+stk_405790
+stk_40579f
+stk_4057ae
+stk_4057c4
+stk_4057fc
+stk_405812
+stk_405997
+stk_405a11
+stk_405a29
+stk_405aaf
+stk_405afe
+stk_405b1c
+stk_405b91
+stk_405c19
+stk_405c4a
+stk_405c96
+stk_405cd2
+stk_405d07
+stk_405d8a
+stk_405da4
+stk_405dc8
+stk_405e1f
+stk_405e56
+stk_405eb2
+stk_405f10
+stk_406040
+stk_40607d
+stk_40609c
+stk_4060b7
+stk_4060e0
+stk_40625c
+stk_4064b9
+stk_4064e5
+stk_406541
+stk_4065a4
+stk_406716
+stk_4067ae
+stk_4068f8
+stk_40696c
+stk_40698b
+stk_4069a3
+stk_406a17
+stk_406a57
+stk_406a72
+stk_406a94
+stk_406ad9
+stk_406b64
+stk_406bfe
+stk_406c22
+stk_406cb7
+stk_406d97
+stk_406dfb
+stk_406e16
+stk_406f51
+stk_406f65
+stk_406fe0
+stk_406ff0
+stk_40700d
+stk_407040
+stk_40710d
+stk_407118
+stk_40712c
+stk_407170
+stk_4071c2
+stk_4071cd
+stk_407340
+stk_407346
+stk_407355
+stk_407386
+stk_40739f
+stk_4073b3
+stk_4073fc
+stk_407411
+stk_407530
+stk_4076b6
+stk_40770b
+stk_407716
+stk_40776a
+stk_407864
+stk_407893
+stk_4078d3
+stk_4078ee
+stk_407909
+stk_407945
+stk_40798b
+stk_4079e7
+stk_407a2c
+stk_407a69
+stk_407a74
+stk_407ac6
+stk_407b28
+stk_407b2e
+stk_407b5d
+stk_407b63
+stk_407b68
+stk_407bb9
+stk_407c0a
+stk_407c32
+stk_407c5a
+stk_407c79
+stk_407d99
+stk_407eda
+stk_407ef0
+stk_407f0d
+stk_407f4a
+stk_407f6e
+stk_407f80
+stk_407f9a
+stk_407fa2
+stk_407fdf
+stk_407feb
+stk_408062
+stk_408074
+stk_408086
+stk_4080e5
+stk_408121
+stk_40817b
+stk_4081b5
+stk_408246
+stk_4082a3
+stk_4082dd
+stk_408310
+stk_4089f5
+stk_408a21
+stk_408a4b
+stk_408abf
+stk_408ad6
+stk_408b07
+stk_408b1e
+stk_408bba
+stk_408c35
+stk_408c8b
+stk_408ce1
+stk_408d37
+stk_408d90
+stk_408df2
+stk_408e7a
+stk_408ed6
+stk_408efc
+stk_408f83
+stk_408f85
+stk_408fb9
+stk_408ff1
+stk_40901e
+stk_409168
+stk_409185
+stk_40919f
+stk_4091cf
+stk_409212
+stk_409235
+stk_409248
+stk_40925b
+stk_409276
+stk_4092a2
+stk_40939c
+stk_4093b6
+stk_40956d
+stk_4095bd
+stk_40961e
+stk_409669
+stk_4096b1
+stk_4096d9
+stk_409701
+stk_409729
+stk_409751
+stk_4097ca
+stk_4097eb
+stk_409894
+stk_4098df
+stk_409963
+stk_4099e8
+stk_409a14
+stk_409a2e
+stk_409a5b
+stk_409a88
+stk_409af4
+stk_409b12
+stk_409e15
+stk_409eb0
+stk_409ffb
+stk_40a088
+stk_40a15f
+stk_40a227
+stk_40a31f
+stk_40a353
+stk_40a49d
+stk_40a4c3
+stk_40a5d7
+stk_40a5eb
+stk_40a5ff
+stk_40a614
+stk_40a6ca
+stk_40a780
+stk_40a802
+stk_40a8cb
+stk_40a8e3
+stk_40aab0
+stk_40ab4e
+stk_40ad04
+stk_40ad29
+stk_40ad5e
+stk_40ade5
+stk_40adf0
+stk_40ae33
+stk_40ae5b
+stk_40af1f
+stk_40af5d
+stk_40afd0
+stk_40b035
+stk_40b1c9
+stk_40b2ca
+stk_40b2e8
+stk_40b38a
+stk_40b57b
+stk_40b594
+stk_40b597
+stk_40b5ce
+stk_40b61e
+stk_40b698
+stk_40b6cd
+stk_40b765
+stk_40b788
+stk_40b7ab
+stk_40b83c
+stk_40b8a6
+stk_40b8cc
+stk_40b9ca
+stk_40ba33
+stk_40ba6f
+stk_40bb53
+stk_40bb98
+stk_40bcb5
+stk_40bcd5
+stk_40bd52
+stk_40be9c
+stk_40bec5
+stk_40bef5
+stk_40bf1e
+stk_40bf9f
+stk_40c016
+stk_40c066
+stk_40c0de
+stk_40c0ef
+stk_40c0f9
+stk_40c17c
+stk_40c1c9
+stk_40c223
+stk_40c24b
+stk_40c28d
+stk_40c2b5
+stk_40c2cc
+stk_40c307
+stk_40c310
+stk_40c518
+stk_40c5c3
+stk_40c6a1
+stk_40c9a3
+stk_40ca3c
+stk_40ca9b
+stk_40cb6d
+stk_40cc29
+stk_40cc55
+stk_40cc8e
+stk_40ceab
+stk_40cef6
+stk_40cfb2
+stk_40cfe0
+stk_40d48e
+stk_40e82a
+stk_40e8ab
+stk_40e94b
+stk_40e9b1
+stk_40e9f8
+stk_40ea01
+stk_40ead9
+stk_40eb17
+stk_40eb6d
+stk_40ebb0
+stk_40ec50
+stk_40ec90
+stk_40f030
+stk_40f070
+stk_40f07f
+stk_40f0b2
+stk_40f11b
+stk_40f191
+stk_40f1a4
+stk_40f1d0
+stk_40f22b
+stk_40f23d
+stk_40f259
+stk_40f276
+stk_40f2bf
+stk_40f310
+stk_40f350
+stk_40f3a8
+stk_40f460
+stk_40f57d
+stk_40f730
+stk_40f79d
+stk_40f813
+stk_40f8f2
+stk_40f9e0
+stk_40fb0d
+stk_40fbf8
+stk_40fe04
+stk_40fe82
+stk_40fe9d
+stk_40ff13
+stk_40ff93
+stk_41002b
+stk_410053
+stk_4100c2
+stk_41013f
+stk_4101b2
+stk_410223
+stk_4102a3
+stk_410304
+stk_410365
+stk_4103a8
+stk_410450
+stk_4104d0
+stk_410550
+stk_410560
+stk_41057e
+stk_4108c7
+stk_410912
+stk_410931
+stk_41093e
+stk_410981
+stk_4109a6
+stk_4109e6
+stk_410aec
+stk_410b07
+stk_410b0a
+stk_410b0f
+stk_410bb6
+stk_410bdc
+stk_410be3
+stk_410bf0
+stk_410c1c
+stk_410c35
+stk_410c78
+stk_410cc5
+stk_410d80
+stk_410d97
+stk_410dd3
+stk_410feb
+stk_4110a4
+stk_4110e9
+stk_41116b
+stk_411193
+stk_411212
+stk_4112ae
+stk_4112f0
+stk_411351
+stk_4113bb
+stk_4114e6
+stk_4115f1
+stk_411607
+stk_41163b
+stk_411709
+stk_4118e9
+stk_41190c
+stk_411bfd
+stk_411c2c
+stk_411cce
+stk_411da2
+stk_411dd1
+stk_411e2f
+stk_411e4e
+stk_411e65
+stk_411f09
+stk_411f10
+stk_411f60
+stk_412020
+stk_412066
+stk_412077
+stk_4120ae
+stk_4120f0
+stk_412190
+stk_4121d9
+stk_4121f0
+stk_412230
+stk_412310
+stk_412330
+stk_412360
+stk_412380
+stk_412440
+stk_412470
+stk_4125b0
 
-stm: 1520
-stm_8  Buffer WCHAR
-stm_c  Text WCHAR
-stm_80c var_4
-stm_818 arg_0 int
-stm_10 var_50
-stm_44 var_1C
-stm_48 pNumArgs int
-stm_5c var_4
-stm_6c arg_4
-stm_10 StartupInfo struct _STARTUPINFOW /*%_STARTUPINFOW#EC9B93005128B2B4%*/
-stm_54 SystemInfo struct _SYSTEM_INFO /*%_SYSTEM_INFO#0821E0E222DCA252%*/
-stm_78 ProcessInformation struct _PROCESS_INFORMATION /*%_PROCESS_INFORMATION#EF2C1BBAD9962C15%*/
-stm_88 CommandLine WCHAR
-stm_698 Buffer WCHAR
-stm_8a0 Dst wchar_t
-stm_aa8 pszDest WCHAR
-stm_cb0 var_E48 WCHAR
-stm_eb8 ApplicationName WCHAR
-stm_10c0 NewFileName WCHAR
-stm_12c8 ExistingFileName WCHAR
-stm_14d0 pszPath WCHAR
-stm_16d8 Src WCHAR
-stm_18e0 Filename WCHAR
-stm_1ae8 var_10
-stm_1aec var_C
-stm_1af4 var_4
-stm_1b00 arg_0 wchar_t *
-stm_1b04 arg_4 int
-stm_1b14 arg_14 int
-stm_1b18 arg_18 int
-stm_1b28 arg_28 int
-stm_1b2c arg_2C int
-stm_10 var_2C wchar_t *
-stm_20 var_1C
-stm_24 var_18
-stm_28 phkResult HKEY
-stm_38 var_4
-stm_44 arg_0
-stm_48 arg_4
-stm_14 hKey HKEY
-stm_18 phkResult HKEY
-stm_1c Data WCHAR
-stm_24c pszDest WCHAR
-stm_454 Filename WCHAR
-stm_668 var_4
-stm_674 arg_0
-stm_678 arg_4
-stm_28 phkResult HKEY
-stm_38 var_4
-stm_44 arg_0
-stm_48 arg_4
-stm_14 var_34 wchar_t *
-stm_28 var_20
-stm_2c var_1C int
-stm_44 var_4
-stm_50 hInstance HINSTANCE /*%HINSTANCE__#DD664C352E9B6326%*/
-stm_54 hPrevInstance HINSTANCE /*%HINSTANCE__#DD664C352E9B6326%*/
-stm_58 lpCmdLine LPSTR
-stm_5c nShowCmd int
-stm_c  arg_0 wchar_t *
-stm_4  var_4
-stm_10 arg_0 wchar_t *
-stm_c  var_4
-stm_18 arg_0 void *
-stm_10 arg_0 void *
-stm_8  arg_0 int
-stm_c  arg_4 int
-stm_10 arg_8 int
-stm_8  arg_0 int
-stm_c  arg_4 int
-stm_10 arg_8 int
-stm_8  arg_0 int
-stm_c  arg_4 int
-stm_10 arg_8 int
-stm_c  var_8
-stm_10 var_4 void *
-stm_1c arg_0
-stm_24 arg_8
-stm_c  arg_0 struct std::exception *
-stm_c  arg_0 const struct std::exception *
-stm_4  var_8
-stm_14 arg_0 const char *const
-stm_c  arg_0 struct std::exception *
-stm_4  var_4
-stm_10 arg_0 char *
-stm_c  arg_0 struct std::exception *
-stm_c  arg_0
-stm_14 arg_0 char *
-stm_8  arg_0 size_t
-stm_8  lpMem LPVOID
-stm_10 var_24
-stm_14 var_20 int
-stm_1c ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_c  arg_0
-stm_8  ExceptionInfo struct _EXCEPTION_POINTERS /*%_EXCEPTION_POINTERS#D9443E4AA8E6A18C%*/ *
-stm_0  var_324
-stm_31c var_8
-stm_324 var_s0
-stm_32c arg_0
-stm_c  arg_0 struct std::exception *
-stm_4  lpMem LPVOID
-stm_8  arg_0
-stm_c  arg_0 unsigned __int8 *const
-stm_10 arg_4 unsigned int
-stm_8  arg_0
-stm_0  var_C
-stm_4  var_8
-stm_8  var_4
-stm_14 arg_0
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_30 arg_0
-stm_8  arg_0
-stm_8  arg_0
-stm_c  arg_4
-stm_8  arg_0 _onexit_t
-stm_8  arg_0 _onexit_t
-stm_0  PerformanceCount LARGE_INTEGER /*%LARGE_INTEGER#6F2DECE5B9963D4B%*/
-stm_8  SystemTimeAsFileTime struct _FILETIME /*%_FILETIME#CCA50A8A595D82C4%*/
-stm_10 var_4
-stm_0  var_32C size_t
-stm_8  var_324
-stm_94 var_298
-stm_98 var_294
-stm_9c var_290
-stm_a0 var_28C
-stm_a4 var_288
-stm_a8 var_284
-stm_ac var_280
-stm_b0 var_27C
-stm_b4 var_278
-stm_b8 var_274
-stm_bc var_270
-stm_c0 var_26C
-stm_c4 var_268
-stm_c8 var_264
-stm_cc var_260
-stm_d0 var_25C
-stm_2d4 var_58
-stm_2d8 var_54
-stm_2e0 var_4C
-stm_324 ExceptionInfo struct _EXCEPTION_POINTERS /*%_EXCEPTION_POINTERS#D9443E4AA8E6A18C%*/
-stm_334 arg_0
-stm_0  StartupInfo struct _STARTUPINFOW /*%_STARTUPINFOW#EC9B93005128B2B4%*/
-stm_8  ExceptionInfo struct _EXCEPTION_POINTERS /*%_EXCEPTION_POINTERS#D9443E4AA8E6A18C%*/ *
-stm_8  arg_4
-stm_4  var_24
-stm_8  var_20
-stm_c  var_1C
-stm_10 var_18
-stm_14 var_14
-stm_18 var_10
-stm_1c var_C
-stm_20 var_8
-stm_24 var_4
-stm_0  var_18
-stm_4  var_14
-stm_8  var_10
-stm_c  var_C
-stm_10 var_8
-stm_14 var_4
-stm_20 arg_0 struct EHRegistrationNode *
-stm_24 arg_4 const struct _s_FuncInfo *
-stm_28 arg_8 void *
-stm_2c arg_C int
-stm_30 arg_10 unsigned int
-stm_4  var_38
-stm_8  var_34
-stm_c  var_30
-stm_10 var_2C
-stm_14 var_28
-stm_18 var_24
-stm_1c var_20
-stm_20 var_1C
-stm_24 var_18
-stm_28 var_14
-stm_2c var_10
-stm_30 var_C
-stm_34 var_8
-stm_38 var_4
-stm_44 arg_0 struct EHExceptionRecord *
-stm_48 arg_4 struct EHRegistrationNode *
-stm_4c arg_8 void *
-stm_54 arg_10 const struct _s_FuncInfo *
-stm_58 arg_14 int
-stm_5c arg_18 struct EHRegistrationNode *
-stm_c  var_4
-stm_18 arg_0 const struct _s_FuncInfo *
-stm_1c arg_4 int
-stm_20 arg_8 int
-stm_24 arg_C unsigned int *
-stm_28 arg_10 unsigned int *
-stm_4  var_4
-stm_10 arg_0 void *
-stm_14 arg_4 struct EHRegistrationNode *
-stm_c  var_8
-stm_10 TargetIp PVOID
-stm_1c TargetFrame PVOID
-stm_20 ExceptionRecord PEXCEPTION_RECORD
-stm_c  ExceptionRecord PEXCEPTION_RECORD
-stm_10 TargetFrame PVOID
-stm_14 arg_8 struct _CONTEXT *
-stm_c  arg_0
-stm_10 arg_4
-stm_c  arg_0
-stm_4  var_4
-stm_10 ExceptionRecord PEXCEPTION_RECORD
-stm_14 TargetFrame PVOID
-stm_18 arg_8 struct _CONTEXT *
-stm_c  var_8
-stm_10 var_4 struct _s_FuncInfo *
-stm_1c ExceptionRecord PEXCEPTION_RECORD
-stm_20 arg_4 struct EHRegistrationNode *
-stm_24 arg_8 struct _CONTEXT *
-stm_28 arg_C void *
-stm_c  arg_0 void *
-stm_10 arg_4 const void *
-stm_14 arg_8 size_t
-stm_c  arg_0 void *
-stm_10 arg_4 const void *
-stm_14 arg_8 size_t
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_30 arg_0
-stm_34 arg_4
-stm_8  arg_0 void *const
-stm_c  arg_4 void *const
-stm_8  arg_0
-stm_c  arg_0
-stm_10 arg_4
-stm_8  arg_0
-stm_c  arg_0
-stm_10 arg_4
-stm_c  arg_0
-stm_c  dwExceptionCode DWORD
-stm_10 dwExceptionFlags DWORD
-stm_1c nNumberOfArguments DWORD
-stm_20 Arguments ULONG_PTR
-stm_24 var_8
-stm_28 var_4
-stm_34 arg_0
-stm_38 arg_4
-stm_10 arg_0
-stm_14 arg_4
-stm_c  var_1C
-stm_10 var_18
-stm_14 var_14
-stm_18 var_10
-stm_1c var_C
-stm_20 var_8
-stm_30 ExceptionRecord PEXCEPTION_RECORD
-stm_34 TargetFrame PVOID
-stm_38 arg_8 int
-stm_8  arg_0
-stm_8  arg_0
-stm_c  arg_4
-stm_4  arg_0 void *
-stm_8  arg_4 int
-stm_c  arg_8 size_t
-stm_8  lpMem LPVOID
-stm_4  var_4
-stm_10 arg_0
-stm_14 arg_4
-stm_18 arg_8
-stm_c  arg_0 struct std::exception *
-stm_18 var_40
-stm_1c var_3C
-stm_20 var_38
-stm_24 var_34
-stm_28 var_30
-stm_2c var_2C
-stm_30 var_28
-stm_34 var_24
-stm_38 var_20
-stm_3c var_1C
-stm_40 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_60 arg_0 struct EHExceptionRecord *
-stm_64 arg_4 struct EHRegistrationNode *
-stm_68 arg_8 struct _CONTEXT *
-stm_6c arg_C struct _s_FuncInfo *
-stm_70 arg_10 void *
-stm_74 arg_14 int
-stm_78 arg_18 unsigned int
-stm_1c var_4
-stm_28 arg_0 const struct _s_ESTypeList *
-stm_2c arg_4
-stm_14 ExceptionRecord PEXCEPTION_RECORD
-stm_18 arg_4 struct EHRegistrationNode *
-stm_1c arg_8 struct _CONTEXT *
-stm_20 arg_C void *
-stm_24 arg_10 struct _s_FuncInfo *
-stm_28 arg_14 const struct _s_HandlerType *
-stm_2c arg_18 const struct _s_CatchableType *
-stm_30 arg_1C const struct _s_TryBlockMapEntry *
-stm_34 arg_20 int
-stm_38 TargetFrame PVOID
-stm_8  arg_0 struct _EXCEPTION_POINTERS /*%_EXCEPTION_POINTERS#D9443E4AA8E6A18C%*/ *
-stm_18 var_34 struct _s_TryBlockMapEntry *
-stm_1c var_30
-stm_20 var_2C
-stm_24 var_28 unsigned int
-stm_28 var_24
-stm_2c var_20
-stm_30 var_1C
-stm_34 var_18 struct _s_ESTypeList *
-stm_38 var_14 unsigned int
-stm_3c var_10 struct _s_HandlerType *
-stm_40 var_C
-stm_44 var_8 struct _CONTEXT *
-stm_54 ExceptionRecord PEXCEPTION_RECORD
-stm_58 arg_4 struct EHRegistrationNode *
-stm_5c arg_8 struct _CONTEXT *
-stm_60 arg_C void *
-stm_64 arg_10 struct _s_FuncInfo *
-stm_68 arg_14
-stm_6c arg_18 int
-stm_70 TargetFrame PVOID
-stm_4  var_8 unsigned int
-stm_8  var_4 unsigned int
-stm_14 ExceptionRecord PEXCEPTION_RECORD
-stm_18 arg_4 struct EHRegistrationNode *
-stm_1c arg_8 struct _CONTEXT *
-stm_20 arg_C void *
-stm_24 arg_10 struct _s_FuncInfo *
-stm_28 arg_14 int
-stm_2c arg_18 int
-stm_30 TargetFrame PVOID
-stm_c  var_18
-stm_10 var_14
-stm_14 var_10
-stm_18 var_C
-stm_1c var_8
-stm_20 var_4
-stm_2c arg_0 struct EHExceptionRecord *
-stm_30 arg_4 const struct _s_ESTypeList *
-stm_14 arg_0 const struct _s_ESTypeList *
-stm_8  arg_0 void *const
-stm_c  arg_4 void *const
-stm_10 arg_8 void *const
-stm_8  arg_0 void *const
-stm_c  arg_4 void *const
-stm_10 arg_8 void *const
-stm_14 arg_C int
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_30 arg_0 int
-stm_34 arg_4 void *
-stm_38 arg_8 int
-stm_3c arg_C int
-stm_10 var_20
-stm_14 var_1C
-stm_18 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_38 arg_0 int
-stm_3c arg_4 void *
-stm_40 arg_8 int
-stm_44 arg_C int
-stm_10 var_20
-stm_14 var_1C
-stm_18 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_38 arg_0
-stm_40 arg_8
-stm_44 arg_C
-stm_14 ExceptionRecord PEXCEPTION_RECORD
-stm_18 arg_4 struct EHRegistrationNode *
-stm_1c arg_8 struct _CONTEXT *
-stm_20 arg_C void *
-stm_24 arg_10 struct _s_FuncInfo *
-stm_28 arg_14 int
-stm_2c TargetFrame PVOID
-stm_30 arg_1C
-stm_14 arg_0
-stm_18 arg_4
-stm_1c arg_8
-stm_8  arg_0
-stm_8  arg_0
-stm_0  var_20
-stm_24 arg_0
-stm_28 arg_4
-stm_2c arg_8
-stm_4  arg_0
-stm_8  arg_4
-stm_10 arg_C
-stm_8  arg_0
-stm_8  arg_0
-stm_c  arg_4
-stm_c  var_4
-stm_18 arg_0
-stm_1c arg_4
-stm_10 arg_0
-stm_14 lpProcName LPCSTR
-stm_18 arg_8
-stm_1c arg_C
-stm_c  arg_0
-stm_c  dwTlsIndex DWORD
-stm_c  dwTlsIndex DWORD
-stm_c  dwTlsIndex DWORD
-stm_10 lpTlsValue LPVOID
-stm_c  lpCriticalSection LPCRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/
-stm_10 dwSpinCount DWORD
-stm_14 arg_8 int
-stm_8  arg_0
-stm_18 TargetFrame PVOID
-stm_4  arg_0
-stm_8  arg_4
-stm_10 arg_C
-stm_14 arg_10
-stm_0  var_20
-stm_8  var_18
-stm_24 arg_0
-stm_28 arg_4
-stm_10 arg_0
-stm_8  arg_0 unsigned int
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_34 uExitCode UINT
-stm_38 arg_4
-stm_3c arg_8
-stm_8  uExitCode UINT
-stm_0  phModule HMODULE /*%HINSTANCE__#DD664C352E9B6326%*/
-stm_4  var_4
-stm_10 arg_0 unsigned int
-stm_8  arg_0
-stm_8  arg_0 int
-stm_8  arg_0
-stm_8  arg_0 int
-stm_4  var_484
-stm_14 var_474
-stm_18 var_470
-stm_1c var_46C
-stm_20 var_468
-stm_28 var_460
-stm_484 var_4
-stm_490 arg_0 int
-stm_494 arg_4 int
-stm_498 arg_8 int
-stm_49c arg_C int
-stm_4a0 arg_10 int
-stm_4a4 arg_14 struct __crt_locale_pointers *
-stm_4a8 arg_18 int
-stm_8  arg_0 int
-stm_c  arg_4 int
-stm_10 arg_8 int
-stm_14 arg_C int
-stm_18 arg_10 int
-stm_1c arg_14 struct __crt_locale_pointers *
-stm_20 arg_18 int
-stm_8  var_4
-stm_14 arg_0
-stm_8  arg_0
-stm_10 arg_8
-stm_14 arg_C
-stm_14 arg_0
-stm_18 arg_4
-stm_1c arg_8
-stm_10 var_4
-stm_1c arg_0
-stm_20 arg_4
-stm_24 arg_8
-stm_28 arg_C
-stm_c  arg_0
-stm_10 arg_4
-stm_14 arg_8
-stm_18 arg_C
-stm_0  var_4
-stm_c  arg_0
-stm_10 arg_4
-stm_14 arg_8
-stm_18 arg_C
-stm_1c arg_10
-stm_20 arg_14
-stm_c  arg_0
-stm_10 arg_4
-stm_14 arg_8
-stm_18 arg_C
-stm_1c arg_10
-stm_20 arg_14
-stm_c  arg_0 struct __crt_locale_pointers *const
-stm_c  arg_0
-stm_c  this __crt_stdio_output *
-stm_10 arg_4 char *
-stm_8  arg_0
-stm_c  arg_4
-stm_c  this __crt_stdio_output *
-stm_10 arg_4 char *
-stm_c  var_4 wchar_t *
-stm_18 arg_0
-stm_8  var_C
-stm_c  var_8
-stm_10 var_4
-stm_8  arg_0
-stm_8  var_8 double
-stm_c  SrcCh
-stm_10 arg_0
-stm_14 arg_4
-stm_10 arg_0
-stm_8  arg_0
-stm_c  arg_4
-stm_c  var_8
-stm_10 DstCh wchar_t
-stm_8  var_8
-stm_c  var_4
-stm_18 arg_0 void *
-stm_1c arg_4 int
-stm_20 arg_8 int
-stm_24 arg_C int
-stm_8  arg_0 int
-stm_c  arg_4 int
-stm_10 arg_8 int
-stm_14 arg_C int
-stm_18 arg_10 int
-stm_1c arg_14 struct __crt_locale_pointers *
-stm_20 arg_18 int
-stm_8  Str1 wchar_t *
-stm_c  Str2 wchar_t *
-stm_8  var_10
-stm_c  var_C struct localeinfo_struct /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_20 Str1 const wchar_t *
-stm_24 Str2 const wchar_t *
-stm_28 Locale _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_c  Dst wchar_t *
-stm_10 SizeInWords rsize_t
-stm_14 Src const wchar_t *
-stm_8  arg_0 const wchar_t *
-stm_4  ExceptionInfo struct _EXCEPTION_POINTERS /*%_EXCEPTION_POINTERS#D9443E4AA8E6A18C%*/
-stm_c  var_320
-stm_10 var_31C
-stm_18 var_314
-stm_5c var_2D0
-stm_e8 var_244
-stm_ec var_240
-stm_f0 var_23C
-stm_f4 var_238
-stm_f8 var_234
-stm_fc var_230
-stm_100 var_22C
-stm_104 var_228
-stm_108 var_224
-stm_10c var_220
-stm_110 var_21C
-stm_114 var_218
-stm_118 var_214
-stm_11c var_210
-stm_120 var_20C
-stm_124 var_208
-stm_328 var_4
-stm_334 arg_0
-stm_338 arg_4
-stm_33c arg_8
-stm_8  arg_0
-stm_4  var_4
-stm_10 arg_0
-stm_14 arg_4
-stm_18 arg_8
-stm_1c arg_C
-stm_20 arg_10
-stm_10 arg_0
-stm_14 arg_4
-stm_18 arg_8
-stm_1c arg_C
-stm_8  Dst wchar_t *
-stm_c  SizeInWords rsize_t
-stm_10 Src const wchar_t *
-stm_14 MaxCount rsize_t
-stm_8  arg_0
-stm_4  var_4
-stm_10 arg_0
-stm_10 var_1C
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_4  var_8
-stm_8  var_4
-stm_14 arg_0
-stm_18 arg_4
-stm_8  arg_0
-stm_c  arg_0
-stm_8  arg_0
-stm_4  var_4
-stm_10 arg_0
-stm_8  arg_0
-stm_4  var_C
-stm_8  lpMem LPVOID
-stm_c  var_4
-stm_18 arg_0
-stm_c  var_10
-stm_10 var_C
-stm_14 var_8
-stm_24 arg_0
-stm_28 arg_4
-stm_2c arg_8
-stm_30 arg_C
-stm_34 arg_10
-stm_c  arg_0
-stm_10 arg_4
-stm_14 arg_8
-stm_c  SizeInWords rsize_t
-stm_10 var_4
-stm_1c Src wchar_t *
-stm_c  lpMem LPVOID
-stm_8  var_4
-stm_14 arg_0
-stm_8  arg_0
-stm_8  arg_0
-stm_c  var_8
-stm_10 var_4
-stm_1c arg_0
-stm_20 arg_4
-stm_8  var_4
-stm_14 arg_0
-stm_18 arg_4
-stm_8  Mode int
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_c  arg_0
-stm_8  arg_0
-stm_4  lpMem LPVOID
-stm_10 var_1C
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_34 arg_0
-stm_38 arg_4
-stm_3c arg_8
-stm_10 var_1C
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_34 arg_0
-stm_38 arg_4
-stm_3c arg_8
-stm_0  var_C
-stm_4  var_8
-stm_14 arg_0
-stm_18 arg_4
-stm_0  var_C
-stm_4  var_8
-stm_14 arg_0
-stm_18 arg_4
-stm_8  arg_0
-stm_4  var_18
-stm_8  var_14
-stm_c  var_10
-stm_10 var_C
-stm_14 var_8
-stm_18 var_4
-stm_4  var_C
-stm_8  var_8
-stm_c  var_4
-stm_8  arg_0
-stm_0  var_4
-stm_c  arg_0
-stm_c  arg_0
-stm_0  var_8
-stm_4  var_4
-stm_10 arg_0
-stm_14 arg_4
-stm_0  var_4
-stm_c  CurrentState unsigned int *
-stm_10 NewValue unsigned int
-stm_14 Mask unsigned int
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_c  Dst char *
-stm_10 SizeInBytes rsize_t
-stm_14 Src const char *
-stm_8  lpMem LPVOID
-stm_c  dwBytes SIZE_T
-stm_c  arg_0
-stm_10 arg_4
-stm_8  arg_0 const wchar_t *
-stm_c  arg_4 const wchar_t *
-stm_10 arg_8 size_t
-stm_8  arg_0
-stm_c  arg_4
-stm_8  var_1C
-stm_18 var_C
-stm_1c var_8
-stm_20 var_4
-stm_2c arg_0 struct __crt_locale_pointers *
-stm_30 arg_4 int
-stm_34 arg_8 int
-stm_38 arg_C int
-stm_3c arg_10
-stm_8  arg_0
-stm_8  arg_0
-stm_c  arg_4
-stm_10 arg_8
-stm_8  C int
-stm_c  Type int
-stm_10 Locale _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_8  arg_0
-stm_8  arg_0
-stm_14 arg_0
-stm_18 lpProcName LPCSTR
-stm_1c arg_8
-stm_20 arg_C
-stm_c  arg_0
-stm_4  var_4
-stm_10 arg_0
-stm_4  var_4
-stm_10 dwTlsIndex DWORD
-stm_4  var_4
-stm_10 dwTlsIndex DWORD
-stm_4  var_4
-stm_10 dwTlsIndex DWORD
-stm_14 lpTlsValue LPVOID
-stm_4  var_4
-stm_10 lpCriticalSection LPCRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/
-stm_14 dwSpinCount DWORD
-stm_18 arg_8 int
-stm_4  var_4
-stm_10 arg_0 wchar_t *
-stm_14 dwMapFlags DWORD
-stm_18 lpSrcStr LPCWSTR
-stm_1c cchSrc int
-stm_20 lpDestStr LPWSTR
-stm_24 cchDest int
-stm_28 arg_18 int
-stm_2c arg_1C int
-stm_30 arg_20 int
-stm_4  var_4
-stm_10 arg_0 wchar_t *
-stm_14 arg_4 int
-stm_0  var_8
-stm_4  var_4
-stm_8  arg_0
-stm_0  var_10
-stm_4  var_C struct localeinfo_struct /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_18 C int
-stm_1c Locale _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_8  C int
-stm_4  var_1C
-stm_8  Locale struct localeinfo_struct /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_14 var_C
-stm_18 DestStr WCHAR
-stm_1c MultiByteStr CHAR
-stm_28 C int
-stm_2c dwMapFlags DWORD
-stm_30 arg_8 struct __crt_locale_pointers *
-stm_8  C int
-stm_c  Locale _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_8  C int
-stm_c  Locale _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_8  C int
-stm_8  arg_0
-stm_c  arg_0
-stm_8  arg_0
-stm_c  arg_4
-stm_10 arg_8
-stm_8  arg_0 const wchar_t *
-stm_c  arg_4 wchar_t **
-stm_10 arg_8 int
-stm_8  var_10
-stm_c  var_C struct localeinfo_struct /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_20 lpWideCharStr LPWSTR
-stm_24 lpMultiByteStr LPCSTR
-stm_28 SrcSizeInBytes size_t
-stm_2c Locale _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_8  DstCh wchar_t *
-stm_c  SrcCh char *
-stm_10 SrcSizeInBytes size_t
-stm_8  var_4
-stm_14 Src const wchar_t *
-stm_18 MaxCount size_t
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_30 arg_0
-stm_34 arg_4
-stm_38 arg_8
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_30 arg_0
-stm_34 arg_4
-stm_38 arg_8
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_30 arg_0
-stm_34 arg_4
-stm_38 arg_8
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_30 arg_0
-stm_34 arg_4
-stm_38 arg_8
-stm_0  var_C
-stm_4  var_8
-stm_14 arg_0
-stm_18 arg_4
-stm_0  var_C
-stm_4  var_8
-stm_14 arg_0
-stm_18 arg_4
-stm_0  var_C
-stm_4  var_8
-stm_14 arg_0
-stm_18 arg_4
-stm_0  var_C
-stm_4  var_8
-stm_14 arg_0
-stm_18 arg_4
-stm_0  var_8
-stm_4  var_4
-stm_10 arg_0 struct __acrt_ptd *const
-stm_14 arg_4 struct __crt_locale_data **const
-stm_8  lpMem LPVOID
-stm_0  var_4
-stm_c  arg_0 struct __acrt_ptd *const
-stm_c  arg_0 struct __acrt_ptd *const
-stm_10 arg_4 struct __crt_locale_data *const
-stm_c  arg_0
-stm_10 arg_4
-stm_c  arg_0
-stm_10 arg_4
-stm_14 arg_0
-stm_8  arg_0 const double *
-stm_c  var_30
-stm_10 var_2C
-stm_1c var_20
-stm_20 var_1C
-stm_24 var_18
-stm_2c var_10
-stm_30 var_C
-stm_34 var_8
-stm_38 var_4
-stm_44 arg_0 double *
-stm_48 arg_4 char *
-stm_4c arg_8 unsigned int
-stm_50 arg_C char *
-stm_54 arg_10 unsigned int
-stm_58 arg_14 size_t
-stm_5c arg_18
-stm_60 arg_1C unsigned int
-stm_64 arg_20 struct __crt_locale_pointers *
-stm_8  var_C int
-stm_1c arg_0 const double *const
-stm_20 arg_4 char *
-stm_24 arg_8 unsigned int
-stm_28 arg_C char *const
-stm_2c arg_10 unsigned int
-stm_30 arg_14 int
-stm_34 arg_18
-stm_38 arg_1C unsigned int
-stm_3c arg_20 struct __crt_locale_pointers *
-stm_8  var_10
-stm_c  var_C
-stm_20 arg_0 char *
-stm_24 arg_4 unsigned int
-stm_28 arg_8 int
-stm_2c arg_C
-stm_30 arg_10 unsigned int
-stm_34 arg_14 struct _strflt *const
-stm_38 arg_18
-stm_3c arg_1C struct __crt_locale_pointers *
-stm_8  var_C int
-stm_c  var_8
-stm_1c arg_0 const double *const
-stm_20 arg_4 char *
-stm_24 arg_8 unsigned int
-stm_28 arg_C char *const
-stm_2c arg_10 unsigned int
-stm_30 arg_14 size_t
-stm_34 arg_18 struct __crt_locale_pointers *
-stm_c  var_10
-stm_10 var_C
-stm_24 arg_0 char *
-stm_28 arg_4 unsigned int
-stm_2c arg_8 size_t
-stm_30 arg_C struct _strflt *const
-stm_34 arg_10
-stm_38 arg_14 struct __crt_locale_pointers *
-stm_c  var_10 int
-stm_10 var_C
-stm_18 var_4
-stm_24 arg_0 const double *const
-stm_28 arg_4 char *
-stm_2c arg_8 unsigned int
-stm_30 arg_C char *const
-stm_34 arg_10 unsigned int
-stm_38 arg_14 size_t
-stm_3c arg_18
-stm_40 arg_1C unsigned int
-stm_44 arg_20 struct __crt_locale_pointers *
-stm_4  var_48
-stm_8  Src char *
-stm_c  var_40
-stm_10 var_3C
-stm_14 var_38
-stm_18 var_34
-stm_1c var_30
-stm_20 var_2C
-stm_24 var_28
-stm_28 var_24
-stm_2c var_20
-stm_30 var_1C
-stm_34 var_18
-stm_38 var_14
-stm_3c var_10
-stm_40 var_C
-stm_44 var_8
-stm_48 var_4
-stm_54 arg_0
-stm_58 arg_4
-stm_5c Dst char *
-stm_60 SizeInBytes rsize_t
-stm_64 arg_10
-stm_10 arg_8 char *const
-stm_14 arg_C int
-stm_8  var_8
-stm_c  var_4
-stm_18 arg_0 double *
-stm_1c arg_4 char *
-stm_20 arg_8 unsigned int
-stm_24 arg_C char *
-stm_28 arg_10 unsigned int
-stm_2c arg_14 int
-stm_30 arg_18 size_t
-stm_34 arg_1C int
-stm_3c arg_24 struct __crt_locale_pointers *
-stm_8  arg_0 FILE *
-stm_8  arg_0
-stm_8  arg_0
-stm_0  StartupInfo struct _STARTUPINFOW /*%_STARTUPINFOW#EC9B93005128B2B4%*/
-stm_44 var_4
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_0  var_18
-stm_4  var_14
-stm_10 var_8
-stm_14 DestStr WCHAR
-stm_20 C wint_t
-stm_24 Locale _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_8  arg_0 const void *
-stm_c  arg_4 const void *
-stm_4  var_30
-stm_8  var_2C
-stm_c  var_28 int
-stm_10 var_24
-stm_14 var_20
-stm_18 var_1C
-stm_1c var_18
-stm_20 var_14
-stm_24 var_10
-stm_28 var_C wchar_t
-stm_2c var_8
-stm_30 var_4
-stm_3c arg_0
-stm_40 arg_4
-stm_8  var_4 rsize_t
-stm_14 arg_0 wchar_t *
-stm_18 Src wchar_t *
-stm_1c MaxCount rsize_t
-stm_20 arg_C int
-stm_c  var_260
-stm_10 MaxCount rsize_t
-stm_14 var_258 int
-stm_18 FindFileData
-stm_44 var_228 wchar_t
-stm_46 var_226
-stm_48 var_224
-stm_268 var_4
-stm_274 lpFileName LPCWSTR
-stm_278 arg_4 int
-stm_27c arg_8 int
-stm_10 lpMem LPVOID
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_30 arg_0
-stm_34 arg_4
-stm_38 arg_8
-stm_0  var_C
-stm_4  var_8
-stm_14 arg_0
-stm_18 arg_4
-stm_8  arg_0 int
-stm_0  var_10
-stm_4  var_C
-stm_18 arg_0 int
-stm_14 arg_0 struct __crt_multibyte_data *
-stm_c  var_720
-stm_10 var_71C
-stm_14 CPInfo struct _cpinfo /*%_cpinfo#264D2EA74B99B8A6%*/
-stm_28 CharType WORD
-stm_428 var_304 WCHAR
-stm_528 DestStr WCHAR
-stm_628 MultiByteStr CHAR
-stm_728 var_4
-stm_734 arg_0 struct __crt_multibyte_data *
-stm_0  var_C int
-stm_8  var_4
-stm_14 arg_0 int
-stm_18 arg_4
-stm_10 var_1C
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_8  var_20
-stm_c  var_1C
-stm_10 CPInfo struct _cpinfo /*%_cpinfo#264D2EA74B99B8A6%*/
-stm_24 var_4
-stm_30 arg_0 int
-stm_34 arg_4 struct __crt_multibyte_data *
-stm_c  arg_0 const wchar_t *const
-stm_8  var_8
-stm_c  lpCriticalSection LPCRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/
-stm_14 var_20
-stm_18 var_1C
-stm_1c ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_3c arg_0
-stm_8  arg_0
-stm_8  arg_0
-stm_14 arg_0
-stm_8  arg_0 int
-stm_0  var_4
-stm_c  arg_0
-stm_c  arg_0
-stm_14 arg_0 const void **const
-stm_18 arg_4 unsigned int
-stm_c  arg_0 void **
-stm_14 arg_0 const wchar_t *
-stm_18 arg_4 const wchar_t *
-stm_c  var_18
-stm_10 var_14
-stm_1c cchWideChar int
-stm_20 var_4
-stm_2c arg_0 struct __crt_locale_pointers *
-stm_30 dwInfoType DWORD
-stm_34 lpMultiByteStr LPCSTR
-stm_38 cbMultiByte int
-stm_3c lpCharType LPWORD
-stm_40 CodePage UINT
-stm_44 arg_18 int
-stm_8  arg_0
-stm_8  arg_0
-stm_c  var_4
-stm_18 lpMem LPVOID
-stm_8  arg_0
-stm_c  lpMem LPVOID
-stm_8  arg_0
-stm_8  arg_0
-stm_10 var_1C
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_10 arg_0
-stm_14 arg_4
-stm_8  lpMem void *
-stm_c  arg_4 int
-stm_10 arg_8 int
-stm_4  var_4
-stm_10 arg_0
-stm_14 arg_4
-stm_4  var_4
-stm_10 arg_0
-stm_14 arg_4
-stm_10 var_1C
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_34 arg_0
-stm_3c arg_8
-stm_0  var_C
-stm_4  var_8
-stm_14 arg_0
-stm_18 arg_4
-stm_8  arg_0 int
-stm_8  arg_0 int
-stm_c  arg_4 struct __crt_signal_action_t *const
-stm_8  arg_0
-stm_10 var_3C
-stm_14 var_38
-stm_18 var_34
-stm_1c var_30
-stm_20 var_2C
-stm_24 var_28
-stm_28 var_24
-stm_34 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_54 arg_0 int
-stm_8  arg_0
-stm_0  var_C
-stm_4  var_8
-stm_8  var_4
-stm_0  var_10
-stm_4  var_C
-stm_8  var_8
-stm_c  var_4
-stm_18 arg_0 unsigned int
-stm_1c arg_4 unsigned int
-stm_8  arg_0
-stm_0  SrcStr WCHAR
-stm_4  CharType WORD
-stm_10 arg_0 wint_t
-stm_14 arg_4 wctype_t
-stm_4  var_24
-stm_8  var_20
-stm_c  var_1C struct localeinfo_struct /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_18 MultiByteStr CHAR
-stm_1c CharType WORD
-stm_20 var_8
-stm_24 var_4
-stm_30 C int
-stm_34 Type int
-stm_38 Locale _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_c  var_10
-stm_10 var_C
-stm_14 var_8
-stm_18 var_4
-stm_24 arg_0 const wchar_t *
-stm_8  arg_0 wchar_t *
-stm_0  var_10
-stm_4  var_C
-stm_18 C int
-stm_1c Locale _locale_t /*%localeinfo_struct#C887B7B31EC5CED4%*/
-stm_c  cchWideChar int
-stm_10 var_4
-stm_1c arg_0 struct __crt_locale_pointers *
-stm_20 arg_4 wchar_t *
-stm_24 dwMapFlags DWORD
-stm_28 lpMultiByteStr LPCSTR
-stm_2c cbMultiByte int
-stm_30 lpDestStr LPWSTR
-stm_34 cchDest int
-stm_38 CodePage UINT
-stm_3c arg_20 int
-stm_0  var_10
-stm_18 arg_0 struct __crt_locale_pointers *
-stm_1c arg_4 wchar_t *
-stm_20 dwMapFlags DWORD
-stm_24 lpMultiByteStr LPCSTR
-stm_28 cbMultiByte int
-stm_2c lpDestStr LPWSTR
-stm_30 cchDest int
-stm_34 CodePage UINT
-stm_38 arg_20 int
-stm_c  arg_0 void *
-stm_10 arg_4 int
-stm_14 arg_8 int
-stm_18 arg_C int
-stm_4  var_21C
-stm_8  Src
-stm_1d4 var_4C
-stm_1d8 var_48
-stm_1dc var_44
-stm_1e0 var_40
-stm_1e4 var_3C
-stm_1e8 var_38
-stm_1ec var_34
-stm_1f0 var_30
-stm_1f8 var_28
-stm_1fc var_24
-stm_200 var_20
-stm_204 var_1C
-stm_208 var_18
-stm_20c var_14
-stm_210 var_10
-stm_214 var_C
-stm_218 var_8
-stm_21c var_4
-stm_228 this __crt_strtox *
-stm_22c arg_4 struct __crt_strtox::big_integer *
-stm_0  var_978 double
-stm_14 var_964
-stm_1f4 var_784
-stm_1f8 var_780
-stm_1fc var_77C
-stm_200 var_778
-stm_204 var_774
-stm_208 var_770
-stm_20c var_76C
-stm_210 var_768
-stm_218 var_760
-stm_21c var_75C
-stm_220 var_758
-stm_224 var_754
-stm_228 var_750
-stm_22c var_74C
-stm_234 var_744
-stm_238 var_740
-stm_404 var_574
-stm_408 Src
-stm_40c var_56C
-stm_5d4 var_3A4
-stm_5d8 var_3A0
-stm_7a4 var_1D4
-stm_7a8 var_1D0
-stm_7ac var_1CC
-stm_974 var_4
-stm_980 arg_0
-stm_988 arg_8
-stm_98c arg_C
-stm_990 Dst char *
-stm_994 SizeInBytes rsize_t
-stm_c  Dst void *
-stm_10 DstSize size_t
-stm_14 arg_8 void *
-stm_18 MaxCount size_t
-stm_10 var_20
-stm_14 var_1C
-stm_18 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_c  arg_0 FILE *
-stm_c  File FILE *
-stm_10 var_2C
-stm_14 var_28
-stm_18 var_24
-stm_1c var_20
-stm_20 var_1C
-stm_24 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_44 arg_0
-stm_10 arg_0
-stm_8  arg_0 int
-stm_c  arg_0 wchar_t *
-stm_10 dwMapFlags DWORD
-stm_14 Src wchar_t *
-stm_18 MaxCount size_t
-stm_1c lpDestStr LPWSTR
-stm_20 cchDest int
-stm_4  var_4
-stm_10 arg_0 char *
-stm_14 arg_4 char *
-stm_18 arg_8 unsigned int
-stm_1c arg_C int (__cdecl *)(const void *, const void *)
-stm_c  arg_0 char *
-stm_10 arg_4 char *
-stm_14 arg_8 unsigned int
-stm_8  var_11C
-stm_c  var_118
-stm_10 var_114
-stm_14 var_110
-stm_18 var_10C
-stm_1c var_108
-stm_20 var_104 char *
-stm_24 var_100
-stm_28 var_FC
-stm_2c var_F8 char *
-stm_30 var_F4
-stm_a8 var_7C
-stm_120 var_4
-stm_12c arg_0 char *
-stm_130 arg_4 size_t
-stm_134 arg_8 size_t
-stm_138 arg_C int (__cdecl *)(const void *, const void *)
-stm_0  var_24
-stm_2c arg_0 const char *
-stm_30 arg_4 const char *
-stm_8  lpMem LPCVOID
-stm_c  lpMem LPVOID
-stm_10 dwBytes SIZE_T
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_30 arg_0
-stm_0  var_4
-stm_0  var_8
-stm_4  var_4
-stm_10 arg_0
-stm_14 arg_4
-stm_0  var_C
-stm_8  var_4
-stm_14 arg_0
-stm_0  var_4
-stm_8  arg_0
-stm_c  arg_4
-stm_c  arg_0
-stm_4  var_8
-stm_8  var_4
-stm_14 arg_0
-stm_0  var_8
-stm_4  var_4
-stm_10 arg_0
-stm_0  var_8
-stm_4  var_4
-stm_c  arg_0 double
-stm_4  var_8
-stm_8  var_4
-stm_0  var_4
-stm_8  arg_0
-stm_c  arg_4
-stm_0  var_10
-stm_4  var_C
-stm_8  var_8
-stm_c  var_4
-stm_14 arg_0 double
-stm_c  CodePage UINT
-stm_10 var_34
-stm_14 var_30
-stm_18 var_2C
-stm_1c hFile HANDLE
-stm_20 var_24
-stm_24 NumberOfBytesWritten DWORD
-stm_28 Buffer
-stm_2c WideCharStr WCHAR
-stm_30 MultiByteStr CHAR
-stm_40 var_4
-stm_4c arg_0
-stm_50 arg_4
-stm_54 arg_8 char *
-stm_58 arg_C
-stm_c  var_4
-stm_18 arg_0
-stm_1c arg_4
-stm_20 arg_8
-stm_4  Mode DWORD
-stm_10 arg_0 int
-stm_c  var_1410
-stm_10 NumberOfBytesWritten DWORD
-stm_14 var_1408
-stm_18 Buffer
-stm_1418 var_4
-stm_1424 arg_0
-stm_1428 arg_4
-stm_142c arg_8
-stm_1430 arg_C
-stm_c  var_1410
-stm_10 NumberOfBytesWritten DWORD
-stm_14 var_1408
-stm_18 Buffer
-stm_1418 var_4
-stm_1424 arg_0
-stm_1428 arg_4
-stm_142c arg_8
-stm_1430 arg_C
-stm_c  var_1418
-stm_10 hFile HANDLE
-stm_14 NumberOfBytesWritten DWORD
-stm_18 var_140C
-stm_1c MultiByteStr CHAR
-stm_d74 WideCharStr WCHAR
-stm_1420 var_4
-stm_142c arg_0
-stm_1430 arg_4
-stm_1434 arg_8
-stm_1438 arg_C
-stm_14 var_20
-stm_18 var_1C
-stm_1c ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_3c arg_0 int
-stm_40 lpBuffer LPCVOID
-stm_44 arg_8 unsigned int
-stm_8  var_30
-stm_c  var_2C
-stm_10 var_28
-stm_14 var_24
-stm_18 var_20
-stm_1c var_1C
-stm_20 var_18
-stm_24 var_14
-stm_28 NumberOfBytesWritten DWORD
-stm_2c var_C
-stm_30 nNumberOfBytesToWrite DWORD
-stm_34 var_4
-stm_40 arg_0 int
-stm_44 lpBuffer LPCVOID
-stm_48 arg_8 int
-stm_8  NewFilePointer LARGE_INTEGER /*%LARGE_INTEGER#6F2DECE5B9963D4B%*/
-stm_18 arg_0 int
-stm_1c liDistanceToMove LARGE_INTEGER /*%LARGE_INTEGER#6F2DECE5B9963D4B%*/
-stm_24 dwMoveMethod DWORD
-stm_8  arg_0 int
-stm_c  liDistanceToMove LARGE_INTEGER /*%LARGE_INTEGER#6F2DECE5B9963D4B%*/
-stm_14 dwMoveMethod DWORD
-stm_c  File FILE *
-stm_10 var_20
-stm_14 var_1C
-stm_18 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_38 File FILE *
-stm_10 var_1C
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_34 arg_0
-stm_38 arg_4
-stm_3c arg_8
-stm_0  var_C
-stm_4  var_8
-stm_14 arg_0
-stm_18 arg_4
-stm_4  var_4
-stm_10 arg_0 int
-stm_8  arg_0
-stm_8  arg_0
-stm_8  arg_0
-stm_8  arg_0
-stm_8  arg_0
-stm_8  arg_0
-stm_0  var_8
-stm_4  var_4
-stm_0  var_8
-stm_4  var_4
-stm_c  var_20
-stm_10 var_1C
-stm_14 var_18
-stm_18 var_14
-stm_1c var_10
-stm_20 var_C
-stm_24 var_8
-stm_28 var_4
-stm_34 arg_0
-stm_c  var_20
-stm_10 var_1C
-stm_14 var_18
-stm_18 var_14
-stm_1c var_10
-stm_20 var_C
-stm_24 var_8
-stm_28 var_4
-stm_34 arg_0
-stm_0  var_8
-stm_0  var_1C
-stm_4  var_18
-stm_8  var_14
-stm_c  var_10
-stm_10 var_C
-stm_20 arg_0
-stm_0  var_A
-stm_8  arg_4
-stm_0  var_8
-stm_0  var_20
-stm_10 var_10
-stm_14 var_C
-stm_38 arg_10
-stm_3c arg_14
-stm_0  var_20
-stm_4  var_1C
-stm_8  var_18
-stm_c  var_14
-stm_18 var_8
-stm_28 arg_0
-stm_30 arg_8
-stm_34 arg_C
-stm_8  var_24
-stm_c  var_20
-stm_10 var_1C
-stm_18 var_14
-stm_20 var_C
-stm_28 var_4
-stm_34 arg_0
-stm_38 arg_4
-stm_3c arg_8
-stm_40 arg_C
-stm_0  var_24
-stm_c  var_18 double
-stm_1c var_8
-stm_2c arg_0 double
-stm_0  NumberOfCharsWritten DWORD
-stm_c  Buffer __int16
-stm_10 var_1C
-stm_14 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_34 arg_0
-stm_38 arg_4
-stm_3c arg_8
-stm_0  var_C
-stm_4  var_8
-stm_14 arg_0
-stm_18 arg_4
-stm_4  var_4
-stm_10 arg_0
-stm_10 arg_0 int
-stm_8  arg_0
-stm_14 arg_0
-stm_18 arg_4
-stm_1c arg_8
-stm_0  var_10 double
-stm_8  var_8
-stm_18 arg_0 double
-stm_0  var_8 double
-stm_10 arg_0 double
-stm_18 arg_8 double
-stm_20 arg_10 int
-stm_4  var_8
-stm_0  var_8
-stm_10 arg_0 double
-stm_8  arg_0
-stm_0  var_B8 int[]
-stm_8  var_B0 int[]
-stm_10 var_A8 double
-stm_18 var_A0
-stm_b0 var_8
-stm_0  var_28 double
-stm_18 var_10
-stm_24 var_4 int
-stm_30 arg_0
-stm_34 arg_4
-stm_38 arg_8
-stm_8  Arguments ULONG_PTR
-stm_c  arg_4 int
-stm_10 arg_8 int
-stm_14 arg_C int
-stm_18 arg_10 int
-stm_1c arg_14 int
-stm_10 Arguments ULONG_PTR
-stm_14 arg_4 int
-stm_18 arg_8 int
-stm_1c arg_C int
-stm_20 arg_10 int
-stm_24 arg_14 int
-stm_28 arg_18 int
-stm_8  arg_0
-stm_0  var_20
-stm_4  var_1C
-stm_8  var_18
-stm_c  var_14
-stm_10 var_10
-stm_14 var_C
-stm_18 var_8
-stm_28 arg_0 int
-stm_2c arg_4 int
-stm_30 arg_8 int
-stm_34 arg_C int
-stm_38 arg_10 int
-stm_3c arg_14 int
-stm_40 arg_18 double
-stm_48 arg_20 int
-stm_0  var_14
-stm_1c arg_0 double
-stm_24 arg_8 int
-stm_0  var_8
-stm_16 arg_6
-stm_18 arg_8
-stm_8  arg_0
-stm_c  arg_4
-stm_0  var_8
-stm_10 arg_0 double
-stm_4  ProcessorFeature DWORD
-stm_14 arg_0
-stm_18 arg_4
-stm_10 ms_exc CPPEH_RECORD /*%CPPEH_RECORD#45C42EF61A386281%*/
-stm_30 arg_0
-stm_8  arg_0
-stm_8  arg_0
-stm_c  arg_4
-stm_10 arg_8
-stm_14 arg_C
-stm_8  arg_4
-stm_4  arg_0
-stm_8  arg_4
-stm_c  arg_8
-stm_10 arg_C
-stm_10 arg_0
-stm_14 arg_4
-stm_18 arg_8
-stm_1c arg_C
-stm_0  var_24
-stm_10 var_14
-stm_18 var_C
-stm_20 var_4
-stm_c  arg_0 const char *
-stm_10 arg_4 int
-stm_4  arg_0 const char *
-stm_8  arg_4 int
+skm: 1490
+skm_401006:8  Buffer WCHAR[2]
+skm_401006:c  Text WCHAR
+skm_401006:80c var_4
+skm_401006:818 arg_0 int
+skm_40108c:10 var_50
+skm_40108c:44 var_1C
+skm_40108c:48 pNumArgs int
+skm_40108c:5c var_4
+skm_40108c:6c arg_4
+skm_4011cd:10 StartupInfo struct _STARTUPINFOW
+skm_4011cd:54 SystemInfo struct _SYSTEM_INFO
+skm_4011cd:78 ProcessInformation struct _PROCESS_INFORMATION
+skm_4011cd:88 CommandLine WCHAR
+skm_4011cd:698 Buffer WCHAR
+skm_4011cd:8a0 Dst wchar_t
+skm_4011cd:aa8 pszDest WCHAR
+skm_4011cd:cb0 var_E48 WCHAR
+skm_4011cd:eb8 ApplicationName WCHAR
+skm_4011cd:10c0 NewFileName WCHAR
+skm_4011cd:12c8 ExistingFileName WCHAR
+skm_4011cd:14d0 pszPath WCHAR
+skm_4011cd:16d8 Src WCHAR
+skm_4011cd:18e0 Filename WCHAR
+skm_4011cd:1ae8 var_10
+skm_4011cd:1aec var_C
+skm_4011cd:1af4 var_4
+skm_4011cd:1b00 arg_0 wchar_t *
+skm_4011cd:1b04 arg_4 int
+skm_4011cd:1b14 arg_14 int
+skm_4011cd:1b18 arg_18 int
+skm_4011cd:1b28 arg_28 int
+skm_4011cd:1b2c arg_2C int
+skm_40162d:10 var_2C wchar_t *
+skm_40162d:20 var_1C
+skm_40162d:24 var_18
+skm_40162d:28 phkResult HKEY
+skm_40162d:38 var_4
+skm_40162d:48 arg_4
+skm_401702:14 hKey HKEY
+skm_401702:18 phkResult HKEY
+skm_401702:1c Data WCHAR
+skm_401702:24c pszDest WCHAR
+skm_401702:454 Filename WCHAR
+skm_401702:668 var_4
+skm_401702:678 arg_4
+skm_4018f0:28 phkResult HKEY
+skm_4018f0:38 var_4
+skm_4018f0:48 arg_4
+skm_40197e:14 var_34 wchar_t *
+skm_40197e:28 var_20
+skm_40197e:2c var_1C int
+skm_40197e:44 var_4
+skm_40197e:50 hInstance HINSTANCE
+skm_40197e:54 hPrevInstance HINSTANCE
+skm_40197e:58 lpCmdLine LPSTR
+skm_40197e:5c nShowCmd int
+skm_401bb2:c  arg_0 wchar_t *
+skm_401c3c:4  var_4
+skm_401c3c:10 arg_0 wchar_t *
+skm_401c97:c  var_4
+skm_401c97:18 arg_0 void *
+skm_401d3d:10 arg_0 void *
+skm_401d74:8  arg_0 int
+skm_401d74:c  arg_4 int
+skm_401d74:10 arg_8 int
+skm_401da5:8  arg_0 int
+skm_401da5:c  arg_4 int
+skm_401da5:10 arg_8 int
+skm_401dd6:8  arg_0 int
+skm_401dd6:c  arg_4 int
+skm_401dd6:10 arg_8 int
+skm_401e07:c  var_8
+skm_401e07:10 var_4 void *
+skm_401e07:1c arg_0
+skm_401e07:24 arg_8
+skm_401f2f:c  arg_0 struct std::exception *
+skm_401f62:c  arg_0 const struct std::exception *
+skm_401f8e:4  var_8
+skm_401f8e:14 arg_0 const char *const
+skm_401fc5:c  arg_0 struct std::exception *
+skm_401fe0:4  var_4
+skm_401fe0:10 arg_0 char *
+skm_402001:c  arg_0 struct std::exception *
+skm_402077:14 arg_0 char *
+skm_4020b5:8  arg_0 size_t
+skm_4020e5:8  lpMem LPVOID
+skm_4021b1:10 var_24
+skm_4021b1:14 var_20 int
+skm_4021b1:1c ms_exc CPPEH_RECORD
+skm_40234f:8  ExceptionInfo struct _EXCEPTION_POINTERS *
+skm_402377:0  var_324
+skm_402377:31c var_8
+skm_402377:324 var_s0
+skm_402472:c  arg_0 struct std::exception *
+skm_4024c2:4  lpMem LPVOID
+skm_4024c7:8  arg_0
+skm_4024e4:c  arg_0 unsigned __int8 *const
+skm_4024e4:10 arg_4 unsigned int
+skm_40255d:8  arg_0
+skm_402596:0  var_C
+skm_402596:4  var_8
+skm_402596:8  var_4
+skm_402596:14 arg_0
+skm_402640:10 ms_exc CPPEH_RECORD
+skm_402640:30 arg_0
+skm_4026e7:8  arg_0
+skm_40270f:8  arg_0 _onexit_t
+skm_40274a:8  arg_0 _onexit_t
+skm_40275f:0  PerformanceCount LARGE_INTEGER
+skm_40275f:8  SystemTimeAsFileTime struct _FILETIME
+skm_40275f:10 var_4
+skm_40286f:0  var_32C size_t
+skm_40286f:8  var_324
+skm_40286f:94 var_298
+skm_40286f:98 var_294
+skm_40286f:9c var_290
+skm_40286f:a0 var_28C
+skm_40286f:a4 var_288
+skm_40286f:a8 var_284
+skm_40286f:ac var_280
+skm_40286f:b0 var_27C
+skm_40286f:b4 var_278
+skm_40286f:b8 var_274
+skm_40286f:bc var_270
+skm_40286f:c0 var_26C
+skm_40286f:c4 var_268
+skm_40286f:c8 var_264
+skm_40286f:cc var_260
+skm_40286f:d0 var_25C
+skm_40286f:2d4 var_58
+skm_40286f:2d8 var_54
+skm_40286f:2e0 var_4C
+skm_40286f:324 ExceptionInfo struct _EXCEPTION_POINTERS
+skm_40286f:334 arg_0
+skm_40298b:0  StartupInfo struct _STARTUPINFOW
+skm_402a0e:8  ExceptionInfo struct _EXCEPTION_POINTERS *
+skm_402ac0:8  arg_4
+skm_402b1b:4  var_24
+skm_402b1b:8  var_20
+skm_402b1b:c  var_1C
+skm_402b1b:10 var_18
+skm_402b1b:14 var_14
+skm_402b1b:18 var_10
+skm_402b1b:1c var_C
+skm_402b1b:20 var_8
+skm_402b1b:24 var_4
+skm_402cc0:0  var_18
+skm_402cc0:4  var_14
+skm_402cc0:8  var_10
+skm_402cc0:c  var_C
+skm_402cc0:10 var_8
+skm_402cc0:14 var_4
+skm_402cc0:20 arg_0 struct EHRegistrationNode *
+skm_402cc0:24 arg_4 const struct _s_FuncInfo *
+skm_402cc0:28 arg_8 void *
+skm_402cc0:2c arg_C int
+skm_402cc0:30 arg_10 unsigned int
+skm_402d20:4  var_38
+skm_402d20:8  var_34
+skm_402d20:c  var_30
+skm_402d20:10 var_2C
+skm_402d20:14 var_28
+skm_402d20:18 var_24
+skm_402d20:1c var_20
+skm_402d20:20 var_1C
+skm_402d20:24 var_18
+skm_402d20:28 var_14
+skm_402d20:2c var_10
+skm_402d20:30 var_C
+skm_402d20:34 var_8
+skm_402d20:38 var_4
+skm_402d20:44 arg_0 struct EHExceptionRecord *
+skm_402d20:48 arg_4 struct EHRegistrationNode *
+skm_402d20:4c arg_8 void *
+skm_402d20:54 arg_10 const struct _s_FuncInfo *
+skm_402d20:58 arg_14 int
+skm_402d20:5c arg_18 struct EHRegistrationNode *
+skm_402dfd:c  var_4
+skm_402dfd:18 arg_0 const struct _s_FuncInfo *
+skm_402dfd:1c arg_4 int
+skm_402dfd:20 arg_8 int
+skm_402dfd:24 arg_C unsigned int *
+skm_402dfd:28 arg_10 unsigned int *
+skm_402e75:4  var_4
+skm_402e75:10 arg_0 void *
+skm_402e75:14 arg_4 struct EHRegistrationNode *
+skm_402ea7:c  var_8
+skm_402ea7:10 TargetIp PVOID
+skm_402ea7:1c TargetFrame PVOID
+skm_402ea7:20 ExceptionRecord PEXCEPTION_RECORD
+skm_402efc:c  ExceptionRecord PEXCEPTION_RECORD
+skm_402efc:10 TargetFrame PVOID
+skm_402efc:14 arg_8 struct _CONTEXT *
+skm_402f2d:c  arg_0
+skm_402f2d:10 arg_4
+skm_402f51:c  arg_0
+skm_402f96:4  var_4
+skm_402f96:10 ExceptionRecord PEXCEPTION_RECORD
+skm_402f96:14 TargetFrame PVOID
+skm_402f96:18 arg_8 struct _CONTEXT *
+skm_403035:c  var_8
+skm_403035:10 var_4 struct _s_FuncInfo *
+skm_403035:1c ExceptionRecord PEXCEPTION_RECORD
+skm_403035:20 arg_4 struct EHRegistrationNode *
+skm_403035:24 arg_8 struct _CONTEXT *
+skm_403035:28 arg_C void *
+skm_403070:c  arg_0 void *
+skm_403070:10 arg_4 const void *
+skm_403070:14 arg_8 size_t
+skm_4035f0:c  arg_0 void *
+skm_4035f0:10 arg_4 const void *
+skm_4035f0:14 arg_8 size_t
+skm_403b64:10 ms_exc CPPEH_RECORD
+skm_403b64:30 arg_0
+skm_403bf9:8  arg_0 void *const
+skm_403bf9:c  arg_4 void *const
+skm_403c06:8  arg_0
+skm_403c2c:c  arg_0
+skm_403c2c:10 arg_4
+skm_403c51:8  arg_0
+skm_403c96:c  arg_0
+skm_403c96:10 arg_4
+skm_403cf9:c  arg_0
+skm_403d18:c  dwExceptionCode DWORD
+skm_403d18:10 dwExceptionFlags DWORD
+skm_403d18:1c nNumberOfArguments DWORD
+skm_403d18:20 Arguments ULONG_PTR
+skm_403d18:24 var_8
+skm_403d18:28 var_4
+skm_403d18:34 arg_0
+skm_403d18:38 arg_4
+skm_403d90:10 arg_0
+skm_403d90:14 arg_4
+skm_403dd0:c  var_1C
+skm_403dd0:10 var_18
+skm_403dd0:14 var_14
+skm_403dd0:18 var_10
+skm_403dd0:1c var_C
+skm_403dd0:20 var_8
+skm_403dd0:30 ExceptionRecord PEXCEPTION_RECORD
+skm_403dd0:34 TargetFrame PVOID
+skm_403dd0:38 arg_8 int
+skm_403f75:8  arg_0
+skm_403f75:c  arg_4
+skm_403fc0:4  arg_0 void *
+skm_403fc0:8  arg_4 int
+skm_403fc0:c  arg_8 size_t
+skm_40411a:8  lpMem LPVOID
+skm_404240:4  var_4
+skm_404240:10 arg_0
+skm_404240:14 arg_4
+skm_404240:18 arg_8
+skm_40428c:c  arg_0 struct std::exception *
+skm_4042bf:18 var_40
+skm_4042bf:1c var_3C
+skm_4042bf:20 var_38
+skm_4042bf:24 var_34
+skm_4042bf:28 var_30
+skm_4042bf:2c var_2C
+skm_4042bf:30 var_28
+skm_4042bf:34 var_24
+skm_4042bf:38 var_20
+skm_4042bf:3c var_1C
+skm_4042bf:40 ms_exc CPPEH_RECORD
+skm_4042bf:60 arg_0 struct EHExceptionRecord *
+skm_4042bf:64 arg_4 struct EHRegistrationNode *
+skm_4042bf:68 arg_8 struct _CONTEXT *
+skm_4042bf:6c arg_C struct _s_FuncInfo *
+skm_4042bf:70 arg_10 void *
+skm_4042bf:74 arg_14 int
+skm_4042bf:78 arg_18 unsigned int
+skm_40447b:1c var_4
+skm_40447b:28 arg_0 const struct _s_ESTypeList *
+skm_40447b:2c arg_4
+skm_4044b5:14 ExceptionRecord PEXCEPTION_RECORD
+skm_4044b5:18 arg_4 struct EHRegistrationNode *
+skm_4044b5:1c arg_8 struct _CONTEXT *
+skm_4044b5:20 arg_C void *
+skm_4044b5:24 arg_10 struct _s_FuncInfo *
+skm_4044b5:28 arg_14 const struct _s_HandlerType *
+skm_4044b5:2c arg_18 const struct _s_CatchableType *
+skm_4044b5:30 arg_1C const struct _s_TryBlockMapEntry *
+skm_4044b5:34 arg_20 int
+skm_4044b5:38 TargetFrame PVOID
+skm_40452e:8  arg_0 struct _EXCEPTION_POINTERS *
+skm_404578:18 var_34 struct _s_TryBlockMapEntry *
+skm_404578:1c var_30
+skm_404578:20 var_2C
+skm_404578:24 var_28 unsigned int
+skm_404578:28 var_24 unsigned __int8[4]
+skm_404578:2c var_20
+skm_404578:30 var_1C
+skm_404578:34 var_18 struct _s_ESTypeList *
+skm_404578:38 var_14 unsigned int
+skm_404578:3c var_10 struct _s_HandlerType *
+skm_404578:40 var_C
+skm_404578:44 var_8 struct _CONTEXT *
+skm_404578:54 ExceptionRecord PEXCEPTION_RECORD
+skm_404578:58 arg_4 struct EHRegistrationNode *
+skm_404578:5c arg_8 struct _CONTEXT *
+skm_404578:60 arg_C void *
+skm_404578:64 arg_10 struct _s_FuncInfo *
+skm_404578:6c arg_18 int
+skm_404578:70 TargetFrame PVOID
+skm_4048d9:4  var_8 unsigned int
+skm_4048d9:8  var_4 unsigned int
+skm_4048d9:14 ExceptionRecord PEXCEPTION_RECORD
+skm_4048d9:18 arg_4 struct EHRegistrationNode *
+skm_4048d9:1c arg_8 struct _CONTEXT *
+skm_4048d9:20 arg_C void *
+skm_4048d9:24 arg_10 struct _s_FuncInfo *
+skm_4048d9:28 arg_14 int
+skm_4048d9:2c arg_18 int
+skm_4048d9:30 TargetFrame PVOID
+skm_4049f4:c  var_18
+skm_4049f4:10 var_14
+skm_4049f4:14 var_10
+skm_4049f4:18 var_C
+skm_4049f4:1c var_8
+skm_4049f4:20 var_4
+skm_4049f4:2c arg_0 struct EHExceptionRecord *
+skm_4049f4:30 arg_4 const struct _s_ESTypeList *
+skm_404a90:14 arg_0 const struct _s_ESTypeList *
+skm_404acf:8  arg_0 void *const
+skm_404acf:c  arg_4 void *const
+skm_404acf:10 arg_8 void *const
+skm_404adf:8  arg_0 void *const
+skm_404adf:c  arg_4 void *const
+skm_404adf:10 arg_8 void *const
+skm_404adf:14 arg_C int
+skm_404af2:10 ms_exc CPPEH_RECORD
+skm_404af2:30 arg_0 int
+skm_404af2:34 arg_4 void *
+skm_404af2:38 arg_8 int
+skm_404af2:3c arg_C int
+skm_404b81:10 var_20
+skm_404b81:14 var_1C
+skm_404b81:18 ms_exc CPPEH_RECORD
+skm_404b81:38 arg_0 int
+skm_404b81:3c arg_4 void *
+skm_404b81:40 arg_8 int
+skm_404b81:44 arg_C int
+skm_404cb4:10 var_20
+skm_404cb4:14 var_1C
+skm_404cb4:18 ms_exc CPPEH_RECORD
+skm_404cb4:38 arg_0
+skm_404cb4:40 arg_8
+skm_404cb4:44 arg_C
+skm_404d81:14 ExceptionRecord PEXCEPTION_RECORD
+skm_404d81:18 arg_4 struct EHRegistrationNode *
+skm_404d81:1c arg_8 struct _CONTEXT *
+skm_404d81:20 arg_C void *
+skm_404d81:24 arg_10 struct _s_FuncInfo *
+skm_404d81:28 arg_14 int
+skm_404d81:2c TargetFrame PVOID
+skm_404e7d:14 arg_0
+skm_404e7d:18 arg_4
+skm_404e7d:1c arg_8
+skm_404f0b:8  arg_0
+skm_404f3b:8  arg_0
+skm_404f70:0  var_20
+skm_404f70:24 arg_0
+skm_404f70:28 arg_4
+skm_404f70:2c arg_8
+skm_405000:4  arg_0
+skm_405000:8  arg_4
+skm_405000:10 arg_C
+skm_405048:8  arg_0
+skm_4050c0:8  arg_0
+skm_4050c0:c  arg_4
+skm_405142:c  var_4
+skm_405142:18 arg_0
+skm_405142:1c arg_4
+skm_405208:10 arg_0
+skm_405208:14 lpProcName LPCSTR
+skm_405208:18 arg_8
+skm_405208:1c arg_C
+skm_40528f:c  arg_0
+skm_4052c9:c  dwTlsIndex DWORD
+skm_405303:c  dwTlsIndex DWORD
+skm_40533d:c  dwTlsIndex DWORD
+skm_40533d:10 lpTlsValue LPVOID
+skm_40537a:c  lpCriticalSection LPCRITICAL_SECTION
+skm_40537a:10 dwSpinCount DWORD
+skm_40537a:14 arg_8 int
+skm_405450:18 TargetFrame PVOID
+skm_405471:4  arg_0
+skm_405471:8  arg_4
+skm_405471:10 arg_C
+skm_405471:14 arg_10
+skm_4054b6:0  var_20
+skm_4054b6:8  var_18
+skm_4054b6:24 arg_0
+skm_4054b6:28 arg_4
+skm_40556c:10 arg_0
+skm_4055aa:8  arg_0 unsigned int
+skm_4055bd:14 ms_exc CPPEH_RECORD
+skm_4055bd:34 uExitCode UINT
+skm_4055bd:38 arg_4
+skm_4055bd:3c arg_8
+skm_4056d6:8  uExitCode UINT
+skm_405717:0  phModule HMODULE
+skm_405717:4  var_4
+skm_405717:10 arg_0 unsigned int
+skm_405781:8  arg_0
+skm_4057ae:8  arg_0 int
+skm_4057c4:8  arg_0
+skm_4057fc:8  arg_0 int
+skm_405812:4  var_484
+skm_405812:14 var_474
+skm_405812:18 var_470
+skm_405812:1c var_46C
+skm_405812:20 var_468
+skm_405812:28 var_460
+skm_405812:484 var_4
+skm_405812:490 arg_0 int
+skm_405812:494 arg_4 int
+skm_405812:498 arg_8 int
+skm_405812:49c arg_C int
+skm_405812:4a0 arg_10 int
+skm_405812:4a4 arg_14 struct __crt_locale_pointers *
+skm_405812:4a8 arg_18 int
+skm_405997:8  arg_0 int
+skm_405997:c  arg_4 int
+skm_405997:10 arg_8 int
+skm_405997:14 arg_C int
+skm_405997:18 arg_10 int
+skm_405997:1c arg_14 struct __crt_locale_pointers *
+skm_405997:20 arg_18 int
+skm_405a29:8  var_4
+skm_405a29:14 arg_0
+skm_405aaf:8  arg_0
+skm_405aaf:10 arg_8
+skm_405aaf:14 arg_C
+skm_405b1c:14 arg_0
+skm_405b1c:18 arg_4
+skm_405b91:10 var_4
+skm_405b91:1c arg_0
+skm_405b91:20 arg_4
+skm_405b91:24 arg_8
+skm_405c19:c  arg_0
+skm_405c19:14 arg_8
+skm_405c19:18 arg_C
+skm_405c4a:0  var_4
+skm_405c96:c  arg_0
+skm_405c96:10 arg_4
+skm_405c96:14 arg_8
+skm_405c96:18 arg_C
+skm_405c96:1c arg_10
+skm_405c96:20 arg_14
+skm_405cd2:c  arg_0
+skm_405cd2:10 arg_4
+skm_405cd2:14 arg_8
+skm_405cd2:18 arg_C
+skm_405cd2:1c arg_10
+skm_405cd2:20 arg_14
+skm_405d07:c  arg_0 struct __crt_locale_pointers *const
+skm_405da4:c  arg_0
+skm_405dc8:c  this __crt_stdio_output *
+skm_405dc8:10 arg_4 char *
+skm_405e1f:8  arg_0
+skm_405e1f:c  arg_4
+skm_405e56:c  this __crt_stdio_output *
+skm_405e56:10 arg_4 char *
+skm_405eb2:c  var_4 wchar_t *
+skm_405eb2:18 arg_0
+skm_40625c:8  var_C
+skm_40625c:c  var_8
+skm_40625c:10 var_4
+skm_4064e5:8  arg_0
+skm_4065a4:8  var_8 double
+skm_406716:c  SrcCh
+skm_4067ae:10 arg_0
+skm_4067ae:14 arg_4
+skm_406a17:10 arg_0
+skm_406a94:8  arg_0
+skm_406a94:c  arg_4
+skm_406ad9:c  var_8
+skm_406ad9:10 DstCh wchar_t[2]
+skm_406b64:8  var_8
+skm_406b64:c  var_4
+skm_406b64:18 arg_0 void *
+skm_406b64:1c arg_4 int
+skm_406b64:20 arg_8 int
+skm_406b64:24 arg_C int
+skm_406bfe:8  arg_0 int
+skm_406bfe:c  arg_4 int
+skm_406bfe:10 arg_8 int
+skm_406bfe:14 arg_C int
+skm_406bfe:18 arg_10 int
+skm_406bfe:1c arg_14 struct __crt_locale_pointers *
+skm_406bfe:20 arg_18 int
+skm_406c22:8  Str1 wchar_t *
+skm_406c22:c  Str2 wchar_t *
+skm_406cb7:8  var_10
+skm_406cb7:c  var_C struct localeinfo_struct
+skm_406cb7:20 Str1 const wchar_t *
+skm_406cb7:24 Str2 const wchar_t *
+skm_406cb7:28 Locale _locale_t
+skm_406d97:c  Dst wchar_t *
+skm_406d97:10 SizeInWords rsize_t
+skm_406d97:14 Src const wchar_t *
+skm_406dfb:8  arg_0 const wchar_t *
+skm_406e16:4  ExceptionInfo struct _EXCEPTION_POINTERS
+skm_406e16:c  var_320
+skm_406e16:10 var_31C
+skm_406e16:18 var_314
+skm_406e16:5c var_2D0
+skm_406e16:e8 var_244
+skm_406e16:ec var_240
+skm_406e16:f0 var_23C
+skm_406e16:f4 var_238
+skm_406e16:f8 var_234
+skm_406e16:fc var_230
+skm_406e16:100 var_22C
+skm_406e16:104 var_228
+skm_406e16:108 var_224
+skm_406e16:10c var_220
+skm_406e16:110 var_21C
+skm_406e16:114 var_218
+skm_406e16:118 var_214
+skm_406e16:11c var_210
+skm_406e16:120 var_20C
+skm_406e16:124 var_208
+skm_406e16:328 var_4
+skm_406e16:334 arg_0
+skm_406e16:338 arg_4
+skm_406e16:33c arg_8
+skm_406f51:8  arg_0
+skm_406f65:4  var_4
+skm_406f65:10 arg_0
+skm_406f65:14 arg_4
+skm_406f65:18 arg_8
+skm_406f65:1c arg_C
+skm_406f65:20 arg_10
+skm_407040:10 arg_0
+skm_407040:14 arg_4
+skm_407040:18 arg_8
+skm_407040:1c arg_C
+skm_40710d:8  Dst wchar_t *
+skm_40710d:c  SizeInWords rsize_t
+skm_40710d:10 Src const wchar_t *
+skm_40710d:14 MaxCount rsize_t
+skm_407118:8  arg_0
+skm_40712c:4  var_4
+skm_40712c:10 arg_0
+skm_407170:10 var_1C
+skm_407170:14 ms_exc CPPEH_RECORD
+skm_4071cd:4  var_8
+skm_4071cd:8  var_4
+skm_4071cd:14 arg_0
+skm_4071cd:18 arg_4
+skm_407346:8  arg_0
+skm_407355:c  arg_0
+skm_40739f:8  arg_0
+skm_4073b3:4  var_4
+skm_4073b3:10 arg_0
+skm_4073fc:8  arg_0
+skm_407411:4  var_C
+skm_407411:8  lpMem LPVOID
+skm_407411:c  var_4
+skm_407411:18 arg_0
+skm_407530:c  var_10
+skm_407530:10 var_C
+skm_407530:14 var_8
+skm_407530:24 arg_0
+skm_407530:28 arg_4
+skm_407530:2c arg_8
+skm_407530:30 arg_C
+skm_407530:34 arg_10
+skm_4076b6:c  arg_0
+skm_4076b6:10 arg_4
+skm_4076b6:14 arg_8
+skm_40776a:c  SizeInWords rsize_t
+skm_40776a:10 var_4
+skm_40776a:1c Src wchar_t *
+skm_407864:c  lpMem LPVOID
+skm_407893:8  var_4
+skm_407893:14 arg_0
+skm_4078d3:8  arg_0
+skm_4078ee:8  arg_0
+skm_40798b:c  var_8
+skm_40798b:10 var_4
+skm_40798b:1c arg_0
+skm_40798b:20 arg_4
+skm_4079e7:8  var_4
+skm_4079e7:14 arg_0
+skm_4079e7:18 arg_4
+skm_407a2c:8  Mode int
+skm_407a74:10 ms_exc CPPEH_RECORD
+skm_407ac6:c  arg_0
+skm_407b2e:8  arg_0
+skm_407b63:4  lpMem LPVOID
+skm_407b68:10 var_1C
+skm_407b68:14 ms_exc CPPEH_RECORD
+skm_407b68:34 arg_0
+skm_407b68:38 arg_4
+skm_407b68:3c arg_8
+skm_407bb9:10 var_1C
+skm_407bb9:14 ms_exc CPPEH_RECORD
+skm_407bb9:34 arg_0
+skm_407bb9:38 arg_4
+skm_407bb9:3c arg_8
+skm_407c0a:0  var_C
+skm_407c0a:4  var_8
+skm_407c0a:14 arg_0
+skm_407c0a:18 arg_4
+skm_407c32:0  var_C
+skm_407c32:4  var_8
+skm_407c32:14 arg_0
+skm_407c32:18 arg_4
+skm_407c5a:8  arg_0
+skm_407c79:4  var_18
+skm_407c79:8  var_14
+skm_407c79:c  var_10
+skm_407c79:10 var_C
+skm_407c79:14 var_8
+skm_407c79:18 var_4
+skm_407d99:4  var_C
+skm_407d99:8  var_8
+skm_407d99:c  var_4
+skm_407eda:8  arg_0
+skm_407ef0:0  var_4
+skm_407f0d:c  arg_0
+skm_407f4a:0  var_8
+skm_407f4a:4  var_4
+skm_407f80:0  var_4
+skm_408086:c  CurrentState unsigned int *
+skm_408086:10 NewValue unsigned int
+skm_408086:14 Mask unsigned int
+skm_4080e5:14 ms_exc CPPEH_RECORD
+skm_408121:c  Dst char *
+skm_408121:10 SizeInBytes rsize_t
+skm_408121:14 Src const char *
+skm_40817b:8  lpMem LPVOID
+skm_4081b5:c  dwBytes SIZE_T
+skm_408246:c  arg_0
+skm_408246:10 arg_4
+skm_4082a3:8  arg_0 const wchar_t *
+skm_4082a3:c  arg_4 const wchar_t *
+skm_4082a3:10 arg_8 size_t
+skm_4082dd:8  arg_0
+skm_4082dd:c  arg_4
+skm_408310:8  var_1C
+skm_408310:18 var_C
+skm_408310:1c var_8
+skm_408310:20 var_4
+skm_408310:2c arg_0 struct __crt_locale_pointers *
+skm_408310:30 arg_4 int
+skm_408310:34 arg_8 int
+skm_408310:38 arg_C int
+skm_4089f5:8  arg_0
+skm_408a21:8  arg_0
+skm_408a21:c  arg_4
+skm_408a21:10 arg_8
+skm_408a4b:8  C int
+skm_408a4b:c  Type int
+skm_408a4b:10 Locale _locale_t
+skm_408abf:8  arg_0
+skm_408b07:8  arg_0
+skm_408b1e:14 arg_0
+skm_408b1e:18 lpProcName LPCSTR
+skm_408b1e:1c arg_8
+skm_408b1e:20 arg_C
+skm_408bba:c  arg_0
+skm_408c35:4  var_4
+skm_408c35:10 arg_0
+skm_408c8b:4  var_4
+skm_408c8b:10 dwTlsIndex DWORD
+skm_408ce1:4  var_4
+skm_408ce1:10 dwTlsIndex DWORD
+skm_408d37:4  var_4
+skm_408d37:10 dwTlsIndex DWORD
+skm_408d37:14 lpTlsValue LPVOID
+skm_408d90:4  var_4
+skm_408d90:10 lpCriticalSection LPCRITICAL_SECTION
+skm_408d90:14 dwSpinCount DWORD
+skm_408d90:18 arg_8 int
+skm_408df2:4  var_4
+skm_408df2:10 arg_0 wchar_t *
+skm_408df2:14 dwMapFlags DWORD
+skm_408df2:18 lpSrcStr LPCWSTR
+skm_408df2:1c cchSrc int
+skm_408df2:20 lpDestStr LPWSTR
+skm_408df2:24 cchDest int
+skm_408df2:28 arg_18 int
+skm_408df2:2c arg_1C int
+skm_408df2:30 arg_20 int
+skm_408e7a:4  var_4
+skm_408e7a:10 arg_0 wchar_t *
+skm_408e7a:14 arg_4 int
+skm_408efc:0  var_8
+skm_408efc:4  var_4
+skm_408fb9:0  var_10
+skm_408fb9:4  var_C struct localeinfo_struct
+skm_408fb9:18 C int
+skm_408fb9:1c Locale _locale_t
+skm_408ff1:8  C int
+skm_40901e:4  var_1C
+skm_40901e:8  Locale struct localeinfo_struct
+skm_40901e:14 var_C
+skm_40901e:18 DestStr WCHAR
+skm_40901e:1c MultiByteStr CHAR[2]
+skm_40901e:28 C int
+skm_40901e:2c dwMapFlags DWORD
+skm_40901e:30 arg_8 struct __crt_locale_pointers *
+skm_409168:8  C int
+skm_409168:c  Locale _locale_t
+skm_409185:8  C int
+skm_409185:c  Locale _locale_t
+skm_40919f:8  C int
+skm_4091cf:8  arg_0
+skm_409212:c  arg_0
+skm_40925b:8  arg_0
+skm_40925b:c  arg_4
+skm_40925b:10 arg_8
+skm_409276:8  arg_0 const wchar_t *
+skm_409276:c  arg_4 wchar_t **
+skm_409276:10 arg_8 int
+skm_4092a2:8  var_10
+skm_4092a2:c  var_C struct localeinfo_struct
+skm_4092a2:20 lpWideCharStr LPWSTR
+skm_4092a2:24 lpMultiByteStr LPCSTR
+skm_4092a2:28 SrcSizeInBytes size_t
+skm_4092a2:2c Locale _locale_t
+skm_40939c:8  DstCh wchar_t *
+skm_40939c:c  SrcCh char *
+skm_40939c:10 SrcSizeInBytes size_t
+skm_4093b6:8  var_4
+skm_4093b6:14 Src const wchar_t *
+skm_4093b6:18 MaxCount size_t
+skm_40956d:10 ms_exc CPPEH_RECORD
+skm_40956d:30 arg_0
+skm_40956d:34 arg_4
+skm_40956d:38 arg_8
+skm_4095bd:10 ms_exc CPPEH_RECORD
+skm_4095bd:30 arg_0
+skm_4095bd:34 arg_4
+skm_4095bd:38 arg_8
+skm_40961e:10 ms_exc CPPEH_RECORD
+skm_40961e:30 arg_0
+skm_40961e:34 arg_4
+skm_40961e:38 arg_8
+skm_409669:10 ms_exc CPPEH_RECORD
+skm_409669:30 arg_0
+skm_409669:34 arg_4
+skm_409669:38 arg_8
+skm_4096b1:0  var_C
+skm_4096b1:4  var_8
+skm_4096b1:14 arg_0
+skm_4096b1:18 arg_4
+skm_4096d9:0  var_C
+skm_4096d9:4  var_8
+skm_4096d9:14 arg_0
+skm_4096d9:18 arg_4
+skm_409701:0  var_C
+skm_409701:4  var_8
+skm_409701:14 arg_0
+skm_409701:18 arg_4
+skm_409729:0  var_C
+skm_409729:4  var_8
+skm_409729:14 arg_0
+skm_409729:18 arg_4
+skm_409751:0  var_8
+skm_409751:4  var_4
+skm_409751:10 arg_0 struct __acrt_ptd *const
+skm_409751:14 arg_4 struct __crt_locale_data **const
+skm_4097ca:8  lpMem LPVOID
+skm_4097eb:0  var_4
+skm_4097eb:c  arg_0 struct __acrt_ptd *const
+skm_409894:c  arg_0 struct __acrt_ptd *const
+skm_409894:10 arg_4 struct __crt_locale_data *const
+skm_409a2e:c  arg_0
+skm_409a2e:10 arg_4
+skm_409a5b:c  arg_0
+skm_409a5b:10 arg_4
+skm_409a88:14 arg_0
+skm_409af4:8  arg_0 const double *
+skm_409b12:c  var_30
+skm_409b12:10 var_2C
+skm_409b12:1c var_20
+skm_409b12:20 var_1C
+skm_409b12:24 var_18
+skm_409b12:2c var_10
+skm_409b12:30 var_C
+skm_409b12:34 var_8
+skm_409b12:38 var_4
+skm_409b12:44 arg_0 double *
+skm_409b12:48 arg_4 char *
+skm_409b12:4c arg_8 unsigned int
+skm_409b12:50 arg_C char *
+skm_409b12:54 arg_10 unsigned int
+skm_409b12:58 arg_14 size_t
+skm_409b12:60 arg_1C unsigned int
+skm_409b12:64 arg_20 struct __crt_locale_pointers *
+skm_409e15:8  var_C int
+skm_409e15:1c arg_0 const double *const
+skm_409e15:20 arg_4 char *
+skm_409e15:24 arg_8 unsigned int
+skm_409e15:28 arg_C char *const
+skm_409e15:2c arg_10 unsigned int
+skm_409e15:30 arg_14 int
+skm_409e15:38 arg_1C unsigned int
+skm_409e15:3c arg_20 struct __crt_locale_pointers *
+skm_409eb0:8  var_10
+skm_409eb0:c  var_C
+skm_409eb0:20 arg_0 char *
+skm_409eb0:24 arg_4 unsigned int
+skm_409eb0:28 arg_8 int
+skm_409eb0:30 arg_10 unsigned int
+skm_409eb0:34 arg_14 struct _strflt *const
+skm_409eb0:3c arg_1C struct __crt_locale_pointers *
+skm_409ffb:8  var_C int
+skm_409ffb:c  var_8
+skm_409ffb:1c arg_0 const double *const
+skm_409ffb:20 arg_4 char *
+skm_409ffb:24 arg_8 unsigned int
+skm_409ffb:28 arg_C char *const
+skm_409ffb:2c arg_10 unsigned int
+skm_409ffb:30 arg_14 size_t
+skm_409ffb:34 arg_18 struct __crt_locale_pointers *
+skm_40a088:c  var_10
+skm_40a088:10 var_C
+skm_40a088:24 arg_0 char *
+skm_40a088:28 arg_4 unsigned int
+skm_40a088:2c arg_8 size_t
+skm_40a088:30 arg_C struct _strflt *const
+skm_40a088:38 arg_14 struct __crt_locale_pointers *
+skm_40a15f:c  var_10 int
+skm_40a15f:10 var_C
+skm_40a15f:18 var_4
+skm_40a15f:24 arg_0 const double *const
+skm_40a15f:28 arg_4 char *
+skm_40a15f:2c arg_8 unsigned int
+skm_40a15f:30 arg_C char *const
+skm_40a15f:34 arg_10 unsigned int
+skm_40a15f:38 arg_14 size_t
+skm_40a15f:40 arg_1C unsigned int
+skm_40a15f:44 arg_20 struct __crt_locale_pointers *
+skm_40a227:4  var_48
+skm_40a227:8  Src char *
+skm_40a227:c  var_40
+skm_40a227:10 var_3C
+skm_40a227:14 var_38
+skm_40a227:18 var_34
+skm_40a227:1c var_30
+skm_40a227:20 var_2C
+skm_40a227:24 var_28
+skm_40a227:28 var_24
+skm_40a227:2c var_20
+skm_40a227:30 var_1C
+skm_40a227:34 var_18
+skm_40a227:38 var_14
+skm_40a227:3c var_10
+skm_40a227:40 var_C
+skm_40a227:44 var_8
+skm_40a227:48 var_4
+skm_40a227:54 arg_0
+skm_40a227:5c Dst char *
+skm_40a227:60 SizeInBytes rsize_t
+skm_40a31f:10 arg_8 char *const
+skm_40a31f:14 arg_C int
+skm_40a353:8  var_8
+skm_40a353:c  var_4 bool[4]
+skm_40a353:18 arg_0 double *
+skm_40a353:1c arg_4 char *
+skm_40a353:20 arg_8 unsigned int
+skm_40a353:24 arg_C char *
+skm_40a353:28 arg_10 unsigned int
+skm_40a353:2c arg_14 int
+skm_40a353:30 arg_18 size_t
+skm_40a353:34 arg_1C int
+skm_40a353:3c arg_24 struct __crt_locale_pointers *
+skm_40a49d:8  arg_0 FILE *
+skm_40a5d7:8  arg_0
+skm_40a5eb:8  arg_0
+skm_40a614:0  StartupInfo struct _STARTUPINFOW
+skm_40a614:44 var_4
+skm_40a780:14 ms_exc CPPEH_RECORD
+skm_40a802:0  var_18
+skm_40a802:4  var_14
+skm_40a802:10 var_8
+skm_40a802:14 DestStr WCHAR
+skm_40a802:20 C wint_t
+skm_40a802:24 Locale _locale_t
+skm_40a8cb:8  arg_0 const void *
+skm_40a8cb:c  arg_4 const void *
+skm_40a8e3:4  var_30
+skm_40a8e3:8  var_2C
+skm_40a8e3:c  var_28 int
+skm_40a8e3:10 var_24
+skm_40a8e3:14 var_20
+skm_40a8e3:18 var_1C
+skm_40a8e3:1c var_18
+skm_40a8e3:20 var_14
+skm_40a8e3:24 var_10
+skm_40a8e3:28 var_C wchar_t[2]
+skm_40a8e3:2c var_8
+skm_40a8e3:30 var_4
+skm_40a8e3:3c arg_0
+skm_40a8e3:40 arg_4
+skm_40aab0:8  var_4 rsize_t
+skm_40aab0:14 arg_0 wchar_t *
+skm_40aab0:18 Src wchar_t *
+skm_40aab0:1c MaxCount rsize_t
+skm_40aab0:20 arg_C int
+skm_40ab4e:c  var_260
+skm_40ab4e:10 MaxCount rsize_t
+skm_40ab4e:14 var_258 int
+skm_40ab4e:18 FindFileData
+skm_40ab4e:44 var_228 wchar_t
+skm_40ab4e:46 var_226
+skm_40ab4e:48 var_224
+skm_40ab4e:268 var_4
+skm_40ab4e:274 lpFileName LPCWSTR
+skm_40ab4e:278 arg_4 int
+skm_40ab4e:27c arg_8 int
+skm_40ad29:10 lpMem LPVOID
+skm_40adf0:10 ms_exc CPPEH_RECORD
+skm_40adf0:30 arg_0
+skm_40adf0:34 arg_4
+skm_40adf0:38 arg_8
+skm_40ae33:0  var_C
+skm_40ae33:4  var_8
+skm_40ae33:14 arg_0
+skm_40ae33:18 arg_4
+skm_40af1f:8  arg_0 int
+skm_40af5d:0  var_10
+skm_40af5d:4  var_C
+skm_40af5d:18 arg_0 int
+skm_40afd0:14 arg_0 struct __crt_multibyte_data *
+skm_40b035:c  var_720
+skm_40b035:10 var_71C
+skm_40b035:14 CPInfo struct _cpinfo
+skm_40b035:28 CharType WORD
+skm_40b035:428 var_304 WCHAR
+skm_40b035:528 DestStr WCHAR
+skm_40b035:628 MultiByteStr CHAR
+skm_40b035:728 var_4
+skm_40b035:734 arg_0 struct __crt_multibyte_data *
+skm_40b1c9:0  var_C int
+skm_40b1c9:8  var_4
+skm_40b1c9:14 arg_0 int
+skm_40b2e8:10 var_1C
+skm_40b2e8:14 ms_exc CPPEH_RECORD
+skm_40b38a:8  var_20
+skm_40b38a:c  var_1C
+skm_40b38a:10 CPInfo struct _cpinfo
+skm_40b38a:24 var_4
+skm_40b38a:30 arg_0 int
+skm_40b38a:34 arg_4 struct __crt_multibyte_data *
+skm_40b597:c  arg_0 const wchar_t *const
+skm_40b61e:8  var_8
+skm_40b698:c  lpCriticalSection LPCRITICAL_SECTION
+skm_40b6cd:14 var_20
+skm_40b6cd:18 var_1C
+skm_40b6cd:1c ms_exc CPPEH_RECORD
+skm_40b6cd:3c arg_0
+skm_40b765:8  arg_0
+skm_40b788:8  arg_0
+skm_40b7ab:14 arg_0
+skm_40b83c:8  arg_0 int
+skm_40b8a6:0  var_4
+skm_40b8cc:c  arg_0
+skm_40b9ca:c  arg_0
+skm_40ba33:14 arg_0 const void **const
+skm_40ba33:18 arg_4 unsigned int
+skm_40ba6f:c  arg_0 void **
+skm_40bb53:14 arg_0 const wchar_t *
+skm_40bb53:18 arg_4 const wchar_t *
+skm_40bb98:c  var_18
+skm_40bb98:10 var_14
+skm_40bb98:1c cchWideChar int
+skm_40bb98:20 var_4
+skm_40bb98:2c arg_0 struct __crt_locale_pointers *
+skm_40bb98:30 dwInfoType DWORD
+skm_40bb98:34 lpMultiByteStr LPCSTR
+skm_40bb98:38 cbMultiByte int
+skm_40bb98:3c lpCharType LPWORD
+skm_40bb98:40 CodePage UINT
+skm_40bb98:44 arg_18 int
+skm_40bcb5:8  arg_0
+skm_40bcd5:8  arg_0
+skm_40bd52:c  var_4
+skm_40bd52:18 lpMem LPVOID
+skm_40be9c:8  arg_0
+skm_40bec5:c  lpMem LPVOID
+skm_40bef5:8  arg_0
+skm_40bf1e:8  arg_0
+skm_40bf9f:10 var_1C
+skm_40bf9f:14 ms_exc CPPEH_RECORD
+skm_40c016:10 arg_0
+skm_40c016:14 arg_4
+skm_40c066:8  lpMem void *
+skm_40c066:c  arg_4 int
+skm_40c066:10 arg_8 int
+skm_40c0f9:4  var_4
+skm_40c0f9:10 arg_0
+skm_40c0f9:14 arg_4
+skm_40c17c:4  var_4
+skm_40c17c:10 arg_0
+skm_40c17c:14 arg_4
+skm_40c1c9:10 var_1C
+skm_40c1c9:14 ms_exc CPPEH_RECORD
+skm_40c1c9:34 arg_0
+skm_40c1c9:3c arg_8
+skm_40c223:0  var_C
+skm_40c223:4  var_8
+skm_40c223:14 arg_0
+skm_40c223:18 arg_4
+skm_40c24b:8  arg_0 int
+skm_40c28d:8  arg_0 int
+skm_40c28d:c  arg_4 struct __crt_signal_action_t *const
+skm_40c2cc:8  arg_0
+skm_40c310:10 var_3C
+skm_40c310:14 var_38
+skm_40c310:18 var_34
+skm_40c310:1c var_30
+skm_40c310:20 var_2C
+skm_40c310:24 var_28
+skm_40c310:28 var_24
+skm_40c310:34 ms_exc CPPEH_RECORD
+skm_40c310:54 arg_0 int
+skm_40c518:8  arg_0
+skm_40c5c3:0  var_C
+skm_40c5c3:4  var_8
+skm_40c5c3:8  var_4
+skm_40c6a1:0  var_10
+skm_40c6a1:4  var_C
+skm_40c6a1:8  var_8
+skm_40c6a1:c  var_4
+skm_40c6a1:18 arg_0 unsigned int
+skm_40c6a1:1c arg_4 unsigned int
+skm_40c9a3:8  arg_0
+skm_40ca3c:0  SrcStr WCHAR
+skm_40ca3c:4  CharType WORD
+skm_40ca3c:10 arg_0 wint_t
+skm_40ca3c:14 arg_4 wctype_t
+skm_40ca9b:4  var_24
+skm_40ca9b:8  var_20
+skm_40ca9b:c  var_1C struct localeinfo_struct
+skm_40ca9b:18 MultiByteStr CHAR
+skm_40ca9b:1c CharType WORD[2]
+skm_40ca9b:20 var_8
+skm_40ca9b:24 var_4
+skm_40ca9b:30 C int
+skm_40ca9b:34 Type int
+skm_40ca9b:38 Locale _locale_t
+skm_40cb6d:c  var_10
+skm_40cb6d:10 var_C
+skm_40cb6d:14 var_8
+skm_40cb6d:18 var_4
+skm_40cb6d:24 arg_0 const wchar_t *
+skm_40cc29:8  arg_0 wchar_t *
+skm_40cc55:0  var_10
+skm_40cc55:4  var_C
+skm_40cc55:18 C int
+skm_40cc55:1c Locale _locale_t
+skm_40cc8e:c  cchWideChar int
+skm_40cc8e:10 var_4
+skm_40cc8e:1c arg_0 struct __crt_locale_pointers *
+skm_40cc8e:20 arg_4 wchar_t *
+skm_40cc8e:24 dwMapFlags DWORD
+skm_40cc8e:28 lpMultiByteStr LPCSTR
+skm_40cc8e:2c cbMultiByte int
+skm_40cc8e:30 lpDestStr LPWSTR
+skm_40cc8e:34 cchDest int
+skm_40cc8e:38 CodePage UINT
+skm_40cc8e:3c arg_20 int
+skm_40ceab:0  var_10
+skm_40ceab:18 arg_0 struct __crt_locale_pointers *
+skm_40ceab:1c arg_4 wchar_t *
+skm_40ceab:20 dwMapFlags DWORD
+skm_40ceab:24 lpMultiByteStr LPCSTR
+skm_40ceab:28 cbMultiByte int
+skm_40ceab:2c lpDestStr LPWSTR
+skm_40ceab:30 cchDest int
+skm_40ceab:34 CodePage UINT
+skm_40ceab:38 arg_20 int
+skm_40cef6:c  arg_0 void *
+skm_40cef6:10 arg_4 int
+skm_40cef6:14 arg_8 int
+skm_40cef6:18 arg_C int
+skm_40cfe0:4  var_21C
+skm_40cfe0:8  Src
+skm_40cfe0:1d4 var_4C
+skm_40cfe0:1d8 var_48
+skm_40cfe0:1dc var_44
+skm_40cfe0:1e0 var_40
+skm_40cfe0:1e4 var_3C
+skm_40cfe0:1e8 var_38
+skm_40cfe0:1ec var_34
+skm_40cfe0:1f0 var_30
+skm_40cfe0:1f8 var_28
+skm_40cfe0:1fc var_24
+skm_40cfe0:200 var_20
+skm_40cfe0:204 var_1C
+skm_40cfe0:208 var_18
+skm_40cfe0:20c var_14
+skm_40cfe0:210 var_10
+skm_40cfe0:214 var_C
+skm_40cfe0:218 var_8
+skm_40cfe0:21c var_4
+skm_40cfe0:228 this __crt_strtox *
+skm_40cfe0:22c arg_4 struct __crt_strtox::big_integer *
+skm_40d48e:0  var_978 double
+skm_40d48e:14 var_964
+skm_40d48e:1f4 var_784
+skm_40d48e:1f8 var_780
+skm_40d48e:1fc var_77C
+skm_40d48e:200 var_778
+skm_40d48e:204 var_774
+skm_40d48e:208 var_770
+skm_40d48e:20c var_76C
+skm_40d48e:210 var_768
+skm_40d48e:218 var_760
+skm_40d48e:21c var_75C
+skm_40d48e:220 var_758
+skm_40d48e:224 var_754
+skm_40d48e:228 var_750
+skm_40d48e:22c var_74C
+skm_40d48e:234 var_744
+skm_40d48e:238 var_740
+skm_40d48e:404 var_574
+skm_40d48e:408 Src
+skm_40d48e:40c var_56C
+skm_40d48e:5d4 var_3A4
+skm_40d48e:5d8 var_3A0
+skm_40d48e:7a4 var_1D4
+skm_40d48e:7a8 var_1D0
+skm_40d48e:7ac var_1CC
+skm_40d48e:974 var_4
+skm_40d48e:980 arg_0
+skm_40d48e:988 arg_8
+skm_40d48e:98c arg_C
+skm_40d48e:990 Dst char *
+skm_40d48e:994 SizeInBytes rsize_t
+skm_40e82a:c  Dst void *
+skm_40e82a:10 DstSize size_t
+skm_40e82a:14 arg_8 void *
+skm_40e82a:18 MaxCount size_t
+skm_40e8ab:10 var_20
+skm_40e8ab:14 var_1C
+skm_40e8ab:18 ms_exc CPPEH_RECORD
+skm_40e94b:c  arg_0 FILE *
+skm_40e9b1:c  File FILE *
+skm_40ea01:10 var_2C
+skm_40ea01:14 var_28
+skm_40ea01:18 var_24
+skm_40ea01:1c var_20
+skm_40ea01:20 var_1C
+skm_40ea01:24 ms_exc CPPEH_RECORD
+skm_40ea01:44 arg_0
+skm_40ead9:10 arg_0
+skm_40eb17:8  arg_0 int
+skm_40eb6d:c  arg_0 wchar_t *
+skm_40eb6d:10 dwMapFlags DWORD
+skm_40eb6d:14 Src wchar_t *
+skm_40eb6d:18 MaxCount size_t
+skm_40eb6d:1c lpDestStr LPWSTR
+skm_40eb6d:20 cchDest int
+skm_40ebb0:4  var_4
+skm_40ebb0:10 arg_0 char *
+skm_40ebb0:14 arg_4 char *
+skm_40ebb0:18 arg_8 unsigned int
+skm_40ebb0:1c arg_C int (__cdecl *)(const void *, const void *)
+skm_40ec50:c  arg_0 char *
+skm_40ec50:10 arg_4 char *
+skm_40ec50:14 arg_8 unsigned int
+skm_40ec90:8  var_11C
+skm_40ec90:c  var_118
+skm_40ec90:10 var_114
+skm_40ec90:14 var_110
+skm_40ec90:18 var_10C
+skm_40ec90:1c var_108
+skm_40ec90:20 var_104 char *
+skm_40ec90:24 var_100
+skm_40ec90:28 var_FC
+skm_40ec90:2c var_F8 char *
+skm_40ec90:30 var_F4
+skm_40ec90:a8 var_7C
+skm_40ec90:120 var_4
+skm_40ec90:12c arg_0 char *
+skm_40ec90:130 arg_4 size_t
+skm_40ec90:134 arg_8 size_t
+skm_40ec90:138 arg_C int (__cdecl *)(const void *, const void *)
+skm_40f030:0  var_24
+skm_40f030:2c arg_0 const char *
+skm_40f030:30 arg_4 const char *
+skm_40f07f:8  lpMem LPCVOID
+skm_40f0b2:c  lpMem LPVOID
+skm_40f0b2:10 dwBytes SIZE_T
+skm_40f11b:10 ms_exc CPPEH_RECORD
+skm_40f11b:30 arg_0
+skm_40f191:0  var_4
+skm_40f1a4:0  var_8
+skm_40f1a4:4  var_4
+skm_40f1a4:10 arg_0
+skm_40f1a4:14 arg_4
+skm_40f1d0:0  var_C
+skm_40f1d0:8  var_4
+skm_40f1d0:14 arg_0
+skm_40f22b:0  var_4
+skm_40f23d:8  arg_0
+skm_40f23d:c  arg_4
+skm_40f259:c  arg_0
+skm_40f276:4  var_8
+skm_40f276:8  var_4
+skm_40f276:14 arg_0
+skm_40f2bf:0  var_8
+skm_40f2bf:4  var_4
+skm_40f2bf:10 arg_0
+skm_40f310:0  var_8
+skm_40f310:4  var_4
+skm_40f310:c  arg_0 double
+skm_40f350:4  var_8
+skm_40f350:8  var_4
+skm_40f3a8:0  var_4
+skm_40f3a8:8  arg_0
+skm_40f3a8:c  arg_4
+skm_40f460:0  var_10
+skm_40f460:4  var_C
+skm_40f460:8  var_8
+skm_40f460:c  var_4
+skm_40f460:14 arg_0 double
+skm_40f57d:c  CodePage UINT
+skm_40f57d:10 var_34
+skm_40f57d:14 var_30
+skm_40f57d:18 var_2C
+skm_40f57d:1c hFile HANDLE
+skm_40f57d:20 var_24
+skm_40f57d:24 NumberOfBytesWritten DWORD
+skm_40f57d:28 Buffer
+skm_40f57d:2c WideCharStr WCHAR
+skm_40f57d:30 MultiByteStr CHAR
+skm_40f57d:40 var_4
+skm_40f57d:4c arg_0
+skm_40f57d:50 arg_4
+skm_40f57d:54 arg_8 char *
+skm_40f57d:58 arg_C
+skm_40f730:c  var_4
+skm_40f730:18 arg_0
+skm_40f730:1c arg_4
+skm_40f730:20 arg_8
+skm_40f79d:4  Mode DWORD
+skm_40f79d:10 arg_0 int
+skm_40f813:c  var_1410
+skm_40f813:10 NumberOfBytesWritten DWORD
+skm_40f813:14 var_1408
+skm_40f813:18 Buffer
+skm_40f813:1418 var_4
+skm_40f813:1424 arg_0
+skm_40f813:1428 arg_4
+skm_40f813:142c arg_8
+skm_40f813:1430 arg_C
+skm_40f8f2:c  var_1410
+skm_40f8f2:10 NumberOfBytesWritten DWORD
+skm_40f8f2:14 var_1408
+skm_40f8f2:18 Buffer
+skm_40f8f2:1418 var_4
+skm_40f8f2:1424 arg_0
+skm_40f8f2:1428 arg_4
+skm_40f8f2:142c arg_8
+skm_40f8f2:1430 arg_C
+skm_40f9e0:c  var_1418
+skm_40f9e0:10 hFile HANDLE
+skm_40f9e0:14 NumberOfBytesWritten DWORD
+skm_40f9e0:18 var_140C
+skm_40f9e0:1c MultiByteStr CHAR
+skm_40f9e0:d74 WideCharStr WCHAR
+skm_40f9e0:1420 var_4
+skm_40f9e0:142c arg_0
+skm_40f9e0:1430 arg_4
+skm_40f9e0:1434 arg_8
+skm_40f9e0:1438 arg_C
+skm_40fb0d:14 var_20
+skm_40fb0d:18 var_1C
+skm_40fb0d:1c ms_exc CPPEH_RECORD
+skm_40fb0d:3c arg_0 int
+skm_40fb0d:40 lpBuffer LPCVOID
+skm_40fb0d:44 arg_8 unsigned int
+skm_40fbf8:8  var_30
+skm_40fbf8:c  var_2C
+skm_40fbf8:10 var_28
+skm_40fbf8:14 var_24
+skm_40fbf8:18 var_20
+skm_40fbf8:1c var_1C
+skm_40fbf8:20 var_18
+skm_40fbf8:24 var_14
+skm_40fbf8:28 NumberOfBytesWritten DWORD
+skm_40fbf8:2c var_C
+skm_40fbf8:30 nNumberOfBytesToWrite DWORD
+skm_40fbf8:34 var_4
+skm_40fbf8:40 arg_0 int
+skm_40fbf8:44 lpBuffer LPCVOID
+skm_40fbf8:48 arg_8 int
+skm_40fe04:8  NewFilePointer LARGE_INTEGER
+skm_40fe04:18 arg_0 int
+skm_40fe04:1c liDistanceToMove LARGE_INTEGER
+skm_40fe04:24 dwMoveMethod DWORD
+skm_40fe82:8  arg_0 int
+skm_40fe82:c  liDistanceToMove LARGE_INTEGER
+skm_40fe82:14 dwMoveMethod DWORD
+skm_40fe9d:c  File FILE *
+skm_40ff13:10 var_20
+skm_40ff13:14 var_1C
+skm_40ff13:18 ms_exc CPPEH_RECORD
+skm_40ff13:38 File FILE *
+skm_40ff93:10 var_1C
+skm_40ff93:14 ms_exc CPPEH_RECORD
+skm_40ff93:34 arg_0
+skm_40ff93:38 arg_4
+skm_40ff93:3c arg_8
+skm_41002b:0  var_C
+skm_41002b:4  var_8
+skm_41002b:14 arg_0
+skm_41002b:18 arg_4
+skm_410053:4  var_4
+skm_410053:10 arg_0 int
+skm_4100c2:8  arg_0
+skm_41013f:8  arg_0
+skm_4101b2:8  arg_0
+skm_410223:8  arg_0
+skm_4102a3:8  arg_0
+skm_410304:8  arg_0
+skm_410365:0  var_8
+skm_410365:4  var_4
+skm_4103a8:0  var_8
+skm_4103a8:4  var_4
+skm_410450:c  var_20
+skm_410450:10 var_1C
+skm_410450:14 var_18
+skm_410450:18 var_14
+skm_410450:1c var_10
+skm_410450:20 var_C
+skm_410450:24 var_8
+skm_410450:28 var_4
+skm_410450:34 arg_0
+skm_4104d0:c  var_20
+skm_4104d0:10 var_1C
+skm_4104d0:14 var_18
+skm_4104d0:18 var_14
+skm_4104d0:1c var_10
+skm_4104d0:20 var_C
+skm_4104d0:24 var_8
+skm_4104d0:28 var_4
+skm_4104d0:34 arg_0
+skm_410560:0  var_8
+skm_41057e:0  var_1C
+skm_41057e:4  var_18
+skm_41057e:8  var_14
+skm_41057e:c  var_10
+skm_41057e:10 var_C
+skm_41057e:20 arg_0
+skm_410c35:0  var_A
+skm_410c78:8  arg_4
+skm_410cc5:0  var_8
+skm_410d80:0  var_20
+skm_410d80:10 var_10
+skm_410d80:14 var_C
+skm_410d80:38 arg_10
+skm_410d80:3c arg_14
+skm_410d97:0  var_20
+skm_410d97:4  var_1C
+skm_410d97:8  var_18
+skm_410d97:c  var_14
+skm_410d97:18 var_8
+skm_410d97:28 arg_0
+skm_410d97:30 arg_8
+skm_410d97:34 arg_C
+skm_410dd3:8  var_24
+skm_410dd3:c  var_20
+skm_410dd3:10 var_1C
+skm_410dd3:18 var_14
+skm_410dd3:20 var_C
+skm_410dd3:28 var_4
+skm_410dd3:34 arg_0
+skm_410dd3:38 arg_4
+skm_410dd3:3c arg_8
+skm_410dd3:40 arg_C
+skm_410feb:0  var_24
+skm_410feb:c  var_18 double
+skm_410feb:1c var_8
+skm_410feb:2c arg_0 double
+skm_4110a4:0  NumberOfCharsWritten DWORD
+skm_4110a4:c  Buffer __int16
+skm_4110e9:10 var_1C
+skm_4110e9:14 ms_exc CPPEH_RECORD
+skm_4110e9:34 arg_0
+skm_4110e9:38 arg_4
+skm_4110e9:3c arg_8
+skm_41116b:0  var_C
+skm_41116b:4  var_8
+skm_41116b:14 arg_0
+skm_41116b:18 arg_4
+skm_411193:4  var_4
+skm_411193:10 arg_0
+skm_411212:10 arg_0 int
+skm_4112ae:8  arg_0
+skm_4112f0:14 arg_0
+skm_4112f0:18 arg_4
+skm_4112f0:1c arg_8
+skm_411351:0  var_10 double
+skm_411351:8  var_8
+skm_411351:18 arg_0 double
+skm_4113bb:0  var_8 double
+skm_4113bb:10 arg_0 double
+skm_4113bb:18 arg_8 double
+skm_4113bb:20 arg_10 int
+skm_4114e6:4  var_8
+skm_4115f1:0  var_8
+skm_4115f1:10 arg_0 double
+skm_411607:8  arg_0
+skm_41163b:0  var_B8 int[]
+skm_41163b:8  var_B0 int[]
+skm_41163b:10 var_A8 double
+skm_41163b:18 var_A0
+skm_41163b:b0 var_8
+skm_411709:0  var_28 double
+skm_411709:18 var_10
+skm_411709:24 var_4 int
+skm_411709:30 arg_0
+skm_411709:34 arg_4
+skm_411709:38 arg_8
+skm_4118e9:8  Arguments ULONG_PTR
+skm_4118e9:c  arg_4 int
+skm_4118e9:10 arg_8 int
+skm_4118e9:14 arg_C int
+skm_4118e9:18 arg_10 int
+skm_4118e9:1c arg_14 int
+skm_41190c:10 Arguments ULONG_PTR
+skm_41190c:14 arg_4 int
+skm_41190c:18 arg_8 int
+skm_41190c:1c arg_C int
+skm_41190c:20 arg_10 int
+skm_41190c:24 arg_14 int
+skm_41190c:28 arg_18 int
+skm_411bfd:8  arg_0
+skm_411c2c:0  var_20
+skm_411c2c:4  var_1C
+skm_411c2c:8  var_18
+skm_411c2c:c  var_14
+skm_411c2c:10 var_10
+skm_411c2c:14 var_C
+skm_411c2c:18 var_8
+skm_411c2c:28 arg_0 int
+skm_411c2c:2c arg_4 int
+skm_411c2c:30 arg_8 int
+skm_411c2c:34 arg_C int
+skm_411c2c:38 arg_10 int
+skm_411c2c:3c arg_14 int
+skm_411c2c:40 arg_18 double
+skm_411c2c:48 arg_20 int
+skm_411cce:0  var_14
+skm_411cce:1c arg_0 double
+skm_411cce:24 arg_8 int
+skm_411da2:0  var_8
+skm_411da2:16 arg_6
+skm_411da2:18 arg_8
+skm_411dd1:8  arg_0
+skm_411dd1:c  arg_4
+skm_411e65:0  var_8
+skm_411e65:10 arg_0 double
+skm_411f09:4  ProcessorFeature DWORD
+skm_411f10:14 arg_0
+skm_411f10:18 arg_4
+skm_411f60:10 ms_exc CPPEH_RECORD
+skm_411f60:30 arg_0
+skm_412020:8  arg_0
+skm_4120f0:8  arg_0
+skm_4120f0:c  arg_4
+skm_4120f0:10 arg_8
+skm_4120f0:14 arg_C
+skm_412190:8  arg_4
+skm_4121f0:4  arg_0
+skm_4121f0:8  arg_4
+skm_4121f0:c  arg_8
+skm_4121f0:10 arg_C
+skm_412230:10 arg_0
+skm_412230:14 arg_4
+skm_412230:18 arg_8
+skm_412230:1c arg_C
+skm_412380:0  var_24
+skm_412380:10 var_14
+skm_412380:18 var_C
+skm_412380:20 var_4
+skm_412470:c  arg_0 const char *
+skm_412470:10 arg_4 int
+skm_4125b0:4  arg_0 const char *
+skm_4125b0:8  arg_4 int
 
 ref: 0
 
@@ -2719,18 +2689,98 @@ cod_410bdd __rtchsifneg
 cod_410c05 __load_CW
 cod_412346 __alloca_probe_8
 
-dat: 1256
+dat: 2912
+dat_40108b
+dat_401701
+dat_4018ef
+dat_40197d
+dat_401c3b
 dat_402321 $LN33
+dat_4024c1
+dat_402ab3
+dat_402f95
+dat_40306b
+dat_4032d3
 dat_4032d4 jpt_403295
+dat_4032eb
+dat_4032f7
+dat_403309
+dat_403323
+dat_40337f
 dat_403380 jpt_403378
+dat_403397
+dat_4033a5
+dat_4033bb
+dat_4034bd
+dat_4035a7
+dat_4035e4
+dat_403853
 dat_403854 jpt_403815
+dat_40386b
+dat_403877
+dat_403889
+dat_4038a3
+dat_4038ff
 dat_403900 jpt_4038F8
+dat_403917
+dat_403925
+dat_40393b
+dat_403a3d
+dat_403b27
+dat_403d86
+dat_403dc2
+dat_403fb1
+dat_404237
+dat_4049f3
+dat_404a8f
+dat_404cb3
+dat_404f68
+dat_405087
+dat_4050a1
+dat_405449
+dat_40555d
+dat_405569
+dat_4055a9
 dat_4056ac unk_4056AC
+dat_40601d
 dat_406020 jpt_405F81
 dat_406511 jpt_4064F2
+dat_408245
 dat_408a7e ___acrt_initialize_locks
 dat_40a58b ___acrt_uninitialize_stdio
 dat_40a7d6 ___acrt_uninitialize_lowio
+dat_40cfdc
+dat_40d45a
+dat_40ebab
+dat_40ebdd
+dat_40ec46
+dat_40ec89
+dat_40ee5a
+dat_40f02a
+dat_40f30e
+dat_40f34f
+dat_41055f
+dat_4107ed
+dat_4109e7
+dat_410be4
+dat_410d7c
+dat_4112e9
+dat_411f0f
+dat_411f53
+dat_41201a
+dat_4120e5
+dat_412185
+dat_4121ea
+dat_412224
+dat_41230f
+dat_41232f
+dat_41235c
+dat_41237f
+dat_412435
+dat_41246d
+dat_4125a7
+dat_41280e
+dat_412a00
 dat_413000 RegCreateKeyExW LSTATUS __stdcall sub(HKEY hKey, LPCWSTR lpSubKey, DWORD Reserved, LPWSTR lpClass, DWORD dwOptions, REGSAM samDesired, const LPSECURITY_ATTRIBUTES lpSecurityAttributes, PHKEY phkResult, LPDWORD lpdwDisposition)
 dat_413004 RegDeleteTreeW
 dat_413008 RegSetValueExW LSTATUS __stdcall sub(HKEY hKey, LPCWSTR lpValueName, DWORD Reserved, DWORD dwType, const BYTE *lpData, DWORD cbData)
@@ -2739,55 +2789,55 @@ dat_413010 RegCloseKey LSTATUS __stdcall sub(HKEY hKey)
 dat_413018 FormatMessageW DWORD __stdcall sub(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DWORD dwLanguageId, LPWSTR lpBuffer, DWORD nSize, va_list *Arguments)
 dat_41301c GetLastError DWORD __stdcall sub()
 dat_413020 CloseHandle BOOL __stdcall sub(HANDLE hObject)
-dat_413024 GetNativeSystemInfo void __stdcall sub(LPSYSTEM_INFO /*%_SYSTEM_INFO#0821E0E222DCA252%*/ lpSystemInfo)
+dat_413024 GetNativeSystemInfo void __stdcall sub(LPSYSTEM_INFO lpSystemInfo)
 dat_413028 LocalFree HLOCAL __stdcall sub(HLOCAL hMem)
 dat_41302c CreateFileW HANDLE __stdcall sub(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 dat_413030 CopyFileW BOOL __stdcall sub(LPCWSTR lpExistingFileName, LPCWSTR lpNewFileName, BOOL bFailIfExists)
 dat_413034 DecodePointer PVOID __stdcall sub(PVOID Ptr)
 dat_413038 FlushFileBuffers BOOL __stdcall sub(HANDLE hFile)
-dat_41303c SetFilePointerEx BOOL __stdcall sub(HANDLE hFile, LARGE_INTEGER /*%LARGE_INTEGER#6F2DECE5B9963D4B%*/ liDistanceToMove, PLARGE_INTEGER /*%LARGE_INTEGER#6F2DECE5B9963D4B%*/ lpNewFilePointer, DWORD dwMoveMethod)
+dat_41303c SetFilePointerEx BOOL __stdcall sub(HANDLE hFile, LARGE_INTEGER liDistanceToMove, PLARGE_INTEGER lpNewFilePointer, DWORD dwMoveMethod)
 dat_413040 GetConsoleMode BOOL __stdcall sub(HANDLE hConsoleHandle, LPDWORD lpMode)
 dat_413044 GetEnvironmentVariableW DWORD __stdcall sub(LPCWSTR lpName, LPWSTR lpBuffer, DWORD nSize)
 dat_413048 SetEnvironmentVariableW BOOL __stdcall sub(LPCWSTR lpName, LPCWSTR lpValue)
-dat_41304c GetModuleFileNameW DWORD __stdcall sub(HMODULE /*%HINSTANCE__#DD664C352E9B6326%*/ hModule, LPWSTR lpFilename, DWORD nSize)
+dat_41304c GetModuleFileNameW DWORD __stdcall sub(HMODULE hModule, LPWSTR lpFilename, DWORD nSize)
 dat_413050 ExpandEnvironmentStringsW DWORD __stdcall sub(LPCWSTR lpSrc, LPWSTR lpDst, DWORD nSize)
-dat_413054 CreateProcessW BOOL __stdcall sub(LPCWSTR lpApplicationName, LPWSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCWSTR lpCurrentDirectory, LPSTARTUPINFOW /*%_STARTUPINFOW#EC9B93005128B2B4%*/ lpStartupInfo, LPPROCESS_INFORMATION /*%_PROCESS_INFORMATION#EF2C1BBAD9962C15%*/ lpProcessInformation)
+dat_413054 CreateProcessW BOOL __stdcall sub(LPCWSTR lpApplicationName, LPWSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCWSTR lpCurrentDirectory, LPSTARTUPINFOW lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation)
 dat_413058 GetCommandLineW LPWSTR __stdcall sub()
 dat_41305c GetConsoleCP UINT __stdcall sub()
 dat_413060 HeapReAlloc LPVOID __stdcall sub(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes)
 dat_413064 HeapSize SIZE_T __stdcall sub(HANDLE hHeap, DWORD dwFlags, LPCVOID lpMem)
 dat_413068 GetProcessHeap HANDLE __stdcall sub()
 dat_41306c GetStringTypeW BOOL __stdcall sub(DWORD dwInfoType, LPCWSTR lpSrcStr, int cchSrc, LPWORD lpCharType)
-dat_413070 UnhandledExceptionFilter LONG __stdcall sub(struct _EXCEPTION_POINTERS /*%_EXCEPTION_POINTERS#D9443E4AA8E6A18C%*/ *ExceptionInfo)
+dat_413070 UnhandledExceptionFilter LONG __stdcall sub(struct _EXCEPTION_POINTERS *ExceptionInfo)
 dat_413074 SetUnhandledExceptionFilter LPTOP_LEVEL_EXCEPTION_FILTER __stdcall sub(LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter)
 dat_413078 GetCurrentProcess HANDLE __stdcall sub()
 dat_41307c TerminateProcess BOOL __stdcall sub(HANDLE hProcess, UINT uExitCode)
 dat_413080 __imp_IsProcessorFeaturePresent BOOL __stdcall sub(DWORD ProcessorFeature)
-dat_413084 QueryPerformanceCounter BOOL __stdcall sub(LARGE_INTEGER /*%LARGE_INTEGER#6F2DECE5B9963D4B%*/ *lpPerformanceCount)
+dat_413084 QueryPerformanceCounter BOOL __stdcall sub(LARGE_INTEGER *lpPerformanceCount)
 dat_413088 GetCurrentProcessId DWORD __stdcall sub()
 dat_41308c GetCurrentThreadId DWORD __stdcall sub()
-dat_413090 GetSystemTimeAsFileTime void __stdcall sub(LPFILETIME /*%_FILETIME#CCA50A8A595D82C4%*/ lpSystemTimeAsFileTime)
-dat_413094 InitializeSListHead void __stdcall sub(PSLIST_HEADER /*%_SLIST_HEADER#8AFBE817ED98AF06%*/ ListHead)
+dat_413090 GetSystemTimeAsFileTime void __stdcall sub(LPFILETIME lpSystemTimeAsFileTime)
+dat_413094 InitializeSListHead void __stdcall sub(PSLIST_HEADER ListHead)
 dat_413098 IsDebuggerPresent BOOL __stdcall sub()
-dat_41309c GetStartupInfoW void __stdcall sub(LPSTARTUPINFOW /*%_STARTUPINFOW#EC9B93005128B2B4%*/ lpStartupInfo)
-dat_4130a0 GetModuleHandleW HMODULE /*%HINSTANCE__#DD664C352E9B6326%*/__stdcall sub(LPCWSTR lpModuleName)
+dat_41309c GetStartupInfoW void __stdcall sub(LPSTARTUPINFOW lpStartupInfo)
+dat_4130a0 GetModuleHandleW HMODULE __stdcall sub(LPCWSTR lpModuleName)
 dat_4130a4 RtlUnwind void __stdcall sub(PVOID TargetFrame, PVOID TargetIp, PEXCEPTION_RECORD ExceptionRecord, PVOID ReturnValue)
 dat_4130a8 RaiseException void __stdcall sub(DWORD dwExceptionCode, DWORD dwExceptionFlags, DWORD nNumberOfArguments, const ULONG_PTR *lpArguments)
 dat_4130ac SetLastError void __stdcall sub(DWORD dwErrCode)
 dat_4130b0 EncodePointer PVOID __stdcall sub(PVOID Ptr)
-dat_4130b4 EnterCriticalSection void __stdcall sub(LPCRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/ lpCriticalSection)
-dat_4130b8 LeaveCriticalSection void __stdcall sub(LPCRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/ lpCriticalSection)
-dat_4130bc DeleteCriticalSection void __stdcall sub(LPCRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/ lpCriticalSection)
-dat_4130c0 InitializeCriticalSectionAndSpinCount BOOL __stdcall sub(LPCRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/ lpCriticalSection, DWORD dwSpinCount)
+dat_4130b4 EnterCriticalSection void __stdcall sub(LPCRITICAL_SECTION lpCriticalSection)
+dat_4130b8 LeaveCriticalSection void __stdcall sub(LPCRITICAL_SECTION lpCriticalSection)
+dat_4130bc DeleteCriticalSection void __stdcall sub(LPCRITICAL_SECTION lpCriticalSection)
+dat_4130c0 InitializeCriticalSectionAndSpinCount BOOL __stdcall sub(LPCRITICAL_SECTION lpCriticalSection, DWORD dwSpinCount)
 dat_4130c4 TlsAlloc DWORD __stdcall sub()
 dat_4130c8 TlsGetValue LPVOID __stdcall sub(DWORD dwTlsIndex)
 dat_4130cc TlsSetValue BOOL __stdcall sub(DWORD dwTlsIndex, LPVOID lpTlsValue)
 dat_4130d0 TlsFree BOOL __stdcall sub(DWORD dwTlsIndex)
-dat_4130d4 FreeLibrary BOOL __stdcall sub(HMODULE /*%HINSTANCE__#DD664C352E9B6326%*/ hLibModule)
-dat_4130d8 GetProcAddress FARPROC __stdcall sub(HMODULE /*%HINSTANCE__#DD664C352E9B6326%*/ hModule, LPCSTR lpProcName)
-dat_4130dc LoadLibraryExW HMODULE /*%HINSTANCE__#DD664C352E9B6326%*/__stdcall sub(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwFlags)
+dat_4130d4 FreeLibrary BOOL __stdcall sub(HMODULE hLibModule)
+dat_4130d8 GetProcAddress FARPROC __stdcall sub(HMODULE hModule, LPCSTR lpProcName)
+dat_4130dc LoadLibraryExW HMODULE __stdcall sub(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwFlags)
 dat_4130e0 ExitProcess void __stdcall sub(UINT uExitCode)
-dat_4130e4 GetModuleHandleExW BOOL __stdcall sub(DWORD dwFlags, LPCWSTR lpModuleName, HMODULE /*%HINSTANCE__#DD664C352E9B6326%*/ *phModule)
+dat_4130e4 GetModuleHandleExW BOOL __stdcall sub(DWORD dwFlags, LPCWSTR lpModuleName, HMODULE *phModule)
 dat_4130e8 GetStdHandle HANDLE __stdcall sub(DWORD nStdHandle)
 dat_4130ec WriteFile BOOL __stdcall sub(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
 dat_4130f0 MultiByteToWideChar int __stdcall sub(UINT CodePage, DWORD dwFlags, LPCSTR lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar)
@@ -2802,7 +2852,7 @@ dat_413110 FindFirstFileExW HANDLE __stdcall sub(LPCWSTR lpFileName, FINDEX_INFO
 dat_413114 FindNextFileW BOOL __stdcall sub(HANDLE hFindFile, LPWIN32_FIND_DATAW lpFindFileData)
 dat_413118 IsValidCodePage BOOL __stdcall sub(UINT CodePage)
 dat_41311c GetOEMCP UINT __stdcall sub()
-dat_413120 GetCPInfo BOOL __stdcall sub(UINT CodePage, LPCPINFO /*%_cpinfo#264D2EA74B99B8A6%*/ lpCPInfo)
+dat_413120 GetCPInfo BOOL __stdcall sub(UINT CodePage, LPCPINFO lpCPInfo)
 dat_413124 GetCommandLineA LPSTR __stdcall sub()
 dat_413128 GetEnvironmentStringsW LPWCH __stdcall sub()
 dat_41312c FreeEnvironmentStringsW BOOL __stdcall sub(LPWCH)
@@ -2816,35 +2866,66 @@ dat_413154 MessageBoxW int __stdcall sub(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCa
 dat_413158 SendMessageTimeoutW LRESULT __stdcall sub(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam, UINT fuFlags, UINT uTimeout, PDWORD_PTR lpdwResult)
 dat_413160 ___guard_check_icall_fptr
 dat_413164 unk_413164
+dat_413168
 dat_41316c unk_41316C
 dat_413170 unk_413170
+dat_413174
+dat_413178
+dat_41317c
+dat_413180
+dat_413184
 dat_413188 unk_413188
 dat_41318c unk_41318C
+dat_413190
+dat_413194
+dat_413198
 dat_41319c unk_41319C
 dat_4131a0 unk_4131A0
 dat_4131a4 unk_4131A4
+dat_4131b0
 dat_4131b4 ??_7exception@std@@6B@
+dat_4131b8
 dat_4131bc aUnknownExcepti
+dat_4131ce
+dat_4131d0
 dat_4131d4 ??_7bad_alloc@std@@6B@
+dat_4131d8
 dat_4131dc aBadAllocation
+dat_4131eb
+dat_4131ec
 dat_4131f0 ??_7logic_error@std@@6B@
+dat_4131f4
+dat_4131f8
 dat_4131fc ??_7length_error@std@@6B@
+dat_413200
+dat_413204
 dat_413208 ??_7type_info@@6B@
-dat_41320c ExceptionInfo struct _EXCEPTION_POINTERS /*%_EXCEPTION_POINTERS#D9443E4AA8E6A18C%*/
+dat_41320c ExceptionInfo struct _EXCEPTION_POINTERS
+dat_413214
 dat_413218 ??_7bad_array_new_length@std@@6B@
+dat_41321c
 dat_413220 aBadArrayNewLen
+dat_413235
 dat_413238 off_413238
 dat_41323c unk_41323C
+dat_41325c
 dat_413260 ??_7bad_exception@std@@6B@
+dat_413264
 dat_413268 aBadException
+dat_413276
 dat_413278 lpLibFileName LPCWSTR
+dat_41327c
+dat_413280
 dat_413284 aApiMsWinCoreFi
 dat_4132c0 aApiMsWinCoreSy
+dat_4132fa
 dat_4132fc aKernel32
+dat_41330e
 dat_413310 aApiMs wchar_t
 dat_413320 aExtMs wchar_t
 dat_413330 unk_413330
 dat_413338 aFlsalloc
+dat_413341
 dat_413344 unk_413344
 dat_41334c aFlsfree
 dat_413354 unk_413354
@@ -2853,134 +2934,375 @@ dat_413368 unk_413368
 dat_413370 aFlssetvalue
 dat_41337c unk_41337C
 dat_413384 aInitializecrit
+dat_4133a0
+dat_4133a4
+dat_4133a8
+dat_4133ac
+dat_4133b0
+dat_4133b4
+dat_4133b8
+dat_4133bc
+dat_4133c0
+dat_4133c4
+dat_4133c8
+dat_4133cc
+dat_4133d0
+dat_4133d4
+dat_4133d8
+dat_4133dc
+dat_4133e0
+dat_4133e4
+dat_4133e8
+dat_4133ec
+dat_4133f0
+dat_4133f4
+dat_4133f8
+dat_4133fc
+dat_413400
+dat_413404
+dat_413408
+dat_41340c
+dat_413410
+dat_413414
+dat_413418
+dat_41341c
+dat_413420
+dat_413424
+dat_413428
+dat_41342c
+dat_413430
+dat_413434
+dat_413438
+dat_41343c
+dat_413440
+dat_413444
+dat_413448
+dat_41344c
+dat_413450
+dat_413454
+dat_413458
+dat_41345c
+dat_413460
+dat_413464
+dat_413468
+dat_41346c
+dat_413470
+dat_413474
+dat_413478
+dat_41347c
+dat_413480
+dat_413484
+dat_413488
+dat_41348c
+dat_413490
+dat_413494
+dat_413498
+dat_41349c
+dat_4134a0
+dat_4134a4
+dat_4134a8
+dat_4134ac
+dat_4134b0
+dat_4134b4
+dat_4134b8
+dat_4134bc
+dat_4134c0
+dat_4134c4
+dat_4134c8
+dat_4134cc
+dat_4134d0
+dat_4134d4
+dat_4134d8
+dat_4134dc
+dat_4134e0
+dat_4134e4
+dat_4134e8
+dat_4134ec
+dat_4134f0
+dat_4134f4
+dat_4134f8
+dat_4134fc
+dat_413500
+dat_413504
+dat_413508
+dat_41350c
+dat_413510
+dat_413514
+dat_413518
+dat_41351c
+dat_413520
+dat_413524
+dat_413528
+dat_41352c
+dat_413530
 dat_413534 aBased
+dat_41353d
 dat_413540 aCdecl
 dat_413548 aPascal
+dat_413551
 dat_413554 aStdcall
+dat_41355e
 dat_413560 aThiscall
+dat_41356b
 dat_41356c aFastcall
+dat_413577
 dat_413578 aVectorcall
+dat_413585
 dat_413588 aClrcall
+dat_413592
 dat_413594 aEabi
+dat_41359b
 dat_41359c aPtr64
 dat_4135a4 aRestrict
+dat_4135af
 dat_4135b0 aUnaligned
 dat_4135bc aRestrict_0
 dat_4135c6 unk_4135C6
 dat_4135c8 aNew
+dat_4135cd
 dat_4135d0 aDelete
 dat_4135d8 asc_4135D8
+dat_4135da
 dat_4135dc asc_4135DC
+dat_4135df
 dat_4135e0 asc_4135E0
+dat_4135e3
 dat_4135e4 asc_4135E4
+dat_4135e6
 dat_4135e8 asc_4135E8
+dat_4135eb
 dat_4135ec asc_4135EC
+dat_4135ef
 dat_4135f0 asc_4135F0
+dat_4135f3
 dat_4135f4 aOperator
+dat_4135fd
 dat_413600 asc_413600
+dat_413603
 dat_413604 asc_413604
+dat_413606
 dat_413608 asc_413608
+dat_41360b
 dat_41360c asc_41360C
+dat_41360f
 dat_413610 asc_413610
+dat_413612
 dat_413614 asc_413614
+dat_413616
 dat_413618 asc_413618
+dat_41361a
 dat_41361c asc_41361C
 dat_413620 asc_413620
+dat_413622
 dat_413624 asc_413624
+dat_413626
 dat_413628 asc_413628
+dat_41362a
 dat_41362c asc_41362C
+dat_41362f
 dat_413630 asc_413630
+dat_413632
 dat_413634 asc_413634
+dat_413637
 dat_413638 asc_413638
+dat_41363a
 dat_41363c asc_41363C
+dat_41363f
 dat_413640 asc_413640
+dat_413642
 dat_413644 asc_413644
+dat_413646
 dat_413648 asc_413648
+dat_41364a
 dat_41364c asc_41364C
+dat_41364f
 dat_413650 asc_413650
+dat_413653
 dat_413654 asc_413654
+dat_413657
 dat_413658 asc_413658
+dat_41365b
 dat_41365c asc_41365C
+dat_41365f
 dat_413660 asc_413660
+dat_413663
 dat_413664 asc_413664
+dat_413667
 dat_413668 asc_413668
 dat_41366c asc_41366C
 dat_413670 asc_413670
+dat_413673
 dat_413674 asc_413674
+dat_413677
 dat_413678 asc_413678
+dat_41367b
 dat_41367c aVftable
+dat_413686
 dat_413688 aVbtable
+dat_413692
 dat_413694 aVcall
 dat_41369c aTypeof
+dat_4136a5
 dat_4136a8 aLocalStaticGua
+dat_4136bd
 dat_4136c0 aString
+dat_4136c9
 dat_4136cc aVbaseDestructo
+dat_4136df
 dat_4136e0 aVectorDeleting
+dat_4136fd
 dat_413700 aDefaultConstru
+dat_41371e
 dat_413720 aScalarDeleting
+dat_41373d
 dat_413740 aVectorConstruc
+dat_41375e
 dat_413760 aVectorDestruct
+dat_41377d
 dat_413780 aVectorVbaseCon
 dat_4137a4 aVirtualDisplac
+dat_4137bf
 dat_4137c0 aEhVectorConstr
+dat_4137e1
 dat_4137e4 aEhVectorDestru
 dat_413804 aEhVectorVbaseC
+dat_41382b
 dat_41382c aCopyConstructo
+dat_413847
 dat_413848 aUdtReturning
 dat_413858 aEh
 dat_41385c aRtti
+dat_413862
 dat_413864 aLocalVftable
 dat_413874 aLocalVftableCo
 dat_413898 aNew_0
+dat_41389f
 dat_4138a0 aDelete_0
+dat_4138aa
 dat_4138ac aOmniCallsig
+dat_4138bb
 dat_4138bc aPlacementDelet
+dat_4138d7
 dat_4138d8 aPlacementDelet_0
+dat_4138f5
 dat_4138f8 aManagedVectorC
+dat_41391e
 dat_413920 aManagedVectorD
+dat_413945
 dat_413948 aEhVectorCopyCo
+dat_41396e
 dat_413970 aEhVectorVbaseC_0
 dat_41399c aDynamicInitial
+dat_4139b7
 dat_4139b8 aDynamicAtexitD
+dat_4139d9
 dat_4139dc aVectorCopyCons
+dat_4139ff
 dat_413a00 aVectorVbaseCop
+dat_413a29
 dat_413a2c aManagedVectorC_0
+dat_413a57
 dat_413a58 aLocalStaticThr
 dat_413a74 aOperator_0
+dat_413a81
 dat_413a84 aOperatorCoAwai
+dat_413a96
 dat_413a98 aTypeDescriptor
+dat_413aaa
 dat_413aac aBaseClassDescr
 dat_413ac8 aBaseClassArray
+dat_413adb
 dat_413adc aClassHierarchy
+dat_413af9
 dat_413afc aCompleteObject
+dat_413b16
 dat_413b18 ModuleName const WCHAR
 dat_413b30 ProcName CHAR[]
+dat_413b3f
 dat_413b40 byte_413B40
 dat_413b9c aNull
+dat_413ba3
 dat_413ba4 aNull_0
+dat_413bb2
 dat_413bb8 unk_413BB8
 dat_413c48 dword_413C48
 dat_413c4c dword_413C4C
 dat_413c50 dword_413C50
+dat_413c54
 dat_413c58 off_413C58
+dat_413c5c
+dat_413c60
+dat_413c64
+dat_413c68
+dat_413c6c
+dat_413c70
+dat_413c74
+dat_413c78
+dat_413c7c
+dat_413c80
+dat_413c84
+dat_413c8c
+dat_413c90
+dat_413c94
+dat_413c98
+dat_413c9c
+dat_413ca0
+dat_413ca4
+dat_413ca8
+dat_413cb4
+dat_413cbc
+dat_413cc0
+dat_413cc4
+dat_413cc8
+dat_413ccc
 dat_413cd0 off_413CD0 LPCWSTR
+dat_413cd4
+dat_413cd8
+dat_413cdc
+dat_413ce0
+dat_413ce4
+dat_413ce8
+dat_413cec
+dat_413cf0
+dat_413cf4
+dat_413cf8
+dat_413cfc
+dat_413d00
+dat_413d04
+dat_413d08
+dat_413d0c
+dat_413d10
+dat_413d14
+dat_413d18
+dat_413d1c
 dat_413d20 aApiMsWinAppmod
+dat_413d66
 dat_413d68 aApiMsWinCoreDa
 dat_413da8 aApiMsWinCoreFi_0
 dat_413de0 aApiMsWinCoreLo
 dat_413e28 aApiMsWinCoreLo_0
+dat_413e82
 dat_413e88 aApiMsWinCorePr
 dat_413ed4 aApiMsWinCoreSt
 dat_413f10 aApiMsWinCoreSy_0
+dat_413f4e
 dat_413f50 aApiMsWinCoreWi
+dat_413f8a
 dat_413f8c aApiMsWinCoreXs
 dat_413fc8 aApiMsWinRtcore
+dat_414016
 dat_414018 aApiMsWinSecuri
+dat_41406e
 dat_414070 aExtMsWinKernel
+dat_4140c6
 dat_4140c8 aExtMsWinNtuser
+dat_41410e
 dat_414110 aExtMsWinNtuser_0
+dat_41415e
 dat_414160 aAdvapi32
+dat_414172
 dat_414174 aUser32
+dat_414182
 dat_414184 unk_414184
 dat_41418c unk_41418C
 dat_414194 unk_414194
@@ -2988,10 +3310,13 @@ dat_41419c unk_41419C
 dat_4141a4 unk_4141A4
 dat_4141ac aGetcurrentpack
 dat_4141c0 asc_4141C0
+dat_4141c2
 dat_4141c8 unk_4141C8
 dat_4141d0 aLcmapstringex
+dat_4141de
 dat_4141e0 unk_4141E0
 dat_4141e8 aLocalenametolc
+dat_4141f9
 dat_414200 dword_414200
 dat_414204 dword_414204
 dat_414368 unk_414368
@@ -2999,10 +3324,15 @@ dat_41436c unk_41436C
 dat_414370 unk_414370
 dat_414374 unk_414374
 dat_414378 aNanSnan
+dat_414382
 dat_414384 aNanSnan_0
+dat_41438e
 dat_414390 aNanInd
+dat_414399
 dat_41439c aNanInd_0
+dat_4143a5
 dat_4143a8 Src char[]
+dat_4143ae
 dat_4143b0 aSun
 dat_4143b4 aMon
 dat_4143b8 aTue
@@ -3011,12 +3341,18 @@ dat_4143c0 aThu
 dat_4143c4 aFri
 dat_4143c8 aSat
 dat_4143cc aSunday
+dat_4143d3
 dat_4143d4 aMonday
+dat_4143db
 dat_4143dc aTuesday
 dat_4143e4 aWednesday
+dat_4143ee
 dat_4143f0 aThursday
+dat_4143f9
 dat_4143fc aFriday
+dat_414403
 dat_414404 aSaturday
+dat_41440d
 dat_414410 aJan
 dat_414414 aFeb
 dat_414418 aMar
@@ -3031,20 +3367,33 @@ dat_414438 aNov
 dat_41443c aDec
 dat_414440 aJanuary
 dat_414448 aFebruary
+dat_414451
 dat_414454 aMarch
+dat_41445a
 dat_41445c aApril
+dat_414462
 dat_414464 aJune
+dat_414469
 dat_41446c aJuly
+dat_414471
 dat_414474 aAugust
+dat_41447b
 dat_41447c aSeptember
+dat_414486
 dat_414488 aOctober
 dat_414490 aNovember
+dat_414499
 dat_41449c aDecember
+dat_4144a5
 dat_4144a8 aAm
+dat_4144ab
 dat_4144ac aPm
+dat_4144af
 dat_4144b0 aMmDdYy
+dat_4144b9
 dat_4144bc aDdddMmmmDdYyyy
 dat_4144d0 aHhMmSs
+dat_4144d9
 dat_4144dc aSun_0
 dat_4144e4 aMon_0
 dat_4144ec aTue_0
@@ -3053,12 +3402,17 @@ dat_4144fc aThu_0
 dat_414504 aFri_0
 dat_41450c aSat_0
 dat_414514 aSunday_0
+dat_414522
 dat_414524 aMonday_0
+dat_414532
 dat_414534 aTuesday_0
 dat_414544 aWednesday_0
 dat_414558 aThursday_0
+dat_41456a
 dat_41456c aFriday_0
+dat_41457a
 dat_41457c aSaturday_0
+dat_41458e
 dat_414590 aJan_0
 dat_414598 aFeb_0
 dat_4145a0 aMar_0
@@ -3073,22 +3427,119 @@ dat_4145e0 aNov_0
 dat_4145e8 aDec_0
 dat_4145f0 aJanuary_0
 dat_414600 aFebruary_0
+dat_414612
 dat_414614 aMarch_0
 dat_414620 aApril_0
 dat_41462c aJune_0
+dat_414636
 dat_414638 aJuly_0
+dat_414642
 dat_414644 aAugust_0
+dat_414652
 dat_414654 aSeptember_0
 dat_414668 aOctober_0
 dat_414678 aNovember_0
+dat_41468a
 dat_41468c aDecember_0
+dat_41469e
 dat_4146a0 aAm_0
+dat_4146a6
 dat_4146a8 aPm_0
+dat_4146ae
 dat_4146b0 aMmDdYy_0
+dat_4146c2
 dat_4146c4 aDdddMmmmDdYyyy_0
 dat_4146ec aHhMmSs_0
+dat_4146fe
 dat_414700 aEnUs
+dat_41470c
 dat_414710 off_414710
+dat_414714
+dat_414718
+dat_41471c
+dat_414720
+dat_414724
+dat_414728
+dat_41472c
+dat_414730
+dat_414734
+dat_414738
+dat_41473c
+dat_414740
+dat_414744
+dat_414748
+dat_41474c
+dat_414750
+dat_414754
+dat_414758
+dat_41475c
+dat_414760
+dat_414764
+dat_414768
+dat_41476c
+dat_414770
+dat_414774
+dat_414778
+dat_41477c
+dat_414780
+dat_414784
+dat_414788
+dat_41478c
+dat_414790
+dat_414794
+dat_414798
+dat_41479c
+dat_4147a0
+dat_4147a4
+dat_4147a8
+dat_4147ac
+dat_4147b0
+dat_4147b4
+dat_4147b8
+dat_4147c4
+dat_4147c8
+dat_4147cc
+dat_4147d0
+dat_4147d4
+dat_4147d8
+dat_4147dc
+dat_4147e0
+dat_4147e4
+dat_4147e8
+dat_4147ec
+dat_4147f0
+dat_4147f4
+dat_4147f8
+dat_4147fc
+dat_414800
+dat_414804
+dat_414808
+dat_41480c
+dat_414810
+dat_414814
+dat_414818
+dat_41481c
+dat_414820
+dat_414824
+dat_414828
+dat_41482c
+dat_414830
+dat_414834
+dat_414838
+dat_41483c
+dat_414840
+dat_414844
+dat_414848
+dat_41484c
+dat_414850
+dat_414854
+dat_414858
+dat_41485c
+dat_414860
+dat_414864
+dat_414868
+dat_41486c
+dat_414870
 dat_414874 off_414874
 dat_414878 off_414878
 dat_41487c off_41487C
@@ -3098,73 +3549,364 @@ dat_414890 aZhCn
 dat_41489c aKoKr
 dat_4148a8 aZhTw
 dat_4148ba asc_4148BA
+dat_4148bc
 dat_414bc0 asc_414BC0
 dat_414e40 unk_414E40
 dat_414fc0 unk_414FC0
 dat_4150c0 aUk
 dat_4150c8 dword_4150C8
+dat_4150cc
+dat_4150d4
+dat_4150dc
+dat_4150e4
+dat_4150ec
+dat_4150f4
+dat_4150fc
+dat_415104
+dat_41510c
+dat_415114
+dat_41511c
+dat_415124
+dat_41512c
+dat_415134
+dat_41513c
+dat_415144
+dat_41514c
+dat_415154
+dat_41515c
+dat_415164
+dat_41516c
+dat_415174
+dat_41517c
+dat_415184
+dat_41518c
+dat_415194
+dat_41519c
+dat_4151a4
+dat_4151ac
+dat_4151b4
+dat_4151bc
+dat_4151c4
+dat_4151cc
+dat_4151d4
+dat_4151dc
+dat_4151e4
+dat_4151ec
+dat_4151f4
+dat_4151fc
+dat_415204
+dat_41520c
+dat_415214
+dat_41521c
+dat_415224
+dat_41522c
+dat_415234
+dat_41523c
+dat_415244
+dat_41524c
+dat_415254
+dat_41525c
+dat_415264
+dat_41526c
+dat_415274
+dat_41527c
+dat_415284
+dat_41528c
+dat_415294
+dat_41529c
+dat_4152a4
+dat_4152ac
+dat_4152b4
+dat_4152bc
+dat_4152c4
+dat_4152cc
+dat_4152d4
+dat_4152dc
+dat_4152e4
+dat_4152ec
+dat_4152f4
+dat_4152fc
+dat_415304
+dat_41530c
+dat_415314
+dat_41531c
+dat_415324
+dat_41532c
+dat_415334
+dat_41533c
+dat_415344
+dat_41534c
+dat_415354
+dat_41535c
+dat_415364
+dat_41536c
+dat_415374
+dat_41537c
+dat_415384
+dat_41538c
+dat_415394
+dat_41539c
+dat_4153a4
+dat_4153ac
+dat_4153b4
+dat_4153bc
+dat_4153c4
+dat_4153cc
+dat_4153d4
+dat_4153dc
+dat_4153e4
+dat_4153ec
+dat_4153f4
+dat_4153fc
+dat_415404
+dat_41540c
+dat_415414
+dat_41541c
+dat_415424
+dat_41542c
+dat_415434
+dat_41543c
+dat_415444
+dat_41544c
+dat_415454
+dat_41545c
+dat_415464
+dat_41546c
+dat_415474
+dat_41547c
+dat_415484
+dat_41548c
+dat_415494
+dat_41549c
+dat_4154a4
+dat_4154ac
+dat_4154b4
+dat_4154bc
+dat_4154c4
+dat_4154cc
+dat_4154d4
+dat_4154dc
+dat_4154e4
+dat_4154ec
+dat_4154f4
+dat_4154fc
+dat_415504
+dat_41550c
+dat_415514
+dat_41551c
+dat_415524
+dat_41552c
+dat_415534
+dat_41553c
+dat_415544
+dat_41554c
+dat_415554
+dat_41555c
+dat_415564
+dat_41556c
+dat_415574
+dat_41557c
+dat_415584
+dat_41558c
+dat_415594
+dat_41559c
+dat_4155a4
+dat_4155ac
+dat_4155b4
+dat_4155bc
+dat_4155c4
+dat_4155cc
+dat_4155d4
+dat_4155dc
+dat_4155e4
+dat_4155ec
+dat_4155f4
+dat_4155fc
+dat_415604
+dat_41560c
+dat_415614
+dat_41561c
+dat_415624
+dat_41562c
+dat_415634
+dat_41563c
+dat_415644
+dat_41564c
+dat_415654
+dat_41565c
+dat_415664
+dat_41566c
+dat_415674
+dat_41567c
+dat_415684
+dat_41568c
+dat_415694
+dat_41569c
+dat_4156a4
+dat_4156ac
+dat_4156b4
+dat_4156bc
+dat_4156c4
+dat_4156cc
+dat_4156d4
+dat_4156dc
+dat_4156e4
+dat_4156ec
+dat_4156f4
+dat_4156fc
+dat_415704
+dat_41570c
+dat_415714
+dat_41571c
+dat_415724
+dat_41572c
+dat_415734
+dat_41573c
+dat_415744
+dat_41574c
+dat_415754
+dat_41575c
+dat_415764
+dat_41576c
+dat_415774
+dat_41577c
+dat_415784
+dat_41578c
+dat_415794
+dat_41579c
+dat_4157a4
+dat_4157ac
+dat_4157b4
+dat_4157bc
+dat_4157c4
+dat_4157cc
+dat_4157d4
+dat_4157dc
+dat_4157e4
 dat_4157e8 aAr
+dat_4157ee
 dat_4157f0 aBg
+dat_4157f6
 dat_4157f8 aCa
+dat_4157fe
 dat_415800 aZhChs
+dat_41580e
 dat_415810 aCs
+dat_415816
 dat_415818 aDa
+dat_41581e
 dat_415820 aDe
+dat_415826
 dat_415828 aEl
+dat_41582e
 dat_415830 aEn
+dat_415836
 dat_415838 aEs
+dat_41583e
 dat_415840 aFi
+dat_415846
 dat_415848 aFr
+dat_41584e
 dat_415850 aHe
+dat_415856
 dat_415858 aHu
+dat_41585e
 dat_415860 aIs
+dat_415866
 dat_415868 aIt
+dat_41586e
 dat_415870 aJa
+dat_415876
 dat_415878 aKo
+dat_41587e
 dat_415880 aNl
+dat_415886
 dat_415888 aNo
+dat_41588e
 dat_415890 aPl
+dat_415896
 dat_415898 aPt
+dat_41589e
 dat_4158a0 aRo
+dat_4158a6
 dat_4158a8 aRu
+dat_4158ae
 dat_4158b0 aHr
+dat_4158b6
 dat_4158b8 aSk
+dat_4158be
 dat_4158c0 aSq
+dat_4158c6
 dat_4158c8 aSv
+dat_4158ce
 dat_4158d0 aTh
+dat_4158d6
 dat_4158d8 aTr
+dat_4158de
 dat_4158e0 aUr
+dat_4158e6
 dat_4158e8 aId
+dat_4158ee
 dat_4158f0 aBe
+dat_4158f6
 dat_4158f8 aSl
+dat_4158fe
 dat_415900 aEt
+dat_415906
 dat_415908 aLv
+dat_41590e
 dat_415910 aLt
+dat_415916
 dat_415918 aFa
+dat_41591e
 dat_415920 aVi
+dat_415926
 dat_415928 aHy
+dat_41592e
 dat_415930 aAz
+dat_415936
 dat_415938 aEu
+dat_41593e
 dat_415940 aMk
+dat_415946
 dat_415948 aAf
+dat_41594e
 dat_415950 aKa
+dat_415956
 dat_415958 aFo
+dat_41595e
 dat_415960 aHi
+dat_415966
 dat_415968 aMs
+dat_41596e
 dat_415970 aKk
+dat_415976
 dat_415978 aKy
+dat_41597e
 dat_415980 aSw
+dat_415986
 dat_415988 aUz
+dat_41598e
 dat_415990 aTt
+dat_415996
 dat_415998 aPa
+dat_41599e
 dat_4159a0 aGu
+dat_4159a6
 dat_4159a8 aTa
+dat_4159ae
 dat_4159b0 aTe
+dat_4159b6
 dat_4159b8 aKn
+dat_4159be
 dat_4159c0 aMr
+dat_4159c6
 dat_4159c8 aSa
+dat_4159ce
 dat_4159d0 aMn
+dat_4159d6
 dat_4159d8 aGl
+dat_4159de
 dat_4159e0 aKok
 dat_4159e8 aSyr
 dat_4159f0 aDiv
@@ -3205,6 +3947,7 @@ dat_415b84 aFaIr
 dat_415b90 aViVn
 dat_415b9c aHyAm
 dat_415ba8 aAzAzLatn
+dat_415bbe
 dat_415bc0 aEuEs
 dat_415bcc aMkMk
 dat_415bd8 aTnZa
@@ -3221,6 +3964,7 @@ dat_415c50 aKkKz
 dat_415c5c aKyKg
 dat_415c68 aSwKe
 dat_415c74 aUzUzLatn
+dat_415c8a
 dat_415c8c aTtRu
 dat_415c98 aBnIn
 dat_415ca4 aPaIn
@@ -3235,9 +3979,13 @@ dat_415d04 aMnMn
 dat_415d10 aCyGb
 dat_415d1c aGlEs
 dat_415d28 aKokIn
+dat_415d36
 dat_415d38 aSyrSy
+dat_415d46
 dat_415d48 aDivMv
+dat_415d56
 dat_415d58 aQuzBo
+dat_415d66
 dat_415d68 aNsZa
 dat_415d74 aMiNz
 dat_415d80 aArIq
@@ -3250,12 +3998,16 @@ dat_415dc8 aNlBe
 dat_415dd4 aNnNo
 dat_415de0 aPtPt
 dat_415dec aSrSpLatn
+dat_415e02
 dat_415e04 aSvFi
 dat_415e10 aAzAzCyrl
+dat_415e26
 dat_415e28 aSeSe
 dat_415e34 aMsBn
 dat_415e40 aUzUzCyrl
+dat_415e56
 dat_415e58 aQuzEc
+dat_415e66
 dat_415e68 aArEg
 dat_415e74 aZhHk
 dat_415e80 aDeAt
@@ -3263,8 +4015,10 @@ dat_415e8c aEnAu
 dat_415e98 aEsEs
 dat_415ea4 aFrCa
 dat_415eb0 aSrSpCyrl
+dat_415ec6
 dat_415ec8 aSeFi
 dat_415ed4 aQuzPe
+dat_415ee2
 dat_415ee4 aArLy
 dat_415ef0 aZhSg
 dat_415efc aDeLu
@@ -3273,6 +4027,7 @@ dat_415f14 aEsGt
 dat_415f20 aFrCh
 dat_415f2c aHrBa
 dat_415f38 aSmjNo
+dat_415f46
 dat_415f48 aArDz
 dat_415f54 aZhMo
 dat_415f60 aDeLi
@@ -3280,26 +4035,34 @@ dat_415f6c aEnNz
 dat_415f78 aEsCr
 dat_415f84 aFrLu
 dat_415f90 aBsBaLatn
+dat_415fa6
 dat_415fa8 aSmjSe
+dat_415fb6
 dat_415fb8 aArMa
 dat_415fc4 aEnIe
 dat_415fd0 aEsPa
 dat_415fdc aFrMc
 dat_415fe8 aSrBaLatn
+dat_415ffe
 dat_416000 aSmaNo
+dat_41600e
 dat_416010 aArTn
 dat_41601c aEnZa
 dat_416028 aEsDo
 dat_416034 aSrBaCyrl
+dat_41604a
 dat_41604c aSmaSe
+dat_41605a
 dat_41605c aArOm
 dat_416068 aEnJm
 dat_416074 aEsVe
 dat_416080 aSmsFi
+dat_41608e
 dat_416090 aArYe
 dat_41609c aEnCb
 dat_4160a8 aEsCo
 dat_4160b4 aSmnFi
+dat_4160c2
 dat_4160c4 aArSy
 dat_4160d0 aEnBz
 dat_4160dc aEsPe
@@ -3323,9 +4086,239 @@ dat_4161a8 aEsHn
 dat_4161b4 aEsNi
 dat_4161c0 aEsPr
 dat_4161cc aZhCht
+dat_4161da
 dat_4161dc aSr
+dat_4161e2
 dat_4161e8 off_4161E8
 dat_4161ec dword_4161EC
+dat_4161f0
+dat_4161f8
+dat_416200
+dat_416204
+dat_416208
+dat_416210
+dat_416218
+dat_416220
+dat_416228
+dat_416230
+dat_416238
+dat_416240
+dat_416248
+dat_416250
+dat_416258
+dat_416260
+dat_416268
+dat_416270
+dat_416278
+dat_416280
+dat_416288
+dat_416290
+dat_416298
+dat_4162a0
+dat_4162a8
+dat_4162b0
+dat_4162b8
+dat_4162c0
+dat_4162c8
+dat_4162d0
+dat_4162d8
+dat_4162e0
+dat_4162e8
+dat_4162f0
+dat_4162f8
+dat_416300
+dat_416308
+dat_416310
+dat_416318
+dat_416320
+dat_416328
+dat_416330
+dat_416338
+dat_416340
+dat_416348
+dat_416350
+dat_416358
+dat_416360
+dat_416368
+dat_416370
+dat_416378
+dat_416380
+dat_416388
+dat_416390
+dat_416398
+dat_4163a0
+dat_4163a8
+dat_4163b0
+dat_4163b8
+dat_4163c0
+dat_4163c8
+dat_4163d0
+dat_4163d8
+dat_4163e0
+dat_4163e8
+dat_4163f0
+dat_4163f8
+dat_416400
+dat_416408
+dat_416410
+dat_416418
+dat_416420
+dat_416428
+dat_416430
+dat_416438
+dat_416440
+dat_416448
+dat_416450
+dat_416458
+dat_416460
+dat_416468
+dat_416470
+dat_416478
+dat_416480
+dat_416488
+dat_416490
+dat_416498
+dat_4164a0
+dat_4164a8
+dat_4164b0
+dat_4164b8
+dat_4164c0
+dat_4164c8
+dat_4164d0
+dat_4164d8
+dat_4164e0
+dat_4164e8
+dat_4164f0
+dat_4164f8
+dat_416500
+dat_416508
+dat_416510
+dat_416518
+dat_416520
+dat_416528
+dat_416530
+dat_416538
+dat_416540
+dat_416548
+dat_416550
+dat_416558
+dat_416560
+dat_416568
+dat_416570
+dat_416578
+dat_416580
+dat_416588
+dat_416590
+dat_416598
+dat_4165a0
+dat_4165a8
+dat_4165b0
+dat_4165b8
+dat_4165c0
+dat_4165c8
+dat_4165d0
+dat_4165d8
+dat_4165e0
+dat_4165e8
+dat_4165f0
+dat_4165f8
+dat_416600
+dat_416608
+dat_416610
+dat_416618
+dat_416620
+dat_416628
+dat_416630
+dat_416638
+dat_416640
+dat_416648
+dat_416650
+dat_416658
+dat_416660
+dat_416668
+dat_416670
+dat_416678
+dat_416680
+dat_416688
+dat_416690
+dat_416698
+dat_4166a0
+dat_4166a8
+dat_4166b0
+dat_4166b8
+dat_4166c0
+dat_4166c8
+dat_4166d0
+dat_4166d8
+dat_4166e0
+dat_4166e8
+dat_4166f0
+dat_4166f8
+dat_416700
+dat_416708
+dat_416710
+dat_416718
+dat_416720
+dat_416728
+dat_416730
+dat_416738
+dat_416740
+dat_416748
+dat_416750
+dat_416758
+dat_416760
+dat_416768
+dat_416770
+dat_416778
+dat_416780
+dat_416788
+dat_416790
+dat_416798
+dat_4167a0
+dat_4167a8
+dat_4167b0
+dat_4167b8
+dat_4167c0
+dat_4167c8
+dat_4167d0
+dat_4167d8
+dat_4167e0
+dat_4167e8
+dat_4167f0
+dat_4167f8
+dat_416800
+dat_416808
+dat_416810
+dat_416818
+dat_416820
+dat_416828
+dat_416830
+dat_416838
+dat_416840
+dat_416848
+dat_416850
+dat_416858
+dat_416860
+dat_416868
+dat_416870
+dat_416878
+dat_416880
+dat_416888
+dat_416890
+dat_416898
+dat_4168a0
+dat_4168a8
+dat_4168b0
+dat_4168b8
+dat_4168c0
+dat_4168c8
+dat_4168d0
+dat_4168d8
+dat_4168e0
+dat_4168e8
+dat_4168f0
+dat_4168f8
+dat_416900
 dat_416908 aAfZa_0
 dat_416914 aArAe_0
 dat_416920 aArBh_0
@@ -3344,11 +4337,14 @@ dat_4169b0 aArSy_0
 dat_4169bc aArTn_0
 dat_4169c8 aArYe_0
 dat_4169d4 aAzAzCyrl_0
+dat_4169ea
 dat_4169ec aAzAzLatn_0
+dat_416a02
 dat_416a04 aBeBy_0
 dat_416a10 aBgBg_0
 dat_416a1c aBnIn_0
 dat_416a28 aBsBaLatn_0
+dat_416a3e
 dat_416a40 aCaEs_0
 dat_416a4c aCsCz_0
 dat_416a58 aCyGb_0
@@ -3359,6 +4355,7 @@ dat_416a88 aDeDe_0
 dat_416a94 aDeLi_0
 dat_416aa0 aDeLu_0
 dat_416aac aDivMv_0
+dat_416aba
 dat_416abc aElGr_0
 dat_416ac8 aEnAu_0
 dat_416ad4 aEnBz_0
@@ -3420,6 +4417,7 @@ dat_416d68 aKaGe_0
 dat_416d74 aKkKz_0
 dat_416d80 aKnIn_0
 dat_416d8c aKokIn_0
+dat_416d9a
 dat_416d9c aKoKr_0
 dat_416da8 aKyKg_0
 dat_416db4 aLtLt_0
@@ -3442,8 +4440,11 @@ dat_416e74 aPlPl_0
 dat_416e80 aPtBr_0
 dat_416e8c aPtPt_0
 dat_416e98 aQuzBo_0
+dat_416ea6
 dat_416ea8 aQuzEc_0
+dat_416eb6
 dat_416eb8 aQuzPe_0
+dat_416ec6
 dat_416ec8 aRoRo_0
 dat_416ed4 aRuRu_0
 dat_416ee0 aSaIn_0
@@ -3453,20 +4454,31 @@ dat_416f04 aSeSe_0
 dat_416f10 aSkSk_0
 dat_416f1c aSlSi_0
 dat_416f28 aSmaNo_0
+dat_416f36
 dat_416f38 aSmaSe_0
+dat_416f46
 dat_416f48 aSmjNo_0
+dat_416f56
 dat_416f58 aSmjSe_0
+dat_416f66
 dat_416f68 aSmnFi_0
+dat_416f76
 dat_416f78 aSmsFi_0
+dat_416f86
 dat_416f88 aSqAl_0
 dat_416f94 aSrBaCyrl_0
+dat_416faa
 dat_416fac aSrBaLatn_0
+dat_416fc2
 dat_416fc4 aSrSpCyrl_0
+dat_416fda
 dat_416fdc aSrSpLatn_0
+dat_416ff2
 dat_416ff4 aSvFi_0
 dat_417000 aSvSe_0
 dat_41700c aSwKe_0
 dat_417018 aSyrSy_0
+dat_417026
 dat_417028 aTaIn_0
 dat_417034 aTeIn_0
 dat_417040 aThTh_0
@@ -3476,11 +4488,15 @@ dat_417064 aTtRu_0
 dat_417070 aUkUa_0
 dat_41707c aUrPk_0
 dat_417088 aUzUzCyrl_0
+dat_41709e
 dat_4170a0 aUzUzLatn_0
+dat_4170b6
 dat_4170b8 aViVn_0
 dat_4170c4 aXhZa_0
 dat_4170d0 aZhChs_0
+dat_4170de
 dat_4170e0 aZhCht_0
+dat_4170ee
 dat_4170f0 aZhCn_0
 dat_4170fc aZhHk_0
 dat_417108 aZhMo_0
@@ -3494,17 +4510,25 @@ dat_417a3f byte_417A3F
 dat_417ad4 dword_417AD4
 dat_417afc unk_417AFC
 dat_417b00 a1Inf char[]
+dat_417b06
 dat_417b08 a1Qnan
+dat_417b0f
 dat_417b10 a1Snan
+dat_417b17
 dat_417b18 a1Ind
+dat_417b1e
 dat_417b20 tbyte_417B20
+dat_417b2a
 dat_417b2c tbyte_417B2C
+dat_417b36
 dat_417b40 aLog10
+dat_417b46
 dat_417b50 xmmword_417B50
 dat_417b60 xmmword_417B60
 dat_417b70 xmmword_417B70
 dat_417b80 xmmword_417B80
 dat_417b90 dbl_417B90
+dat_417b98
 dat_417ba0 xmmword_417BA0
 dat_417bb0 xmmword_417BB0
 dat_417bc0 xmmword_417BC0
@@ -3524,6 +4548,11 @@ dat_417ca0 tbyte_417CA0
 dat_417caa tbyte_417CAA
 dat_417cbe tbyte_417CBE
 dat_417cd2 dbl_417CD2
+dat_417cea
+dat_417cee
+dat_417cf2
+dat_417cf6
+dat_417cfa
 dat_417d00 tbyte_417D00
 dat_417d14 tbyte_417D14
 dat_417d1e dbl_417D1E
@@ -3539,292 +4568,865 @@ dat_417d74 dbl_417D74
 dat_417d7c dbl_417D7C
 dat_417d84 unk_417D84
 dat_417d88 aLog10_0
+dat_417d8e
 dat_417d90 aExp
 dat_417d94 aPow
 dat_417d98 aAsin
+dat_417d9d
 dat_417da0 aAcos
+dat_417da5
 dat_417da8 aSqrt
+dat_417dad
 dat_417db0 dbl_417DB0
+dat_417db8
 dat_417dc0 xmmword_417DC0
 dat_4181d0 xmmword_4181D0
 dat_4185e0 dbl_4185E0
 dat_4185e8 aTanh
+dat_4185ed
 dat_4185f0 aAtan
+dat_4185f5
 dat_4185f8 aAtan2
+dat_4185fe
 dat_418600 aSin
 dat_418604 aCos
 dat_418608 aTan
 dat_41860c aCeil
+dat_418611
 dat_418614 aFloor
+dat_41861a
 dat_41861c aFabs
+dat_418621
 dat_418624 aModf
+dat_418629
 dat_41862c aLdexp
+dat_418632
 dat_418634 aCabs
+dat_41863a
 dat_41863c aHypot
+dat_418643
 dat_418644 aFmod
+dat_418649
 dat_41864c aFrexp
+dat_418652
 dat_418654 aY0
 dat_418658 aY1
 dat_41865c aYn
 dat_418660 aLogb
+dat_418666
 dat_418668 aNextafter
+dat_418673
 dat_418678 dword_418678
 dat_41867c off_41867C
+dat_418684
+dat_41868c
+dat_418694
+dat_41869c
+dat_4186a4
+dat_4186ac
+dat_4186b4
+dat_4186bc
+dat_4186c4
+dat_4186cc
+dat_4186d4
+dat_4186dc
+dat_4186e4
+dat_4186ec
+dat_4186f4
+dat_4186fc
+dat_418704
+dat_41870c
+dat_418714
+dat_41871c
+dat_418724
+dat_41872c
+dat_418734
+dat_41873c
+dat_418744
+dat_41874c
+dat_418754
+dat_41875c
 dat_418760 aSinh
+dat_418765
 dat_418768 aCosh
+dat_41876d
 dat_418770 dbl_418770
 dat_418778 dbl_418778
 dat_418780 dbl_418780
 dat_418788 FileName const WCHAR
 dat_418798 aUnknownErrorFo
+dat_4187e2
 dat_4187e4 aSFunctionSLine
+dat_418816
 dat_418818 Caption const WCHAR
+dat_418836
 dat_418838 word_418838 const WCHAR
+dat_41883a
 dat_41883c aStart wchar_t
+dat_41884a
 dat_41884c pszFile const WCHAR
+dat_41886c
 dat_418870 aConfigConemuCo const WCHAR
+dat_4188b2
 dat_4188b4 aConfigUserCone const WCHAR
+dat_4188e2
 dat_4188e4 aConfigConemuXm const WCHAR
 dat_418908 aVendorConemuMa const WCHAR
+dat_41894c
 dat_418950 aVendorConemuMa_0
 dat_418998 aVendorConemuMa_1 const WCHAR
+dat_4189dc
 dat_4189e0 aFailedToCopyCo
 dat_418a80 aFailedToCopyCo_0 const WCHAR
 dat_418ae0 aFailedToBackup
+dat_418b4a
 dat_418b4c Name const WCHAR
+dat_418b64
 dat_418b68 aSingleIconSTit
+dat_418bbc
 dat_418bc0 aIconSTitleCmde
 dat_418c04 aSRunS
+dat_418c1e
 dat_418c20 aCmderRoot const WCHAR
+dat_418c36
 dat_418c38 aError const WCHAR
+dat_418c44
 dat_418c48 Text const WCHAR
+dat_418c92
 dat_418c94 aEnvironment
 dat_418ca0 aEnvironment_0
 dat_418cb8 aAll wchar_t
 dat_418cc0 aUser wchar_t
+dat_418cca
 dat_418cd0 aUnrecognizedOp const WCHAR
 dat_418d6c SubKey const WCHAR
+dat_418d8e
 dat_418d90 aGetrootkey
+dat_418da6
 dat_418da8 aSV
+dat_418dbe
 dat_418dc0 aRegistershellm
 dat_418de4 Data const WCHAR
+dat_418dfa
 dat_418dfc ValueName const WCHAR
+dat_418e22
 dat_418e24 aIcon const WCHAR
+dat_418e2e
 dat_418e30 aCommand const WCHAR
 dat_418e40 aUnregistershel
 dat_418e68 aSingle wchar_t
 dat_418e78 aTask wchar_t
 dat_418e84 aRegister wchar_t
 dat_418e98 aDirectoryBackg
+dat_418eda
 dat_418edc aDirectoryShell
 dat_418f08 aUnregister wchar_t
 dat_418f20 aUnrecognizedPa const WCHAR
+dat_41902e
 dat_419030 aStringTooLong char[]
+dat_419040
+dat_419044
+dat_419048
+dat_41904a
+dat_41904c
+dat_419050
+dat_419054
+dat_419058
+dat_41905c
+dat_419060
+dat_419064
+dat_419066
+dat_419068
+dat_41906c
+dat_419070
+dat_419074
+dat_419078
+dat_41907c
+dat_419080
+dat_419082
+dat_419084
+dat_419088
+dat_41908c
+dat_419090
+dat_419094
+dat_419098
+dat_41909c
+dat_41909e
+dat_4190a0
+dat_4190a4
+dat_4190a8
+dat_4190ac
 dat_4190b0 __load_config_used
+dat_4190b4
+dat_4190b8
+dat_4190bc
+dat_4190c0
+dat_4190c4
+dat_4190c8
+dat_4190cc
+dat_4190d0
+dat_4190d4
+dat_4190d8
+dat_4190dc
+dat_4190e0
+dat_4190e4
+dat_4190e6
+dat_4190e8
+dat_4190ec
+dat_4190f0
+dat_4190f4
+dat_4190f8
+dat_4190fc
+dat_419100
+dat_419104
+dat_419108
 dat_419150 ??_R4exception@std@@6B@
+dat_419154
+dat_419158
+dat_41915c
+dat_419160
 dat_419164 ??_R3exception@std@@8
+dat_419168
+dat_41916c
+dat_419170
 dat_419174 ??_R2exception@std@@8
 dat_41917c ??_R1A@?0A@EA@exception@std@@8
+dat_419180
+dat_419184
+dat_419188
+dat_41918c
+dat_419190
+dat_419194
 dat_419198 ??_R4bad_alloc@std@@6B@
+dat_41919c
+dat_4191a0
+dat_4191a4
+dat_4191a8
 dat_4191ac ??_R3bad_alloc@std@@8
+dat_4191b0
+dat_4191b4
+dat_4191b8
 dat_4191bc ??_R2bad_alloc@std@@8
+dat_4191c0
+dat_4191c4
 dat_4191c8 ??_R1A@?0A@EA@bad_alloc@std@@8
+dat_4191cc
+dat_4191d0
+dat_4191d4
+dat_4191d8
+dat_4191dc
+dat_4191e0
 dat_4191e4 ??_R4logic_error@std@@6B@
+dat_4191e8
+dat_4191ec
+dat_4191f0
+dat_4191f4
 dat_4191f8 ??_R3logic_error@std@@8
+dat_4191fc
+dat_419200
+dat_419204
 dat_419208 ??_R2logic_error@std@@8
+dat_41920c
 dat_419214 ??_R1A@?0A@EA@logic_error@std@@8
+dat_419218
+dat_41921c
+dat_419220
+dat_419224
+dat_419228
+dat_41922c
 dat_419230 ??_R4length_error@std@@6B@
+dat_419234
+dat_419238
+dat_41923c
+dat_419240
 dat_419244 ??_R3length_error@std@@8
+dat_419248
+dat_41924c
+dat_419250
 dat_419254 ??_R2length_error@std@@8
+dat_419258
+dat_41925c
 dat_419264 ??_R1A@?0A@EA@length_error@std@@8
+dat_419268
+dat_41926c
+dat_419270
+dat_419274
+dat_419278
+dat_41927c
 dat_419280 ??_R4type_info@@6B@
+dat_419284
+dat_419288
+dat_41928c
+dat_419290
 dat_419294 ??_R3type_info@@8
+dat_419298
+dat_41929c
+dat_4192a0
 dat_4192a4 ??_R2type_info@@8
 dat_4192ac ??_R1A@?0A@EA@type_info@@8
+dat_4192b0
+dat_4192b4
+dat_4192b8
+dat_4192bc
+dat_4192c0
+dat_4192c4
 dat_4192c8 ??_R4bad_array_new_length@std@@6B@
+dat_4192cc
+dat_4192d0
+dat_4192d4
+dat_4192d8
 dat_4192dc ??_R3bad_array_new_length@std@@8
+dat_4192e0
+dat_4192e4
+dat_4192e8
 dat_4192ec ??_R2bad_array_new_length@std@@8
+dat_4192f0
+dat_4192f4
 dat_4192fc ??_R1A@?0A@EA@bad_array_new_length@std@@8
+dat_419300
+dat_419304
+dat_419308
+dat_41930c
+dat_419310
+dat_419314
 dat_419318 ??_R4bad_exception@std@@6B@
+dat_41931c
+dat_419320
+dat_419324
+dat_419328
 dat_41932c ??_R3bad_exception@std@@8
+dat_419330
+dat_419334
+dat_419338
 dat_41933c ??_R2bad_exception@std@@8
+dat_419340
+dat_419344
 dat_419348 ??_R1A@?0A@EA@bad_exception@std@@8
+dat_41934c
+dat_419350
+dat_419354
+dat_419358
+dat_41935c
+dat_419360
+dat_419364
 dat_419370 ___safe_se_handler_table
+dat_419374
+dat_419378
+dat_41937c
+dat_419380
+dat_419384
+dat_419388
+dat_41938c
+dat_419390
+dat_419394
+dat_419398
 dat_41939c asc_41939C
+dat_4193a0  GUID
+dat_4193b0
+dat_4193b4
+dat_4193e1
 dat_4193e4 unk_4193E4
 dat_4193f8 aGctl
 dat_4196c0 unk_4196C0
 dat_4196c8 unk_4196C8
-dat_4196d0 stru_4196D0 UnwindMapEntry /*%UnwindMapEntry#23EEB8AA342E4D8D%*/
-dat_4196f0 stru_4196F0 FuncInfo /*%FuncInfo#B06AF4783BB56A62%*/
-dat_419714 stru_419714 UnwindMapEntry /*%UnwindMapEntry#23EEB8AA342E4D8D%*/
-dat_419724 stru_419724 FuncInfo /*%FuncInfo#B06AF4783BB56A62%*/
-dat_419748 stru_419748 UnwindMapEntry /*%UnwindMapEntry#23EEB8AA342E4D8D%*/
-dat_419750 stru_419750 FuncInfo /*%FuncInfo#B06AF4783BB56A62%*/
-dat_419774 stru_419774 UnwindMapEntry /*%UnwindMapEntry#23EEB8AA342E4D8D%*/
-dat_41977c stru_41977C FuncInfo /*%FuncInfo#B06AF4783BB56A62%*/
-dat_4197a0 stru_4197A0 UnwindMapEntry /*%UnwindMapEntry#23EEB8AA342E4D8D%*/
-dat_4197a8 stru_4197A8 FuncInfo /*%FuncInfo#B06AF4783BB56A62%*/
+dat_4196d0 stru_4196D0 UnwindMapEntry
+dat_4196d8  UnwindMapEntry
+dat_4196e0  UnwindMapEntry
+dat_4196e8  UnwindMapEntry
+dat_4196f0 stru_4196F0 FuncInfo
+dat_419714 stru_419714 UnwindMapEntry
+dat_41971c  UnwindMapEntry
+dat_419724 stru_419724 FuncInfo
+dat_419748 stru_419748 UnwindMapEntry
+dat_419750 stru_419750 FuncInfo
+dat_419774 stru_419774 UnwindMapEntry
+dat_41977c stru_41977C FuncInfo
+dat_4197a0 stru_4197A0 UnwindMapEntry
+dat_4197a8 stru_4197A8 FuncInfo
 dat_4197cc __TI2?AVbad_alloc@std@@
+dat_4197d0
+dat_4197d4
+dat_4197d8
 dat_4197dc __CTA2?AVbad_alloc@std@@
+dat_4197e0
+dat_4197e4
 dat_4197e8 __CT??_R0?AVbad_alloc@std@@@8_401F2F
+dat_4197ec
+dat_4197f0
+dat_4197f4
+dat_4197f8
+dat_4197fc
+dat_419800
 dat_419804 __CT??_R0?AVexception@std@@@8_401F62
+dat_419808
+dat_41980c
+dat_419810
+dat_419814
+dat_419818
+dat_41981c
 dat_419820 __CT??_R0?AVlogic_error@std@@@8_402001
+dat_419824
+dat_419828
+dat_41982c
+dat_419830
+dat_419834
+dat_419838
 dat_41983c __TI3?AVlength_error@std@@
+dat_419840
+dat_419844
+dat_419848
 dat_41984c __CTA3?AVlength_error@std@@
+dat_419850
+dat_419854
+dat_419858
 dat_41985c __CT??_R0?AVlength_error@std@@@8_401FC5
-dat_419878 stru_419878 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
+dat_419860
+dat_419864
+dat_419868
+dat_41986c
+dat_419870
+dat_419874
+dat_419878 stru_419878 _EH4_SCOPETABLE
 dat_419894 __TI3?AVbad_array_new_length@std@@
+dat_419898
+dat_41989c
+dat_4198a0
 dat_4198a4 __CTA3?AVbad_array_new_length@std@@
+dat_4198a8
+dat_4198ac
+dat_4198b0
 dat_4198b4 __CT??_R0?AVbad_array_new_length@std@@@8_402472
-dat_4198d0 stru_4198D0 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_4198f0 stru_4198F0 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419910 stru_419910 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419930 stru_419930 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419958 stru_419958 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419980 stru_419980 HandlerType /*%HandlerType#4F52BB5731D92563%*/
-dat_419990 stru_419990 UnwindMapEntry /*%UnwindMapEntry#23EEB8AA342E4D8D%*/
-dat_4199a0 stru_4199A0 TryBlockMapEntry /*%TryBlockMapEntry#FEC28B885C110399%*/
-dat_4199b4 stru_4199B4 FuncInfo /*%FuncInfo#B06AF4783BB56A62%*/
-dat_4199d8 stru_4199D8 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
+dat_4198b8
+dat_4198bc
+dat_4198c0
+dat_4198c4
+dat_4198c8
+dat_4198cc
+dat_4198d0 stru_4198D0 _EH4_SCOPETABLE
+dat_4198ec
+dat_4198f0 stru_4198F0 _EH4_SCOPETABLE
+dat_41990c
+dat_419910 stru_419910 _EH4_SCOPETABLE
+dat_41992c
+dat_419930 stru_419930 _EH4_SCOPETABLE
+dat_419958 stru_419958 _EH4_SCOPETABLE
+dat_419980 stru_419980 HandlerType
+dat_419990 stru_419990 UnwindMapEntry
+dat_419998  UnwindMapEntry
+dat_4199a0 stru_4199A0 TryBlockMapEntry
+dat_4199b4 stru_4199B4 FuncInfo
+dat_4199d8 stru_4199D8 _EH4_SCOPETABLE
 dat_4199f4 __TI2?AVbad_exception@std@@
+dat_4199f8
+dat_4199fc
+dat_419a00
 dat_419a04 __CTA2?AVbad_exception@std@@
+dat_419a08
+dat_419a0c
 dat_419a10 __CT??_R0?AVbad_exception@std@@@8_40428C
-dat_419a30 stru_419A30 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419a58 stru_419A58 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419a78 stru_419A78 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419a98 stru_419A98 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419ab8 stru_419AB8 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419ad8 stru_419AD8 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419af8 stru_419AF8 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419b18 stru_419B18 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419b38 stru_419B38 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419b58 stru_419B58 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419b78 stru_419B78 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419b98 stru_419B98 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419bb8 stru_419BB8 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419bd8 stru_419BD8 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419bf8 stru_419BF8 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419c18 stru_419C18 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419c38 stru_419C38 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419c58 stru_419C58 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419c78 stru_419C78 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419ca0 stru_419CA0 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419cc0 stru_419CC0 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419ce0 stru_419CE0 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419d00 stru_419D00 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419d20 stru_419D20 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
-dat_419d40 stru_419D40 _EH4_SCOPETABLE /*%_EH4_SCOPETABLE#DD6D6B4709311AF3%*/
+dat_419a14
+dat_419a18
+dat_419a1c
+dat_419a20
+dat_419a24
+dat_419a28
+dat_419a2c
+dat_419a30 stru_419A30 _EH4_SCOPETABLE
+dat_419a58 stru_419A58 _EH4_SCOPETABLE
+dat_419a74
+dat_419a78 stru_419A78 _EH4_SCOPETABLE
+dat_419a94
+dat_419a98 stru_419A98 _EH4_SCOPETABLE
+dat_419ab4
+dat_419ab8 stru_419AB8 _EH4_SCOPETABLE
+dat_419ad4
+dat_419ad8 stru_419AD8 _EH4_SCOPETABLE
+dat_419af4
+dat_419af8 stru_419AF8 _EH4_SCOPETABLE
+dat_419b14
+dat_419b18 stru_419B18 _EH4_SCOPETABLE
+dat_419b34
+dat_419b38 stru_419B38 _EH4_SCOPETABLE
+dat_419b54
+dat_419b58 stru_419B58 _EH4_SCOPETABLE
+dat_419b74
+dat_419b78 stru_419B78 _EH4_SCOPETABLE
+dat_419b94
+dat_419b98 stru_419B98 _EH4_SCOPETABLE
+dat_419bb4
+dat_419bb8 stru_419BB8 _EH4_SCOPETABLE
+dat_419bd4
+dat_419bd8 stru_419BD8 _EH4_SCOPETABLE
+dat_419bf4
+dat_419bf8 stru_419BF8 _EH4_SCOPETABLE
+dat_419c14
+dat_419c18 stru_419C18 _EH4_SCOPETABLE
+dat_419c34
+dat_419c38 stru_419C38 _EH4_SCOPETABLE
+dat_419c54
+dat_419c58 stru_419C58 _EH4_SCOPETABLE
+dat_419c74
+dat_419c78 stru_419C78 _EH4_SCOPETABLE
+dat_419ca0 stru_419CA0 _EH4_SCOPETABLE
+dat_419cbc
+dat_419cc0 stru_419CC0 _EH4_SCOPETABLE
+dat_419cdc
+dat_419ce0 stru_419CE0 _EH4_SCOPETABLE
+dat_419cfc
+dat_419d00 stru_419D00 _EH4_SCOPETABLE
+dat_419d1c
+dat_419d20 stru_419D20 _EH4_SCOPETABLE
+dat_419d3c
+dat_419d40 stru_419D40 _EH4_SCOPETABLE
 dat_419d5c __IMPORT_DESCRIPTOR_KERNEL32
+dat_419d60
+dat_419d64
+dat_419d68
+dat_419d6c
 dat_419d70 __IMPORT_DESCRIPTOR_USER32
+dat_419d74
+dat_419d78
+dat_419d7c
+dat_419d80
 dat_419d84 __IMPORT_DESCRIPTOR_ADVAPI32
+dat_419d88
+dat_419d8c
+dat_419d90
+dat_419d94
 dat_419d98 __IMPORT_DESCRIPTOR_SHELL32
+dat_419d9c
+dat_419da0
+dat_419da4
+dat_419da8
 dat_419dac __IMPORT_DESCRIPTOR_SHLWAPI
+dat_419db0
+dat_419db4
+dat_419db8
+dat_419dbc
 dat_419dd4 off_419DD4
+dat_419dd8
+dat_419ddc
+dat_419de0
+dat_419de4
+dat_419de8
 dat_419dec off_419DEC
+dat_419df0
+dat_419df4
+dat_419df8
+dat_419dfc
+dat_419e00
+dat_419e04
+dat_419e08
+dat_419e0c
+dat_419e10
+dat_419e14
+dat_419e18
+dat_419e1c
+dat_419e20
+dat_419e24
+dat_419e28
+dat_419e2c
+dat_419e30
+dat_419e34
+dat_419e38
+dat_419e3c
+dat_419e40
+dat_419e44
+dat_419e48
+dat_419e4c
+dat_419e50
+dat_419e54
+dat_419e58
+dat_419e5c
+dat_419e60
+dat_419e64
+dat_419e68
+dat_419e6c
+dat_419e70
+dat_419e74
+dat_419e78
+dat_419e7c
+dat_419e80
+dat_419e84
+dat_419e88
+dat_419e8c
+dat_419e90
+dat_419e94
+dat_419e98
+dat_419e9c
+dat_419ea0
+dat_419ea4
+dat_419ea8
+dat_419eac
+dat_419eb0
+dat_419eb4
+dat_419eb8
+dat_419ebc
+dat_419ec0
+dat_419ec4
+dat_419ec8
+dat_419ecc
+dat_419ed0
+dat_419ed4
+dat_419ed8
+dat_419edc
+dat_419ee0
+dat_419ee4
+dat_419ee8
+dat_419eec
+dat_419ef0
+dat_419ef4
+dat_419ef8
+dat_419efc
+dat_419f00
+dat_419f04
+dat_419f08
+dat_419f0c
 dat_419f10 off_419F10
+dat_419f14
 dat_419f18 off_419F18
+dat_419f1c
+dat_419f20
+dat_419f24
 dat_419f28 off_419F28
+dat_419f2c
+dat_419f30
 dat_419f34 word_419F34
+dat_419f36
 dat_419f46 word_419F46
+dat_419f48
 dat_419f62 word_419F62
+dat_419f64
+dat_419f77
 dat_419f78 word_419F78
+dat_419f7a
 dat_419f92 word_419F92
+dat_419f94
 dat_419fac word_419FAC
+dat_419fae
 dat_419fba word_419FBA
+dat_419fbc
+dat_419fcb
 dat_419fcc word_419FCC
+dat_419fce
+dat_419fdb
 dat_419fdc word_419FDC
+dat_419fde
 dat_419fea word_419FEA
+dat_419fec
 dat_41a000 word_41A000
+dat_41a002
 dat_41a00c word_41A00C
+dat_41a00e
+dat_41a01d
 dat_41a01e word_41A01E
+dat_41a020
 dat_41a02a aKernel32Dll
+dat_41a037
 dat_41a038 word_41A038
+dat_41a03a
 dat_41a046 word_41A046
+dat_41a048
 dat_41a05c aUser32Dll
+dat_41a067
 dat_41a068 word_41A068
+dat_41a06a
+dat_41a077
 dat_41a078 word_41A078
+dat_41a07a
+dat_41a089
 dat_41a08a word_41A08A
+dat_41a08c
+dat_41a09b
 dat_41a09c word_41A09C
+dat_41a09e
 dat_41a0ae word_41A0AE
+dat_41a0b0
 dat_41a0bc aAdvapi32Dll
+dat_41a0c9
 dat_41a0ca word_41A0CA
+dat_41a0cc
+dat_41a0df
 dat_41a0e0 aShell32Dll
 dat_41a0ec word_41A0EC
+dat_41a0ee
+dat_41a0fb
 dat_41a0fc word_41A0FC
+dat_41a0fe
 dat_41a112 word_41A112
+dat_41a114
 dat_41a124 aShlwapiDll
 dat_41a130 word_41A130
+dat_41a132
+dat_41a14b
 dat_41a14c word_41A14C
+dat_41a14e
 dat_41a16a word_41A16A
+dat_41a16c
 dat_41a17e word_41A17E
+dat_41a180
+dat_41a191
 dat_41a192 word_41A192
+dat_41a194
 dat_41a1ae word_41A1AE
+dat_41a1b0
 dat_41a1c8 word_41A1C8
+dat_41a1ca
 dat_41a1de word_41A1DE
+dat_41a1e0
+dat_41a1f3
 dat_41a1f4 word_41A1F4
+dat_41a1f6
 dat_41a20e word_41A20E
+dat_41a210
 dat_41a224 word_41A224
+dat_41a226
 dat_41a238 word_41A238
+dat_41a23a
 dat_41a24a word_41A24A
+dat_41a24c
+dat_41a25d
 dat_41a25e word_41A25E
+dat_41a260
 dat_41a26a word_41A26A
+dat_41a26c
+dat_41a27b
 dat_41a27c word_41A27C
+dat_41a27e
+dat_41a28b
 dat_41a28c word_41A28C
+dat_41a28e
 dat_41a29c word_41A29C
+dat_41a29e
+dat_41a2b3
 dat_41a2b4 word_41A2B4
+dat_41a2b6
+dat_41a2cb
 dat_41a2cc word_41A2CC
+dat_41a2ce
 dat_41a2e4 word_41A2E4
+dat_41a2e6
 dat_41a30c word_41A30C
+dat_41a30e
+dat_41a317
 dat_41a318 word_41A318
+dat_41a31a
 dat_41a326 word_41A326
+dat_41a328
 dat_41a334 word_41A334
+dat_41a336
 dat_41a33e word_41A33E
+dat_41a340
 dat_41a34c word_41A34C
+dat_41a34e
+dat_41a35d
 dat_41a35e word_41A35E
+dat_41a360
+dat_41a36f
 dat_41a370 word_41A370
+dat_41a372
 dat_41a37e word_41A37E
+dat_41a380
+dat_41a393
 dat_41a394 word_41A394
+dat_41a396
+dat_41a3a3
 dat_41a3a4 word_41A3A4
+dat_41a3a6
 dat_41a3b0 word_41A3B0
+dat_41a3b2
 dat_41a3c6 word_41A3C6
+dat_41a3c8
 dat_41a3dc word_41A3DC
+dat_41a3de
+dat_41a3e5
 dat_41a3e6 word_41A3E6
+dat_41a3e8
+dat_41a3f1
 dat_41a3f2 word_41A3F2
+dat_41a3f4
 dat_41a3fe word_41A3FE
+dat_41a400
+dat_41a40d
 dat_41a40e word_41A40E
+dat_41a410
 dat_41a41c word_41A41C
+dat_41a41e
 dat_41a428 word_41A428
+dat_41a42a
+dat_41a43b
 dat_41a43c word_41A43C
+dat_41a43e
 dat_41a44c word_41A44C
+dat_41a44e
 dat_41a45e word_41A45E
+dat_41a460
+dat_41a469
 dat_41a46a word_41A46A
+dat_41a46c
 dat_41a476 word_41A476
+dat_41a478
 dat_41a488 word_41A488
+dat_41a48a
+dat_41a4a1
 dat_41a4a2 word_41A4A2
+dat_41a4a4
 dat_41a4bc word_41A4BC
+dat_41a4be
+dat_41a4cb
 dat_41a4cc word_41A4CC
+dat_41a4ce
+dat_41a4dd
 dat_41a4de word_41A4DE
+dat_41a4e0
+dat_41a4ef
 dat_41a4f0 word_41A4F0
+dat_41a4f2
+dat_41a4fb
 dat_41a4fc word_41A4FC
+dat_41a4fe
 dat_41a50a word_41A50A
+dat_41a50c
+dat_41a519
 dat_41a51a word_41A51A
+dat_41a51c
+dat_41a52b
 dat_41a52c word_41A52C
+dat_41a52e
+dat_41a53f
 dat_41a540 word_41A540
+dat_41a542
+dat_41a553
 dat_41a554 word_41A554
+dat_41a556
 dat_41a564 word_41A564
+dat_41a566
+dat_41a574
 dat_41b000 ___security_cookie
 dat_41b004 dword_41B004
 dat_41b00c dword_41B00C
 dat_41b010 dword_41B010
+dat_41b014
 dat_41b020 dwTlsIndex DWORD
+dat_41b024
 dat_41b030 unk_41B030
 dat_41b040 byte_41B040
+dat_41b041
 dat_41b044 unk_41B044
 dat_41b048 unk_41B048
 dat_41b04c dword_41B04C DWORD
 dat_41b050 unk_41B050
 dat_41b0f8 off_41B0F8
+dat_41b128
+dat_41b138
+dat_41b148
+dat_41b158
+dat_41b168
+dat_41b16c
+dat_41b180
+dat_41b18c
+dat_41b190
+dat_41b194
 dat_41b1b0 off_41B1B0
 dat_41b1b4 off_41B1B4
 dat_41b1b8 unk_41B1B8
@@ -3858,20 +5460,32 @@ dat_41b72c off_41B72C
 dat_41b730 off_41B730
 dat_41b734 off_41B734
 dat_41b738 dword_41B738
+dat_41b73c
 dat_41b740 dword_41B740
+dat_41b744
 dat_41b750 hObject HANDLE
+dat_41b754
 dat_41b770 ??_R0?AVbad_alloc@std@@@8
+dat_41b774
 dat_41b778 aAvbadAllocStd
 dat_41b78c ??_R0?AVexception@std@@@8
+dat_41b790
 dat_41b794 aAvexceptionStd
 dat_41b7a8 ??_R0?AVlogic_error@std@@@8
+dat_41b7ac
 dat_41b7b0 aAvlogicErrorSt
+dat_41b7c6
 dat_41b7c8 ??_R0?AVlength_error@std@@@8
+dat_41b7cc
 dat_41b7d0 aAvlengthErrorS
+dat_41b7e7
 dat_41b7e8 ??_R0?AVtype_info@@@8
+dat_41b7ec
 dat_41b7f0 aAvtypeInfo
 dat_41b800 ??_R0?AVbad_array_new_length@std@@@8
+dat_41b804
 dat_41b808 aAvbadArrayNewL
+dat_41b827
 dat_41b828 ??_R0?AVbad_exception@std@@@8
 dat_41b82c dword_41B82C
 dat_41b830 aAvbadException
@@ -3882,9 +5496,13 @@ dat_41b858 dword_41B858
 dat_41b85c dword_41B85C
 dat_41b898 dword_41B898
 dat_41b924 word_41B924
+dat_41b926
 dat_41b928 word_41B928
+dat_41b92a
 dat_41b92c word_41B92C
+dat_41b92e
 dat_41b930 word_41B930
+dat_41b932
 dat_41b934 dword_41B934
 dat_41b938 dword_41B938
 dat_41b93c dword_41B93C
@@ -3894,6 +5512,7 @@ dat_41b948 dword_41B948
 dat_41b94c dword_41B94C
 dat_41b950 dword_41B950
 dat_41b954 word_41B954
+dat_41b956
 dat_41b958 dword_41B958
 dat_41b95c dword_41B95C
 dat_41b960 word_41B960
@@ -3903,7 +5522,8 @@ dat_41bb6c dword_41BB6C
 dat_41bb78 unk_41BB78
 dat_41bb84 byte_41BB84
 dat_41bb85 byte_41BB85
-dat_41bb88 ListHead union _SLIST_HEADER /*%_SLIST_HEADER#8AFBE817ED98AF06%*/
+dat_41bb86
+dat_41bb88 ListHead union _SLIST_HEADER
 dat_41bb90 unk_41BB90
 dat_41bb98 dword_41BB98
 dat_41bb9c dword_41BB9C
@@ -3911,7 +5531,7 @@ dat_41bba0 dword_41BBA0
 dat_41bba4 dword_41BBA4
 dat_41bba8 unk_41BBA8
 dat_41bbb8 unk_41BBB8
-dat_41bbd0 CriticalSection struct _RTL_CRITICAL_SECTION /*%_RTL_CRITICAL_SECTION#C4BE179809706C6A%*/
+dat_41bbd0 CriticalSection struct _RTL_CRITICAL_SECTION
 dat_41bbe8 dword_41BBE8
 dat_41bbec unk_41BBEC
 dat_41bbf8 unk_41BBF8
@@ -3919,6 +5539,7 @@ dat_41bc0c dword_41BC0C
 dat_41bc4c unk_41BC4C
 dat_41bc50 dword_41BC50
 dat_41bc54 byte_41BC54
+dat_41bc55
 dat_41bc58 dword_41BC58
 dat_41bc5c dword_41BC5C
 dat_41bc60 dword_41BC60
@@ -3937,6 +5558,7 @@ dat_41be98 unk_41BE98
 dat_41bea0 unk_41BEA0
 dat_41beb0 unk_41BEB0
 dat_41bfe8 dword_41BFE8
+dat_41bfec
 dat_41bff0 unk_41BFF0
 dat_41c040 unk_41C040
 dat_41c0c0 dword_41C0C0
@@ -3946,6 +5568,7 @@ dat_41c0cc dword_41C0CC
 dat_41c0d0 dword_41C0D0 LPVOID
 dat_41c0d4 dword_41C0D4 LPVOID
 dat_41c0d8 dword_41C0D8 struct __crt_locale_data *
+dat_41c0dc
 dat_41c0e0 dword_41C0E0
 dat_41c2e0 dword_41C2E0
 dat_41c2e4 dword_41C2E4
@@ -3954,6 +5577,7 @@ dat_41c2ec dword_41C2EC
 dat_41c2f0 unk_41C2F0
 dat_41c2fc dword_41C2FC
 dat_41c300 byte_41C300
+dat_41c301
 dat_41c304 dword_41C304
 dat_41c308 dword_41C308 LPVOID
 dat_41c30c dword_41C30C LPVOID
@@ -3970,12 +5594,14 @@ dat_41c334 dword_41C334
 dat_41c338 unk_41C338
 dat_41c33c dword_41C33C
 dat_41c340 dword_41C340
+dat_41c344
 dat_41c348 unk_41C348
 dat_41c350 dword_41C350
 dat_41c354 unk_41C354
 dat_41c358 unk_41C358
 dat_41c35c Ptr PVOID
 dat_41c360 dword_41C360
+dat_41c364
 
 bbk: 5437
 bbk_401000

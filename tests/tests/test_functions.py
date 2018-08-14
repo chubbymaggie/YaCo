@@ -318,6 +318,31 @@ idc.del_items(ea, idc.DELIT_EXPAND, 0x2c)
 """),
             self.save_last_ea(),
         )
+        b.check_git(added=["data"], deleted=["function", "basic_block"], modified=["segment_chunk"])
+        a.run(
+            self.check_last_ea(),
+        )
+
+    def test_rename_stackframe_and_undefine_func(self):
+        a, b = self.setup_repos()
+        a.run(
+            self.script("""
+ea = 0x6600EF70
+idaapi.set_name(ea, "new_function_EF30")
+frame = idaapi.get_frame(ea)
+offset = idc.get_first_member(frame.id)
+idaapi.set_member_name(frame, offset, "zorg")
+"""),
+            self.save_last_ea(),
+        )
+        b.run(
+            self.check_last_ea(),
+            self.script("""
+ea = 0x6600EF70
+idc.del_items(ea, idc.DELIT_EXPAND, 0x2c)
+"""),
+            self.save_last_ea(),
+        )
         b.check_git(added=["data"], deleted=["function", "stackframe",
             "stackframe_member", "stackframe_member", "basic_block"], modified=["segment_chunk"])
         a.run(
@@ -326,6 +351,15 @@ idc.del_items(ea, idc.DELIT_EXPAND, 0x2c)
 
     def test_data_in_func_to_undef_and_back(self):
         a, b = self.setup_repos()
+        # remove noise at 0x66001000
+        a.run(
+            self.script("""
+ea = 0x66001000
+idaapi.set_name(ea, "")
+"""),
+        )
+        a.check_git(added=["binary", "segment", "segment_chunk", "data"])
+
         ea = 0x66038DB0
         a.run(
             self.script("""
@@ -337,8 +371,8 @@ ida_auto.plan_and_wait(ea, ea+0x1f0)
 """),
             self.save_ea(ea),
         )
-        a.check_git(added=["binary", "segment", "segment_chunk", "function", "stackframe", "data"] +
-            ["stackframe_member"] * 7 + ["basic_block"] * 17)
+        a.check_git(added=["segment_chunk", "function", "stackframe", "data"] +
+            ["stackframe_member"] * 7 + ["basic_block"] * 15)
 
         b.run(
             self.check_ea(ea),
@@ -360,7 +394,7 @@ ida_auto.auto_wait()
 """),
             self.save_last_ea(),
         )
-        a.check_git(added=["segment_chunk"], modified=["data"])
+        a.check_git(modified=["data"])
 
         b.run(
             self.check_last_ea(),

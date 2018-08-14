@@ -16,18 +16,16 @@
 #include "gtest/gtest.h"
 
 #include "HVersion.hpp"
-#include "HObject.hpp"
 #include "XmlVisitor.hpp"
 #include "MemoryModel.hpp"
-#include "XmlModel.hpp"
+#include "XmlAccept.hpp"
 #include "FileUtils.hpp"
 #include "IModelSink.hpp"
 #include "IModelVisitor.hpp"
 #include "FlatBufferModel.hpp"
 #include "FlatBufferVisitor.hpp"
 #include "../YaToolsLib_test/test_model.hpp"
-#include "Yatools.h"
-#include "Logger.h"
+#include "Yatools.hpp"
 
 #include <functional>
 
@@ -49,72 +47,45 @@ namespace fs = std::experimental::filesystem;
 
 namespace
 {
-    // initialize global logger instance
-    static const auto yaok = []
-    {
-        auto pCtx = YATOOLS_Get();
-        if(!YATOOLS_Init(pCtx))
-            return false;
-        auto pLogger = YATOOLS_GetLogger(pCtx);
-        LOG_Cfg Cfg;
-        memset(&Cfg, 0, sizeof Cfg);
-        Cfg.Outputs[0] = {LOG_OUTPUT_FILE_HANDLE, stderr, nullptr};
-        return LOG_Init(pLogger, &Cfg);
-    }();
-
-    class TestConfiguration : public testing::Test
-    {
-        virtual void SetUp()
-        {
-            EXPECT_TRUE(yaok);
-        }
-    };
-
     typedef std::multiset<std::tuple<std::string, std::string, std::string, std::string>> StringModel;
 
     StringModel walk_model(IModel& db)
     {
         StringModel values;
 
-        db.walk_objects([&](const YaToolObjectId& id, const HObject& href)
+        db.walk([&](const HVersion& hver)
         {
-            EXPECT_EQ(id, href.id());
-            values.insert(std::make_tuple("object", str(href), "", ""));
-            href.walk_versions([&](const HVersion& hver)
+            values.insert(std::make_tuple("version", str(hver), str(hver.address()), ""));
+            hver.walk_signatures([&](const HSignature& hsig)
             {
-                values.insert(std::make_tuple("version", str(hver), str(hver.address()), str(hver.parent_id())));
-                hver.walk_signatures([&](const HSignature& hsig)
+                values.insert(std::make_tuple("signature", str(hver), str(hsig), ""));
+                return WALK_CONTINUE;
+            });
+            hver.walk_xrefs_from([&](offset_t offset, operand_t operand, const HVersion& from)
+            {
+                const auto v = std::to_string(offset) + "_" + std::to_string(operand) + "_" + str(from);
+                values.insert(std::make_tuple("xref", str(hver), v, ""));
+                return WALK_CONTINUE;
+            });
+            hver.walk_xrefs_to([&](const HVersion& to)
+            {
+                values.insert(std::make_tuple("xref_to", str(hver), str(to), ""));
+                return WALK_CONTINUE;
+            });
+            hver.walk_xrefs([&](offset_t offset, operand_t operand, YaToolObjectId id, const XrefAttributes* hattr)
+            {
+                const auto v = std::to_string(offset) + "_" + std::to_string(operand) + "_" + str(id);
+                values.insert(std::make_tuple("ref", str(hver), v, ""));
+                hver.walk_xref_attributes(hattr, [&](const const_string_ref& key, const const_string_ref& value)
                 {
-                    values.insert(std::make_tuple("signature", str(href), str(hver), str(hsig)));
+                    values.insert(std::make_tuple("ref", str(hver) + "_" + v, make_string(key), make_string(value)));
                     return WALK_CONTINUE;
                 });
-                hver.walk_xrefs_from([&](offset_t offset, operand_t operand, const HObject& obj)
-                {
-                    const auto v = std::to_string(offset) + "_" + std::to_string(operand) + "_" + str(obj);
-                    values.insert(std::make_tuple("xref", str(href), str(hver), v));
-                    return WALK_CONTINUE;
-                });
-                hver.walk_xrefs_to([&](const HObject& from)
-                {
-                    values.insert(std::make_tuple("xref_to", str(href), str(hver), str(from)));
-                    return WALK_CONTINUE;
-                });
-                hver.walk_xrefs([&](offset_t offset, operand_t operand, YaToolObjectId id, const XrefAttributes* hattr)
-                {
-                    const auto v = std::to_string(offset) + "_" + std::to_string(operand) + "_" + str(id);
-                    values.insert(std::make_tuple("ref", str(href), str(hver), v));
-                    hver.walk_xref_attributes(hattr, [&](const const_string_ref& key, const const_string_ref& value)
-                    {
-                        values.insert(std::make_tuple("ref", str(hver) + "_" + v, make_string(key), make_string(value)));
-                        return WALK_CONTINUE;
-                    });
-                    return WALK_CONTINUE;
-                });
-                hver.walk_attributes([&](const const_string_ref& key, const const_string_ref& val)
-                {
-                    values.insert(std::make_tuple("attr", str(hver), make_string(key), make_string(val)));
-                    return WALK_CONTINUE;
-                });
+                return WALK_CONTINUE;
+            });
+            hver.walk_attributes([&](const const_string_ref& key, const const_string_ref& val)
+            {
+                values.insert(std::make_tuple("attr", str(hver), make_string(key), make_string(val)));
                 return WALK_CONTINUE;
             });
             return WALK_CONTINUE;
@@ -132,9 +103,9 @@ namespace
 
         void update(const IModel& model) override
         {
-            model.walk_objects([&](auto, const HObject& hobj)
+            model.walk([&](const HVersion& hver)
             {
-                hobj.accept(visitor);
+                hver.accept(visitor);
                 return WALK_CONTINUE;
             });
         }
@@ -185,9 +156,9 @@ namespace
             const auto db = MakeMemoryModel();
             db->visit_start();
             Listener listener(*db);
-            listener.update(*create_fbmodel_with([&](const auto& visitor)
+            listener.update(*create_fbmodel_with([&](auto& visitor)
             {
-                MakeXmlFilesModel({xml})->accept(*visitor);
+                AcceptXmlFiles(visitor, {xml});
             }));
             db->visit_end();
             return walk_model(*db);
@@ -195,9 +166,16 @@ namespace
         expect_eq(xmlmodel, expected);
     }
 
-    const char qt54svg[] = "../../testdata/qt54_svg/database/database.yadb";
-    const char qt57svg[] = "../../testdata/qt57_svg/database/database.yadb";
+    const char qt54svg[]        = "../../testdata/qt54_svg/database/database.yadb";
+    const char qt54svg_no_pdb[] = "../../testdata/qt54_svg_no_pdb/database/database.yadb";
 }
 
-TEST(IntegrationTest, yadb_model_conversions_qt54)      { CheckModelConversions(qt54svg); }
-TEST(IntegrationTest, yadb_model_conversions_qt57)      { CheckModelConversions(qt57svg); }
+int main(int argc, char* argv[])
+{
+    globals::InitFileLogger(*globals::Get().logger, stdout);
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+
+TEST(IntegrationTest, yadb_model_conversions_qt54)        { CheckModelConversions(qt54svg); }
+TEST(IntegrationTest, yadb_model_conversions_qt54_no_pdb) { CheckModelConversions(qt54svg_no_pdb); }

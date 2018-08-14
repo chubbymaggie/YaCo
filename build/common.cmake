@@ -219,10 +219,14 @@ function(setup_git target files_ includes_)
     # generate compile-time git version configuration
     file(WRITE ${root}/git_version.cmake "
         execute_process(COMMAND
-        ${GIT_EXECUTABLE} describe --dirty --tags --long
-        WORKING_DIRECTORY \"${root_dir}\"
-        OUTPUT_VARIABLE GIT_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+            ${GIT_EXECUTABLE} describe --dirty --tags --long
+            WORKING_DIRECTORY \"${root_dir}\"
+            OUTPUT_VARIABLE GIT_VERSION
+            RESULT_VARIABLE retcode
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(NOT \"$\{retcode}\" STREQUAL \"0\")
+            message(FATAL_ERROR \"${GIT_EXECUTABLE} describe --dirty --tags --long: returned $\{retcode}\")
+        endif()
         configure_file(\"\${SRC}\" \"\${DST}\" @ONLY)
     ")
 
@@ -339,6 +343,7 @@ function(setup_gcc target)
             "-Wall"
             "-Wextra"
             "-Werror"
+            "-Wformat-security" # enabled by default on ubuntu so enable it for all
         )
     endif()
 endfunction()
@@ -373,9 +378,9 @@ function(autogen_files target)
     if(EXISTS "${filename}")
         file(READ "${filename}" got)
     endif()
-    if(NOT "${data}" STREQUAL "${got}")
-        file(WRITE "${filename}" ${data})
-    endif()
+    set(tmp_filename "${CMAKE_CURRENT_BINARY_DIR}/${target}.dir/build.list")
+    file(WRITE "${tmp_filename}" "${data}")
+    configure_file("${tmp_filename}" "${filename}" NEWLINE_STYLE LF)
     include(${filename})
     set(_${target}_files ${_${target}_files} PARENT_SCOPE)
 endfunction()

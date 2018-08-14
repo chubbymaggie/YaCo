@@ -21,17 +21,16 @@
 #include "Hooks.hpp"
 #include "IdaVisitor.hpp"
 #include "Events.hpp"
-#include "XmlModel.hpp"
+#include "XmlAccept.hpp"
+#include "Helpers.h"
 #include "FlatBufferVisitor.hpp"
 #include "IdaModel.hpp"
 #include "Utils.hpp"
 #include "MemoryModel.hpp"
 #include "IModelSink.hpp"
+#include "Yatools.hpp"
 
 #include "git_version.h"
-
-#define MODULE_NAME "yaco"
-#include "IdaUtils.hpp"
 
 #include <chrono>
 
@@ -42,6 +41,8 @@
 #endif
 
 namespace fs = std::experimental::filesystem;
+
+#define LOG(LEVEL, FMT, ...) CONCAT(YALOG_, LEVEL)("yaco", (FMT), ## __VA_ARGS__)
 
 namespace
 {
@@ -91,7 +92,7 @@ namespace
     struct YaCo
         : public IYaCo
     {
-         YaCo(const std::shared_ptr<Yatools>& yatools);
+         YaCo();
         ~YaCo();
 
         // IYaCo methods
@@ -104,25 +105,29 @@ namespace
         void toggle_auto_rebase_push();
 
         // Variables
-        std::shared_ptr<Yatools>     yatools_;
         std::shared_ptr<IRepository> repo_;
         std::shared_ptr<IEvents>     events_;
         std::shared_ptr<IHooks>      hooks_;
-
         std::vector<action_desc_t>   action_descs_;
+        bool                         loaded_;
     };
+
+    void exit(YaCo& yaco)
+    {
+        yaco.repo_.reset();
+        qexit(0);
+    }
 }
 
 
-YaCo::YaCo(const std::shared_ptr<Yatools>& yatools)
-    : yatools_(yatools)
-    , repo_(MakeRepository("."))
+YaCo::YaCo()
+    : repo_(MakeRepository("."))
     , events_(MakeEvents(*repo_))
     , hooks_(MakeHooks(*events_))
+    , loaded_(false)
 {
-    IDA_LOG_INFO("YaCo %s", GitVersion);
-
-    repo_->check_valid_cache_startup();
+    if(!repo_->check_valid_cache_startup())
+        exit(*this);
 
     // hooks not hooked yet
     initial_load();
@@ -130,8 +135,11 @@ YaCo::YaCo(const std::shared_ptr<Yatools>& yatools)
 
     #define YACO_ACTION_DESC(name, label, handler) ACTION_DESC_LITERAL_OWNER(name, label, handler, nullptr, nullptr, nullptr, -1)
     action_descs_.push_back(YACO_ACTION_DESC("yaco_toggle_rebase_push",     "YaCo - Toggle YaCo auto rebase/push",   new_handler([&]{ toggle_auto_rebase_push(); })));
-    action_descs_.push_back(YACO_ACTION_DESC("yaco_sync_and_push_idb",      "YaCo - Resync idb & force push",        new_handler([&]{ sync_and_push_idb(IDA_INTERACTIVE); })));
-    action_descs_.push_back(YACO_ACTION_DESC("yaco_discard_and_pull_idb",   "YaCo - Discard idb & force pull",       new_handler([&]{ discard_and_pull_idb(IDA_INTERACTIVE); })));
+    if(repo_->idb_is_tracked())
+    {
+        action_descs_.push_back(YACO_ACTION_DESC("yaco_sync_and_push_idb", "YaCo - Resync idb & force push", new_handler([&] { sync_and_push_idb(IDA_INTERACTIVE); })));
+        action_descs_.push_back(YACO_ACTION_DESC("yaco_discard_and_pull_idb", "YaCo - Discard idb & force pull", new_handler([&] { discard_and_pull_idb(IDA_INTERACTIVE); })));
+    }
     action_descs_.push_back(YACO_ACTION_DESC("yaco_export_database",        "YaCo - Export database",                new_handler([&]{ export_database(); })));
     #undef YACO_ACTION_DESC
 
@@ -142,40 +150,41 @@ YaCo::YaCo(const std::shared_ptr<Yatools>& yatools)
     }
 
     hooks_->hook();
+    loaded_ = true;
 }
 
 void YaCo::export_database()
 {
-    IDA_LOG_INFO("Exporting database using one core");
+    LOG(INFO, "Exporting database\n");
 
     std::error_code ec;
     fs::create_directory("database", ec); //no error if directory already exist
     if (ec)
     {
-        IDA_LOG_ERROR("Export failed, unable to create database directory");
+        LOG(ERROR, "Export failed, unable to create database directory\n");
         return;
     }
 
     const auto exporter = MakeFlatBufferVisitor();
-    MakeIdaModel()->accept(*exporter);
+    AcceptIdaModel(*exporter);
     ExportedBuffer buffer = exporter->GetBuffer();
 
     FILE* database = fopen("database/database.yadb", "wb");
     if (database == nullptr)
     {
-        IDA_LOG_INFO("Export failed, %s", strerror(errno));
+        LOG(INFO, "Export failed, %s\n", strerror(errno));
         return;
     }
 
-    if (fwrite(buffer.value, 1, buffer.size, database) != buffer.size)
-    {
-        IDA_LOG_INFO("Export failed");
-        return;
-    }
-
+    const auto count = fwrite(buffer.value, buffer.size, 1, database);
     fclose(database);
+    if(count != 1)
+    {
+        LOG(INFO, "Export failed\n");
+        return;
+    }
 
-    IDA_LOG_INFO("Export complete");
+    LOG(INFO, "Export complete\n");
 }
 
 YaCo::~YaCo()
@@ -188,22 +197,22 @@ YaCo::~YaCo()
     hooks_.reset();
     events_.reset();
     repo_.reset();
-    IDA_LOG_INFO("exit");
+    LOG(INFO, "exit\n");
 }
 
 void YaCo::initial_load()
 {
     const auto time_start = std::chrono::system_clock::now();
-    LOG(DEBUG, "Loading...");
+    LOG(DEBUG, "Loading...\n");
 
     const auto mem = MakeMemoryModel();
-    MakeXmlAllModel(".")->accept(*mem);
+    AcceptXmlCache(*mem, repo_->get_cache());
     MakeIdaSink()->update(*mem);
 
     const auto time_end = std::chrono::system_clock::now();
     const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(time_end - time_start).count();
     if(elapsed)
-        IDA_LOG_INFO("cache: imported in %d seconds", static_cast<int>(elapsed));
+        LOG(INFO, "cache: imported in %d seconds\n", static_cast<int>(elapsed));
 }
 
 void YaCo::toggle_auto_rebase_push()
@@ -229,7 +238,7 @@ void YaCo::sync_and_push_idb(IdaMode mode)
     repo_->sync_and_push_original_idb();
 
     warning("Force push complete, you can restart IDA and other YaCo users can \"Force pull\"");
-    qexit(0);
+    exit(*this);
 }
 
 void YaCo::discard_and_pull_idb(IdaMode mode)
@@ -247,12 +256,23 @@ void YaCo::discard_and_pull_idb(IdaMode mode)
 
     set_database_flag(DBFL_KILL);
     warning("Force pull complete, you can restart IDA");
-    qexit(0);
+    exit(*this);
 }
 
 std::shared_ptr<IYaCo> MakeYaCo()
 {
     auto idb_path = get_current_idb_path();
     remove_file_extension(idb_path);
-    return std::make_shared<YaCo>(MakeYatools(idb_path.generic_string().data()));
+    auto& logger = *globals::Get().logger;
+    globals::InitIdbLogger(logger, idb_path.generic_string().data());
+    logger.Delegate([](size_t prefix, const char* message)
+    {
+        msg("%s", &message[prefix + 1]);
+    });
+    LOG(INFO, "version %s\n", GitVersion);
+    const auto ptr = std::make_shared<YaCo>();
+    if(!ptr->loaded_)
+        return std::nullptr_t();
+
+    return ptr;
 }

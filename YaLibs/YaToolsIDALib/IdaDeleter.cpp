@@ -18,23 +18,11 @@
 
 #include "IdaDeleter.hpp"
 #include "HVersion.hpp"
-#include "Logger.h"
-#include "Yatools.h"
-#include "HObject.hpp"
+#include "Yatools.hpp"
+#include "Helpers.h"
+#include "YaHelpers.hpp"
 
 #define LOG(LEVEL, FMT, ...) CONCAT(YALOG_, LEVEL)("ida_deleter", (FMT), ## __VA_ARGS__)
-
-#ifdef __EA64__
-#define PRIxEA "llx"
-#define PRIXEA "llX"
-#define PRIuEA "llu"
-#define EA_SIZE "16"
-#else
-#define PRIxEA "x"
-#define PRIXEA "X"
-#define PRIuEA "u"
-#define EA_SIZE "8"
-#endif
 
 namespace
 {
@@ -44,12 +32,12 @@ namespace
         const auto struc = get_struc(get_struc_id(name.data()));
         if(!struc)
         {
-            LOG(ERROR, "unable to deleted missing struc '%s'", name.data());
+            LOG(ERROR, "unable to delete missing struc '%s'\n", name.data());
             return;
         }
         const auto ok = del_struc(struc);
         if(!ok)
-            LOG(ERROR, "unable to delete struc '%s'", name.data());
+            LOG(ERROR, "unable to delete struc '%s'\n", name.data());
     }
 
     void delete_enum(const HVersion& hver)
@@ -57,7 +45,7 @@ namespace
         const auto name = make_string(hver.username());
         const auto eid = get_enum(name.data());
         if(eid == BADADDR)
-            LOG(ERROR, "unable to deleted missing enum '%s'", name.data());
+            LOG(ERROR, "unable to delete missing enum '%s'\n", name.data());
         else
             del_enum(eid);
     }
@@ -68,7 +56,7 @@ namespace
         const auto cid = get_enum_member_by_name(name.data());
         if(cid == BADADDR)
         {
-            LOG(ERROR, "unable to deleted missing enum member '%s'", name.data());
+            LOG(ERROR, "unable to delete missing enum member '%s'\n", name.data());
             return;
         }
         const auto eid = get_enum_member_enum(cid);
@@ -77,7 +65,7 @@ namespace
         const auto bmask = get_enum_member_bmask(cid);
         const auto ok = del_enum_member(eid, value, serial, bmask);
         if(!ok)
-            LOG(ERROR, "unable to delete enum member '%s'", name.data());
+            LOG(ERROR, "unable to delete enum member '%s'\n", name.data());
     }
 
     void delete_function(const HVersion& hver)
@@ -85,81 +73,79 @@ namespace
         const auto ea = static_cast<ea_t>(hver.address());
         const auto ok = del_func(ea);
         if(!ok)
-            LOG(ERROR, "unable to delete func 0x%0" EA_SIZE PRIXEA, ea);
+            LOG(ERROR, "unable to delete func 0x%0" EA_SIZE PRIXEA "\n", ea);
     }
 
-    void delete_data(const HVersion& hver)
+    void reset_ea(ea_t ea, int nmax)
     {
-        const auto ea = static_cast<ea_t>(hver.address());
-        const auto ok = del_items(ea, DELIT_EXPAND);
-        if(!ok)
-            LOG(ERROR, "unable to delete data 0x%0" EA_SIZE PRIXEA, ea);
-    }
-
-    void delete_code(const HVersion& hver)
-    {
-        const auto ea = static_cast<ea_t>(hver.address());
-        const auto ok = del_items(ea, DELIT_EXPAND, static_cast<asize_t>(hver.size()));
-        if(!ok)
-            LOG(ERROR, "unable to delete code 0x%0" EA_SIZE PRIXEA, ea);
-    }
-
-    void delete_block(const HVersion& hver)
-    {
-        const auto ea = static_cast<ea_t>(hver.address());
-        const auto ok = del_items(ea, DELIT_EXPAND, static_cast<asize_t>(hver.size()));
-        if(!ok)
-            LOG(ERROR, "unable to delete basic block 0x%0" EA_SIZE PRIXEA, ea);
-    }
-
-    void delete_object(const HObject& hobj)
-    {
-        const auto type = hobj.type();
-        hobj.walk_versions([&](const HVersion& hver)
+        const auto flags = get_flags(ea);
+        for(const auto repeatable : {false, true})
+            set_cmt(ea, "", repeatable);
+        del_extra_cmt(ea, E_PREV);
+        del_extra_cmt(ea, E_NEXT);
+        for(int n = 0; n < nmax; ++n)
         {
-            switch(type)
-            {
-                default:
-                    break;
+            if(is_invsign(ea, flags, n))
+                toggle_sign(ea, n);
+            if(is_bnot(ea, flags, n))
+                toggle_bnot(ea, n);
+        }
+    }
 
-                case OBJECT_TYPE_STRUCT:
-                    delete_struc(hver);
-                    break;
+    void delete_chunk(const HVersion& hver, const char* where, int nmax)
+    {
+        const auto ea   = static_cast<ea_t>(hver.address());
+        const auto end  = static_cast<ea_t>(ea + hver.size());
+        for(auto it = ea; it < end; it = get_item_end(it))
+            reset_ea(it, nmax);
+        const auto ok = del_items(ea, DELIT_EXPAND, static_cast<asize_t>(hver.size()));
+        if(!ok)
+            LOG(ERROR, "unable to delete %s 0x%0" EA_SIZE PRIXEA "\n", where, ea);
+    }
 
-                case OBJECT_TYPE_ENUM:
-                    delete_enum(hver);
-                    break;
+    void delete_object(const HVersion& hver)
+    {
+        switch(hver.type())
+        {
+            default:
+                break;
 
-                case OBJECT_TYPE_ENUM_MEMBER:
-                    delete_enum_member(hver);
-                    break;
+            case OBJECT_TYPE_STRUCT:
+                delete_struc(hver);
+                break;
 
-                case OBJECT_TYPE_FUNCTION:
-                    delete_function(hver);
-                    break;
+            case OBJECT_TYPE_ENUM:
+                delete_enum(hver);
+                break;
 
-                case OBJECT_TYPE_DATA:
-                    delete_data(hver);
-                    break;
+            case OBJECT_TYPE_ENUM_MEMBER:
+                delete_enum_member(hver);
+                break;
 
-                case OBJECT_TYPE_CODE:
-                    delete_code(hver);
-                    break;
+            case OBJECT_TYPE_FUNCTION:
+                delete_function(hver);
+                break;
 
-                case OBJECT_TYPE_BASIC_BLOCK:
-                    delete_block(hver);
-                    break;
-            }
-            return WALK_CONTINUE;
-        });
+            case OBJECT_TYPE_DATA:
+                delete_chunk(hver, "data", 1);
+                break;
+
+            case OBJECT_TYPE_CODE:
+                delete_chunk(hver, "code", 2);
+                break;
+
+            case OBJECT_TYPE_BASIC_BLOCK:
+                delete_chunk(hver, "block", 2);
+                break;
+        }
     }
 }
 
 void delete_from_model(const IModel& model)
 {
-    model.walk_objects([](YaToolObjectId /*id*/, const HObject& hobj)
+    model.walk([](const HVersion& hver)
     {
-        ::delete_object(hobj);
+        ::delete_object(hver);
         return WALK_CONTINUE;
     });
 }

@@ -25,16 +25,15 @@
 
 #include "YaEnums.hpp"
 
-class IModelVisitor;
+struct IModelVisitor;
 struct IModel;
 struct Signature;
 struct HVersion;
-struct HObject;
 struct HSignature;
 struct HSystem;
 
-typedef uint32_t HObject_id_t;
-typedef uint32_t HVersion_id_t;
+typedef uint32_t VersionIndex;
+
 typedef uint32_t HSignature_id_t;
 typedef uint32_t VersionRelation_id_t;
 
@@ -42,9 +41,6 @@ typedef uint64_t offset_t;
 typedef int32_t  operand_t;
 typedef uint32_t flags_t;
 typedef uint64_t YaToolObjectId;
-typedef uint32_t YaToolFlag_T;
-
-#define UNKNOWN_ADDR    static_cast<offset_t>(~0)
 
 YaToolObjectType_e  get_object_type(const char* object_type);
 const char*         get_object_type_string(YaToolObjectType_e object_type);
@@ -95,6 +91,11 @@ inline const_string_ref make_string_ref(const std::string& value)
 inline bool operator==(const const_string_ref& a, const const_string_ref& b)
 {
     return a.size == b.size && (!a.value || !strcmp(a.value, b.value));
+}
+
+inline bool operator!=(const const_string_ref& a, const const_string_ref& b)
+{
+    return !(a == b);
 }
 
 inline bool operator<(const const_string_ref& a, const const_string_ref& b)

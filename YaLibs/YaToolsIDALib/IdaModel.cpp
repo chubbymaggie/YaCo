@@ -17,7 +17,6 @@
 #include "Ida.h"
 
 #include "IdaModel.hpp"
-#include "IModelAccept.hpp"
 #include "IModelVisitor.hpp"
 #include "Hash.hpp"
 #include "YaHelpers.hpp"
@@ -28,9 +27,8 @@
 #include "MemoryModel.hpp"
 #include "XmlVisitor.hpp"
 #include "IModel.hpp"
-
-#include <Logger.h>
-#include <Yatools.h>
+#include "Helpers.h"
+#include "Yatools.hpp"
 
 #include <algorithm>
 #include <unordered_set>
@@ -44,18 +42,6 @@ extern "C"
 }
 
 #define LOG(LEVEL, FMT, ...) CONCAT(YALOG_, LEVEL)("ida_model", (FMT), ## __VA_ARGS__)
-
-#ifdef __EA64__
-#define PRIxEA "llx"
-#define PRIXEA "llX"
-#define PRIuEA "llu"
-#define EA_SIZE "16"
-#else
-#define PRIxEA "x"
-#define PRIXEA "X"
-#define PRIuEA "u"
-#define EA_SIZE "8"
-#endif
 
 void pool_item_clear(qstring& item)
 {
@@ -107,6 +93,7 @@ namespace
     DECLARE_REF(g_gs, "gs");
     DECLARE_REF(g_type, "type");
     DECLARE_REF(g_color, "color");
+    DECLARE_REF(g_format, "format");
 
 #undef DECLARE_REF
 
@@ -252,9 +239,7 @@ namespace
 
     void start_object(IModelVisitor& v, YaToolObjectType_e type, YaToolObjectId id, YaToolObjectId parent, ea_t ea)
     {
-        v.visit_start_reference_object(type);
-        v.visit_id(id);
-        v.visit_start_object_version();
+        v.visit_start_version(type, id);
         if(parent)
             v.visit_parent_id(parent);
         v.visit_address(offset_from_ea(ea));
@@ -262,8 +247,7 @@ namespace
 
     void finish_object(IModelVisitor& v)
     {
-        v.visit_end_object_version();
-        v.visit_end_reference_object();
+        v.visit_end_version();
     }
 
     template<typename T>
@@ -350,20 +334,42 @@ namespace
         bool    guess;
     };
 
+    MemberType fixup_member_type(member_t* member, const MemberType& type)
+    {
+        const auto member_size = get_member_size(member);
+        const auto type_size = type.tif.get_size();
+        if(member_size == type_size)
+            return type;
+
+        if(!type_size)
+            return type;
+
+        if(member_size % type_size)
+            return type;
+
+        tinfo_t tif;
+        // workaround IDA bug where member type is an array but tinfo contain a single type only
+        const auto ok = tif.create_array(type.tif, static_cast<uint32_t>(member_size / type_size));
+        if(!ok)
+            return type;
+
+        return {tif, true};
+    }
+
     MemberType get_member_type(member_t* member, opinfo_t* pop)
     {
         tinfo_t tif;
         auto ok = get_member_tinfo(&tif, member);
         if(ok)
-            return {tif, false};
+            return fixup_member_type(member, {tif, false});
 
-        tif = ya::get_tinfo(member->flag, pop);
+        tif = ya::get_tinfo_from_op(member->flag, pop);
         if(!tif.empty())
-            return {tif, true};
+            return fixup_member_type(member, {tif, true});
 
         const auto guess = guess_tinfo(&tif, member->id);
         if(guess == GUESS_FUNC_OK)
-            return {tif, true};
+            return fixup_member_type(member, {tif, true});
 
         return {tinfo_t(), true};
     }
@@ -418,12 +424,13 @@ namespace
         return is_trivial_member_type(mtype);
     }
 
-    template<typename T>
-    const_string_ref to_hex_ref(qstring* qbuf, T value)
+    const_string_ref to_hex_ref(qstring& qbuf, uint64_t value)
     {
-        *qbuf = "0x";
-        ya::append_uint64(*qbuf, value);
-        return ya::to_string_ref(*qbuf);
+        char buf[2 + sizeof value * 2];
+        const auto str = to_hex<HexaPrefix>(buf, value);
+        qbuf.qclear();
+        qbuf.append(str.value, str.size);
+        return ya::to_string_ref(qbuf);
     }
 
     template<typename Ctx>
@@ -467,7 +474,7 @@ namespace
 
         if(has_op && is_enum0(flags))
         {
-            const auto seref = op.ec.serial ? to_hex_ref(&*qbuf, op.ec.serial) : g_empty;
+            const auto seref = op.ec.serial ? to_hex_ref(*qbuf, op.ec.serial) : g_empty;
             if(seref.size)
                 v.visit_xref_attribute(g_serial, seref);
         }
@@ -505,12 +512,7 @@ namespace
 
         // we need to skip default members else we explode on structures with thousand of default fields
         if(is_default_member(*ctx.qpool_.acquire(), struc, member, ya::to_string_ref(*qbuf)))
-        {
-            v.visit_start_deleted_object(type);
-            v.visit_id(id);
-            v.visit_end_deleted_object();
-            return;
-        }
+            return v.visit_deleted(type, id);
 
         start_object(v, type, id, parent.id, offset);
         const auto size = get_member_size(member);
@@ -548,7 +550,8 @@ namespace
         start_object(v, type, id, parent.id, ea);
         const auto size = get_struc_size(struc);
         v.visit_size(size);
-        v.visit_name(ya::to_string_ref(*struc_name), DEFAULT_NAME_FLAGS);
+        if(!func)
+            v.visit_name(ya::to_string_ref(*struc_name), DEFAULT_NAME_FLAGS);
         if(struc->is_union())
             v.visit_flags(1); // FIXME constant
 
@@ -859,7 +862,7 @@ namespace
 
     ea_t get_data_head(ea_t ea)
     {
-        const auto eas = get_all_items(ea, ea + 1);
+        const auto eas = ya::get_all_items(ea, ea + 1);
         return eas.empty() ? BADADDR : eas.front();
     }
 
@@ -985,7 +988,7 @@ namespace
             // & make sure offset is sign-extended to 64-bits
             const int64_t iea = sizeof ea == 4 ? int64_t(int32_t(offset)) : offset;
             v.visit_start_xref(iea, bid, DEFAULT_OPERAND);
-            v.visit_xref_attribute(g_size, to_hex_ref(&*qbuf, block.size()));
+            v.visit_xref_attribute(g_size, to_hex_ref(*qbuf, block.size()));
             v.visit_end_xref();
         }
         v.visit_end_xrefs();
@@ -1095,7 +1098,7 @@ namespace
             //const auto dump = ya::dump_flags(xflags);
             if(!is_valid)
                 continue;
-            const auto xref = Xref{ea - root, hash_untyped_ea(ya::get_range_item(xb.to).start_ea), DEFAULT_OPERAND, 0};
+            const auto xref = Xref{ea - root, hash::hash_ea(ya::get_range_item(xb.to).start_ea), DEFAULT_OPERAND, 0};
             ctx.xrefs_.push_back(xref);
         }
     }
@@ -1109,7 +1112,7 @@ namespace
         const auto next = prev_not_tail(end);
         for(auto ea = get_first_cref_from(next); ea != BADADDR; ea = get_next_cref_from(next, ea))
         {
-            const auto id = hash_untyped_ea(ea);
+            const auto id = hash::hash_ea(ea);
             ctx.xrefs_.push_back({ea - start, id, DEFAULT_OPERAND, 0});
         }
     }
@@ -1262,19 +1265,11 @@ namespace
         v.visit_end_offsets();
     }
 
-    template<typename T>
-    void dedup(T& d)
-    {
-        // sort & remove duplicates
-        std::sort(d.begin(), d.end());
-        d.erase(std::unique(d.begin(), d.end()), d.end());
-    }
-
     template<typename Ctx>
     void accept_xrefs(Ctx& ctx, IModelVisitor& v)
     {
         char hexabuf[2 + sizeof(uint32_t) * 2];
-        dedup(ctx.xrefs_);
+        ya::dedup(ctx.xrefs_);
         v.visit_start_xrefs();
         for(const auto& it : ctx.xrefs_)
         {
@@ -1290,7 +1285,7 @@ namespace
     template<typename Ctx>
     void accept_reference_infos(Ctx& ctx, IModelVisitor& v)
     {
-        dedup(ctx.refs_);
+        ya::dedup(ctx.refs_);
         for(const auto& r : ctx.refs_)
         {
             start_object(v, OBJECT_TYPE_REFERENCE_INFO, r.id, 0, r.base);
@@ -1398,13 +1393,14 @@ namespace
             ctx.plugin_->accept_function(v, ea);
         finish_object(v);
 
+        accept_dependencies(ctx, v, deps);
+        if(Ctx::is_incremental)
+            return;
+
         if(frame)
             accept_struct(ctx, v, {id, ea}, frame, func);
-        accept_dependencies(ctx, v, deps);
-
-        if(!Ctx::is_incremental)
-            for(const auto& block : flow.blocks)
-                accept_block(ctx, v, {id, func->start_ea}, block);
+        for(const auto& block : flow.blocks)
+            accept_block(ctx, v, {id, func->start_ea}, block);
     }
 
     template<typename Ctx>
@@ -1442,48 +1438,6 @@ namespace
     }
 }
 
-std::vector<ea_t> get_all_items(ea_t start, ea_t end)
-{
-    std::vector<ea_t> items;
-
-    // add previous overlapped item
-    auto ea = start;
-    const auto curr = ya::get_range_item(ea);
-    if(curr.contains(ea))
-        ea = curr.start_ea;
-
-    const auto allowed = range_t{start, end};
-    const auto add_ea = [&](ea_t x)
-    {
-        const auto flags = get_flags(x);
-        if(is_code(flags) || has_any_name(flags) || has_xref(flags))
-            if(allowed.contains(x))
-                items.emplace_back(x);
-    };
-
-    // find all interesting items
-    while(ea != BADADDR && ea < end)
-    {
-        const auto flags = get_flags(ea);
-        if(is_code(flags))
-        {
-            const auto func = get_func(ea);
-            const auto code = ya::get_range_code(ea, start, end);
-            if(func)
-                add_ea(func->start_ea);
-            else if(code.contains(ea))
-                add_ea(code.start_ea);
-            ea = code.end_ea;
-            continue;
-        }
-        add_ea(ea);
-        ea = next_not_tail(ea);
-    }
-
-    dedup(items);
-    return items;
-}
-
 namespace
 {
     template<typename Ctx>
@@ -1498,7 +1452,7 @@ namespace
         v.visit_size(end - ea);
 
         v.visit_start_xrefs();
-        const auto eas = get_all_items(ea, end);
+        const auto eas = ya::get_all_items(ea, end);
         for(const auto item_ea : eas)
         {
             const auto item_id = hash_untyped_ea(item_ea);
@@ -1524,10 +1478,11 @@ namespace
         // do not chunk empty loader segments
         if(!is_mapped(seg->start_ea))
             return;
-        for(auto ea = seg->start_ea; ea < seg->end_ea; ea += SEGMENT_CHUNK_MAX_SIZE)
+        for(auto ea = seg->start_ea; ea < seg->end_ea; /**/)
         {
-            const auto end = std::min(ea + SEGMENT_CHUNK_MAX_SIZE, seg->end_ea);
+            const auto end = ea + std::min<ea_t>(SEGMENT_CHUNK_MAX_SIZE, seg->end_ea - ea);
             operand(ea, end);
+            ea = end;
         }
     }
 
@@ -1663,6 +1618,13 @@ namespace
         v.visit_segments_end();
     }
 
+    void accept_binary_attributes(IModelVisitor& v)
+    {
+        char file_type[256];
+        const auto size = get_file_type_name(file_type, sizeof file_type);
+        v.visit_attribute(g_format, {file_type, size});
+    }
+
     template<typename Ctx>
     Parent accept_binary(Ctx& ctx, IModelVisitor& v)
     {
@@ -1694,6 +1656,7 @@ namespace
         }
         v.visit_end_xrefs();
 
+        accept_binary_attributes(v);
         finish_object(v);
 
         if(Ctx::is_incremental)
@@ -1722,7 +1685,6 @@ namespace
 namespace
 {
     struct Model
-        : public IModelAccept
     {
         static const bool is_incremental = false;
 
@@ -1730,8 +1692,7 @@ namespace
 
         inline bool skip_id(YaToolObjectId, YaToolObjectType_e) const { return false; }
 
-        // IModelAccept methods
-        void accept(IModelVisitor& v) override;
+        void accept(IModelVisitor& v);
 
         Ctx<Model> ctx_;
     };
@@ -1767,9 +1728,9 @@ Model::Model()
 {
 }
 
-std::shared_ptr<IModelAccept> MakeIdaModel()
+void AcceptIdaModel(IModelVisitor& visitor)
 {
-    return std::make_shared<Model>();
+    Model().accept(visitor);
 }
 
 void Model::accept(IModelVisitor& v)
@@ -1832,7 +1793,7 @@ namespace
         const auto binary = ::accept_binary(ctx, v);
         const auto segment = ::accept_segment(ctx, v, binary, seg);
         const auto chunk_start = ea - ((ea - seg->start_ea) % SEGMENT_CHUNK_MAX_SIZE);
-        const auto chunk_end = std::min(chunk_start + SEGMENT_CHUNK_MAX_SIZE, seg->end_ea);
+        const auto chunk_end = chunk_start + std::min<ea_t>(SEGMENT_CHUNK_MAX_SIZE, seg->end_ea - chunk_start);
         return ::accept_segment_chunk(ctx, v, segment, chunk_start, chunk_end);
     }
 }
@@ -1893,9 +1854,7 @@ void ModelIncremental::accept_segment(IModelVisitor& v, ea_t ea)
 
 void ModelIncremental::delete_version(IModelVisitor& v, YaToolObjectType_e type, YaToolObjectId id)
 {
-    v.visit_start_deleted_object(type);
-    v.visit_id(id);
-    v.visit_end_deleted_object();
+    v.visit_deleted(type, id);
 }
 
 void export_from_ida(const std::string& filename)
@@ -1912,11 +1871,29 @@ void export_from_ida(const std::string& filename)
     qfclose(fh);
 }
 
+namespace
+{
+    std::string export_to_xml(IModel& model)
+    {
+        std::string output;
+        model.accept(*MakeMemoryXmlVisitor(output));
+        return output;
+    }
+}
+
 std::string export_xml(ea_t ea, int type_mask)
 {
     const auto db = MakeMemoryModel();
     db->visit_start();
-    ModelIncremental(type_mask).accept_ea(*db, ea);
+    ModelIncremental ctx(type_mask);
+    ctx.accept_ea(*db, ea);
+    const auto func = get_func(ea);
+    if(func)
+        for(const auto& b : qflow_chart_t(nullptr, func, func->start_ea, func->end_ea, 0).blocks)
+            ctx.accept_ea(*db, b.start_ea);
+    const auto frame = get_frame(ea);
+    if(frame)
+        ctx.accept_struct(*db, ea, frame->id);
     db->visit_end();
     return export_to_xml(*db);
 }

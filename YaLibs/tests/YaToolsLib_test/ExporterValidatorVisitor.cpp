@@ -17,8 +17,8 @@
 #include "ExporterValidatorVisitor.hpp"
 
 #include "IModelVisitor.hpp"
-#include "Yatools.h"
-#include "Logger.h"
+#include "Yatools.hpp"
+#include "Helpers.h"
 
 #include <memory>
 
@@ -30,20 +30,18 @@
 
 namespace
 {
+const offset_t UNKNOWN_ADDR = ~static_cast<offset_t>(0);
+
 enum VisitorState_e
 {
-    VISIT_STARTED = 0,
-    VISIT_START_OBJECT = 1,
-    VISIT_START_REFERENCED_OBJECT = 2,
-    VISIT_START_DEFAULT_OBJECT = 3,
-    VISIT_START_DELETED_OBJECT = 4,
-    VISIT_OBJECT_VERSION = 5,
-    VISIT_SIGNATURES = 6,
-    VISIT_OFFSETS = 7,
-    VISIT_XREFS = 8,
-    VISIT_XREF = 9,
-    VISIT_MATCHING_SYSTEMS = 10,
-    VISIT_MATCHING_SYSTEM = 11,
+    VISIT_STARTED,
+    VISIT_OBJECT_VERSION,
+    VISIT_SIGNATURES,
+    VISIT_OFFSETS,
+    VISIT_XREFS,
+    VISIT_XREF,
+    VISIT_MATCHING_SYSTEMS,
+    VISIT_MATCHING_SYSTEM,
 };
 
 const int MAX_VISIT_DEPTH = 256;
@@ -56,15 +54,11 @@ public:
     ~ExporterValidatorVisitor() override;
     void visit_start() override;
     void visit_end() override;
-    void visit_start_reference_object(YaToolObjectType_e object_type) override;
-    void visit_start_deleted_object(YaToolObjectType_e object_type) override;
-    void visit_end_deleted_object() override;
-    void visit_end_reference_object() override;
-    void visit_id(YaToolObjectId object_id) override;
-    void visit_start_object_version() override;
+    void visit_start_version(YaToolObjectType_e type, YaToolObjectId id) override;
+    void visit_deleted(YaToolObjectType_e type, YaToolObjectId id) override;
+    void visit_end_version() override;
     void visit_parent_id(YaToolObjectId object_id) override;
     void visit_address(offset_t address) override;
-    void visit_end_object_version() override;
     void visit_name(const const_string_ref& name, int flags) override;
     void visit_size(offset_t size) override;
     void visit_start_signatures() override;
@@ -94,7 +88,6 @@ private:
     VisitorState_e state[MAX_VISIT_DEPTH];
     int current_state_depth;
     offset_t last_offset_ea;
-    bool id_visited;
 };
 }
 
@@ -103,10 +96,9 @@ std::shared_ptr<IModelVisitor> MakeExporterValidatorVisitor()
     return std::make_shared<ExporterValidatorVisitor>();
 }
 
-ExporterValidatorVisitor::ExporterValidatorVisitor() :
-        current_state_depth(-1),
-        last_offset_ea(UNKNOWN_ADDR),
-        id_visited(false)
+ExporterValidatorVisitor::ExporterValidatorVisitor()
+    : current_state_depth(-1)
+    , last_offset_ea(UNKNOWN_ADDR)
 {
     memset(state, -1, sizeof(state));
 }
@@ -131,59 +123,28 @@ void ExporterValidatorVisitor::visit_end()
 }
 
 //============= REFERENCE OBJECT ==============
-void ExporterValidatorVisitor::visit_start_reference_object(YaToolObjectType_e object_type)
+void ExporterValidatorVisitor::visit_start_version(YaToolObjectType_e type, YaToolObjectId id)
 {
-    UNUSED(object_type);
+    UNUSED(type);
+    UNUSED(id);
     validator_assert(state[current_state_depth] == VISIT_STARTED, "Bad state");
-    state[++current_state_depth] = VISIT_START_REFERENCED_OBJECT;
-    id_visited = false;
-}
-
-void ExporterValidatorVisitor::visit_start_deleted_object(YaToolObjectType_e object_type)
-{
-    UNUSED(object_type);
-    validator_assert(state[current_state_depth] == VISIT_STARTED, "Bad state");
-    state[++current_state_depth] = VISIT_START_DELETED_OBJECT;
-    id_visited = false;
-}
-
-void ExporterValidatorVisitor::visit_end_deleted_object()
-{
-    validator_assert(id_visited, "Id not visited");
-    validator_assert(state[current_state_depth] == VISIT_START_DELETED_OBJECT, "Bad state");
-    current_state_depth--;
-    validator_assert(state[current_state_depth] == VISIT_STARTED, "Bad state");
-}
-
-void ExporterValidatorVisitor::visit_end_reference_object()
-{
-    validator_assert(id_visited, "Id not visited");
-    validator_assert(state[current_state_depth] == VISIT_START_REFERENCED_OBJECT, "Bad state");
-    current_state_depth--;
-    validator_assert(state[current_state_depth] == VISIT_STARTED, "Bad state");
-}
-
-//#============= REFERENCE OBJECT ID ==============
-void ExporterValidatorVisitor::visit_id(YaToolObjectId object_id)
-{
-    UNUSED(object_id);
-    validator_assert(
-            state[current_state_depth] == VISIT_START_OBJECT
-                    || state[current_state_depth] == VISIT_START_REFERENCED_OBJECT
-                    || state[current_state_depth] == VISIT_START_DELETED_OBJECT
-                    || state[current_state_depth] == VISIT_START_DEFAULT_OBJECT, "Bad state");
-    id_visited = true;
-}
-//#============= OBJECT VERSION ==============
-void ExporterValidatorVisitor::visit_start_object_version()
-{
-    validator_assert(
-            state[current_state_depth] == VISIT_START_OBJECT
-                    || state[current_state_depth] == VISIT_START_REFERENCED_OBJECT
-                    || state[current_state_depth] == VISIT_START_DELETED_OBJECT
-                    || state[current_state_depth] == VISIT_START_DEFAULT_OBJECT, "Bad state");
     state[++current_state_depth] = VISIT_OBJECT_VERSION;
 }
+
+void ExporterValidatorVisitor::visit_deleted(YaToolObjectType_e type, YaToolObjectId id)
+{
+    UNUSED(type);
+    UNUSED(id);
+    validator_assert(state[current_state_depth] == VISIT_STARTED, "Bad state");
+}
+
+void ExporterValidatorVisitor::visit_end_version()
+{
+    validator_assert(state[current_state_depth] == VISIT_OBJECT_VERSION, "Bad state");
+    current_state_depth--;
+    validator_assert(state[current_state_depth] == VISIT_STARTED, "Bad state");
+}
+
 //#============= REFERENCE OBJECT ID ==============
 void ExporterValidatorVisitor::visit_parent_id(YaToolObjectId object_id)
 {
@@ -195,17 +156,6 @@ void ExporterValidatorVisitor::visit_address(offset_t address)
 {
     UNUSED(address);
     validator_assert(state[current_state_depth] == VISIT_OBJECT_VERSION, "Bad state");
-}
-
-void ExporterValidatorVisitor::visit_end_object_version()
-{
-    validator_assert(state[current_state_depth] == VISIT_OBJECT_VERSION, "Bad state");
-    current_state_depth--;
-    validator_assert(
-            state[current_state_depth] == VISIT_START_OBJECT
-                    || state[current_state_depth] == VISIT_START_REFERENCED_OBJECT
-                    || state[current_state_depth] == VISIT_START_DELETED_OBJECT
-                    || state[current_state_depth] == VISIT_START_DEFAULT_OBJECT, "Bad state");
 }
 
 //#============= OBJECT VERSION name ==============

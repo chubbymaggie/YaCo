@@ -12,34 +12,21 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#include "YaTypes.hpp"
 
-#include "HVersion.hpp"
-#include "Relation.hpp"
+#include <functional>
 
-#include <set>
-
-/*
- * Merge conflict prompt callback.
- * When a conflict rises up, we have to call a callback to prompt user for resolving conflict.
- */
-class PromptMergeConflict
-{
-public:
-    PromptMergeConflict() { }
-    virtual ~PromptMergeConflict() { }
-
-    virtual std::string merge_attributes_callback(const char * message_info, const char* input_attribute1, const char* input_attribute2) = 0;
-};
+struct Relation;
 
 /**
  * Merge strategy during merge of two ObjectVersion
  */
 enum ObjectVersionMergeStrategy_e
 {
-    OBJECT_VERSION_MERGE_PROMPT = 0, /* prompt user if a conflict appears */
-    OBJECT_VERSION_MERGE_FORCE_REFERENCE, /* use local infos and overwrite remote infos */
-    OBJECT_VERSION_MERGE_FORCE_NEW, /* use remote infos and overwrite local infos */
-    OBJECT_VERSION_MERGE_IGNORE, /* don't fix conflict */
+    OBJECT_VERSION_MERGE_PROMPT = 0,        // prompt user if a conflict appears
+    OBJECT_VERSION_MERGE_FORCE_REFERENCE,   // use local infos and overwrite remote infos
+    OBJECT_VERSION_MERGE_FORCE_NEW,         // use remote infos and overwrite local infos
+    OBJECT_VERSION_MERGE_IGNORE,            // don't fix conflict
 };
 
 /**
@@ -47,36 +34,24 @@ enum ObjectVersionMergeStrategy_e
  */
 enum MergeStatus_e
 {
-    OBJECT_MERGE_STATUS_NOT_UPDATED           = 0x00,
-    OBJECT_MERGE_STATUS_LOCAL_UPDATED         = 0x01,
-    OBJECT_MERGE_STATUS_REMOTE_UPDATED        = 0x10,
-    OBJECT_MERGE_STATUS_BOTH_UPDATED          = 0x11,
+    OBJECT_MERGE_STATUS_NOT_UPDATED,
+    OBJECT_MERGE_STATUS_LOCAL_UPDATED,
+    OBJECT_MERGE_STATUS_REMOTE_UPDATED,
+    OBJECT_MERGE_STATUS_BOTH_UPDATED,
 };
 
-#define OBJECT_MERGE_STATUS_IS_LOCAL_UPDATED(X)     (X && OBJECT_MERGE_STATUS_LOCAL_UPDATED)
-#define OBJECT_MERGE_STATUS_IS_REMOTE_UPDATED(X)    (X && OBJECT_MERGE_STATUS_REMOTE_UPDATED)
-
-
-enum PromptMergeConflictResult_e
+struct Merger
 {
-    PROMPT_MERGE_CONFLICT_SOLVED = 0,
-    PROMPT_MERGE_CONFLICT_UNSOLVED
-};
+    using on_conflict_fn = std::function<std::string(const std::string& info, const std::string& local, const std::string& remote)>;
+    using on_merge_fn    = std::function<void(const std::string&)>;
+    using on_id_fn       = std::function<void(YaToolObjectId)>;
 
-class Merger
-{
-public:
-    Merger(PromptMergeConflict* MergePrompt, ObjectVersionMergeStrategy_e MergeStrategy);
+    Merger(ObjectVersionMergeStrategy_e estrategy, const on_conflict_fn& on_conflict);
 
-    MergeStatus_e mergeObjectVersions( IModelVisitor& visitor_db, std::set<YaToolObjectId>& newObjectIds,
-                                                            const Relation& relation);
-    void mergeAttributes(const std::string& attribute_name, const const_string_ref& ref_attr, const const_string_ref& new_attr,
-                                 const std::function<void(const const_string_ref&)>& fnCallback);
-    MergeStatus_e smartMerge(   const char* input_file1, const char* input_file2,
-                                const char* output_file_result);
+    MergeStatus_e   merge_ids       (IModelVisitor& visitor, const Relation& relation, const on_id_fn& on_id);
+    MergeStatus_e   merge_files     (const std::string& local, const std::string& remote, const std::string& filename);
 
-private:
-    PromptMergeConflict*            mpMergePrompt;
-    ObjectVersionMergeStrategy_e    mMergeStrategy;
+    ObjectVersionMergeStrategy_e    estrategy_;
+    const on_conflict_fn            on_conflict_;
 };
 

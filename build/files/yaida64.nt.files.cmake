@@ -11,8 +11,6 @@ set(_yaida64_files
     "../YaLibs/YaToolsIDALib/IdaDeleter.hpp"
     "../YaLibs/YaToolsIDALib/IdaModel.cpp"
     "../YaLibs/YaToolsIDALib/IdaModel.hpp"
-    "../YaLibs/YaToolsIDALib/IdaUtils.cpp"
-    "../YaLibs/YaToolsIDALib/IdaUtils.hpp"
     "../YaLibs/YaToolsIDALib/IdaVisitor.cpp"
     "../YaLibs/YaToolsIDALib/IdaVisitor.hpp"
     "../YaLibs/YaToolsIDALib/PluginArm.cpp"
